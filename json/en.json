@@ -1,0 +1,47 @@
+{
+    "home": {
+        "header": {
+            "first": "Just Create an Event",
+            "second": "Scheduler and Simply Share It."
+        },
+        "subheader": "events scheduled.",
+        "input": {
+            "name": "Give your event a name",
+            "second": "Choose your dates.",
+            "third": "Set a time range.",
+            "placeholder": "A very important meeting"
+        }
+    },
+    "global": {
+        "button":{
+            "submit":"Submit",
+            "back": "BACK",
+            "auto": "AUTO",
+            "close": "Close",
+            "donate": "Donate"
+        },
+        "weekdays": ["SUN","MON","TUE","WED","THU","FRI","SAT"],
+        "settings": {
+            "title": "Settings",
+            "theme": "Theme",
+            "language": "Language",
+            "weekStart": {
+                "title":"Week Start",
+                "sun": "SUN",
+                "mon": "MON"
+            },
+            "timeFormat": {
+               "title":"Time Format",
+               "12": "12h",
+                "24": "24h"
+            }
+        },
+        "toast": {
+
+        },
+        "donateAlert": {
+            "title": "This Could Be an Ad",
+            "content": "But since we care about your experience, its <b> not</b>. Consider<b> donate </b>to support us."
+        }
+    }
+}
