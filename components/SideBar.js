@@ -95,6 +95,7 @@ const MenuIcon = forwardRef(({ isOpen, ...props }, ref) => {
         </Button >
     )
 })
+MenuIcon.displayName = 'MenuIcon'
 
 const MenuIconComposition = ({ ...props }) => {
     const { colorMode } = useColorMode()

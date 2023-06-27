@@ -41,4 +41,6 @@ const CustomButton = forwardRef(({ children, ghost, ...props }, ref) => {
     )
 })
 
+CustomButton.displayName = 'CustomButton'
+
 export default CustomButton
