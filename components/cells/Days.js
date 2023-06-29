@@ -2,11 +2,13 @@ import { HStack, Center, FormControl, FormErrorMessage, useColorMode } from "@ch
 import { FieldArray, useFormikContext } from "formik"
 import useToday from "@/hooks/useDate"
 import { colors } from "@/public/theme"
+import { useLang } from "@/context/LangContext"
 
 const Days = () => {
     const { values, errors, touched } = useFormikContext()
-    const { days, today } = useToday()
+    const { today } = useToday()
     const { colorMode } = useColorMode()
+    const { context } = useLang()
 
     const toggler = (helper, isThere, index, day) => {
         if (isThere) helper.remove(index)
@@ -19,14 +21,14 @@ const Days = () => {
                     name="days"
                     render={ arrayHelpers => (
                         <>
-                            { days.map(day => (
+                            { context.global.weekdays.map(day => (
                                 <Center
                                     key={ day }
                                     border={ colors[ colorMode ].border.buttonGhost }
                                     borderRadius='md'
                                     p={ 2 }
                                     w='100%'
-                                    fontWeight={ values.days.includes(day) ? 'bold' : (days[ today.day ] === day ? 'bold' : 'normal') }
+                                    fontWeight={ values.days.includes(day) ? 'bold' : (context.global.weekdays[ today.day ] === day ? 'bold' : 'normal') }
                                     cursor='pointer'
                                     userSelect='none'
                                     _active={ {

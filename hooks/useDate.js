@@ -7,15 +7,7 @@ const useDate = () => {
     const [ locale, setLocale ] = useState(null)
     const [ today, setToday ] = useState({})
     const [ currentDate, setCurrentDate ] = useState({})
-    const days = [
-        'Sun',
-        'Mon',
-        'Tue',
-        'Wed',
-        'Thu',
-        'Fri',
-        'Sat'
-    ]
+    
     const generateCalendar = useCallback((today, addOn) => {
         const startOfWeekday = getDay(startOfMonth(today))
         const result = addDays(today, addOn - startOfWeekday)
@@ -69,7 +61,7 @@ const useDate = () => {
     }, [])
 
     return {
-        days, today, currentDate, generateCalendar, monthControls: { nextMonth, prevMonth, goBack, isCurrentMonth }
+        today, currentDate, generateCalendar, monthControls: { nextMonth, prevMonth, goBack, isCurrentMonth }
     }
 }
 

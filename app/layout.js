@@ -2,9 +2,8 @@
 import './globals.scss'
 
 import { Providers } from "./providers"
-import Navbar from '../components/Navbar'
-import Content from '../components/Content'
-import { Toaster } from 'react-hot-toast'
+
+import PageContainer from '@/components/PageContainer'
 
 // export const metadata = {
 //   title: 'Create Next App',
@@ -12,16 +11,13 @@ import { Toaster } from 'react-hot-toast'
 // }
 
 export default function RootLayout({ children }) {
-
   return (
     <html lang="en" suppressHydrationWarning={ true }>
       <body suppressHydrationWarning={ true }>
-        <Toaster />
         <Providers>
-          <Navbar />
-          <Content>
+          <PageContainer>
             { children }
-          </Content>
+          </PageContainer>
         </Providers>
       </body>
     </html>

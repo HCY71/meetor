@@ -1,12 +1,14 @@
-import { createContext, useContext } from "react"
+import { createContext, useContext, useState } from "react"
 import { configsInitial } from '@/lib/initialValues'
+import useLocalStorage from "@/hooks/useLocalStorage"
 
 export const ConfigsContext = createContext(configsInitial)
 
 export const ConfigsProvider = ({ children }) => {
-    const configs = useContext(ConfigsContext)
+    const [ configs, setConfigs ] = useLocalStorage('configs', configsInitial)
+
     return (
-        <ConfigsContext.Provider value={ configs }>
+        <ConfigsContext.Provider value={ { configs: typeof (configs) === 'object' ? configs : JSON.parse(configs), setConfigs } }>
             { children }
         </ConfigsContext.Provider>
     )

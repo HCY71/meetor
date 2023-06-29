@@ -13,20 +13,24 @@ import { useParams } from "next/navigation"
 import { getTimeDistance } from "@/public/utils/timeFormat"
 import useDate from "@/hooks/useDate"
 
-import { zhTW } from "date-fns/locale"
+import { useLang } from "@/context/LangContext"
 
 const Page = () => {
     const [ event, setEvent ] = useState(null)
     const { eventId } = useParams()
     const { currentDate } = useDate()
 
+    const { context } = useLang()
+
     const { GET_BY_ID, isLoading, data } = useSupabase()
     useEffect(() => {
         GET_BY_ID('events', eventId)
     }, [ GET_BY_ID, eventId ])
+
     useEffect(() => {
         if (!isLoading && data) setEvent(data[ 0 ])
     }, [ isLoading, data ])
+
     return (
         <VStack spacing={ 5 } w='520px' >
             { event
@@ -36,7 +40,7 @@ const Page = () => {
                         { event.name }
                     </Header>
                     <Subtitle>
-                        created at { getTimeDistance(event, currentDate) } ago.
+                        { context.event.createdAt + getTimeDistance(event, currentDate) + context.event.ago }
                     </Subtitle>
                     <HStack mt={ 4 } mb={ 4 } spacing={ 3 }>
                         <CopyLink />

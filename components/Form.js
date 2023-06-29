@@ -23,10 +23,11 @@ import useSupabase from "@/hooks/useSupabase"
 import { toast } from "react-hot-toast"
 import { uid } from "uid"
 import { colors } from "@/public/theme"
+import { useLang } from "@/context/LangContext"
 
 const Form = () => {
     const { POST } = useSupabase()
-
+    const { context } = useLang()
     const handleSubmit = (value) => {
         if (value.type === 'dates') {
             value.dates = value.dates.map(date => date.slice(0, date.indexOf('+')))
@@ -35,9 +36,9 @@ const Form = () => {
         toast.promise(
             POST('events', value),
             {
-                loading: 'Loading...',
-                success: 'Here we go.',
-                error: 'Something went wrong.',
+                loading: context.global.toast.loading,
+                success: context.global.toast.success,
+                error: context.global.toast.error,
             }
         )
     }
@@ -71,12 +72,13 @@ const Steps = () => {
 
 const First = () => {
     const { errors, touched, handleChange } = useFormikContext()
+    const { context } = useLang()
     return (
-        <Step step={ 1 } title='Give your event a name.'>
+        <Step step={ 1 } title={ context.home.input.name }>
             <FormControl isInvalid={ errors.name && touched.name }>
                 <CustomInput
                     id={ 'name' }
-                    placeholder={ 'A very important meeting.' }
+                    placeholder={ context.home.input.placeholder }
                     onChange={ handleChange }
                 />
                 <FormErrorMessage>
@@ -88,12 +90,12 @@ const First = () => {
 }
 const Second = () => {
     const { setFieldValue } = useFormikContext()
-
+    const { context } = useLang()
     return (
-        <Step step={ 2 } title='Choose your dates.'>
+        <Step step={ 2 } title={ context.home.input.chooseDates }>
             <CustomTabs
                 onMouseDown={ [ () => setFieldValue('type', 'dates'), () => setFieldValue('type', 'days') ] }
-                tab={ [ 'Dates', 'Days' ] }
+                tab={ [ context.global.panel.dates, context.global.panel.days ] }
                 panel={ [ <Dates />, <Days /> ] }
             />
         </Step >
@@ -103,8 +105,9 @@ const Second = () => {
 const Third = () => {
     const { values, errors, touched, setFieldValue } = useFormikContext()
     const { colorMode } = useColorMode()
+    const { context } = useLang()
     return (
-        <Step step={ 3 } title='Set a time range.'>
+        <Step step={ 3 } title={ context.home.input.chooseRange }>
             <FormControl isInvalid={ errors.range && touched.range }>
                 <RangeSlider
                     id='range'
@@ -125,7 +128,7 @@ const Third = () => {
                     { errors.range }
                 </FormErrorMessage>
             </FormControl>
-        </Step>
+        </Step >
     )
 }
 

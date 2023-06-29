@@ -5,13 +5,15 @@ import { baseUrl } from "@/public/baseUrl"
 import { toast } from 'react-hot-toast'
 
 import { colors } from "@/public/theme"
+import { useLang } from "@/context/LangContext"
 
 const CopyLink = () => {
     const path = usePathname()
     const link = baseUrl + path
+    const { context } = useLang()
     const copyLink = () => {
         navigator.clipboard.writeText(link)
-        toast.success('Link Copied!')
+        toast.success(context.global.toast.linkCopied)
     }
     return (
         <Template as={ FiLink } onClick={ copyLink } />

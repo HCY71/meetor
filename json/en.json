@@ -7,9 +7,20 @@
         "subheader": "events scheduled.",
         "input": {
             "name": "Give your event a name",
-            "second": "Choose your dates.",
-            "third": "Set a time range.",
+            "chooseDates": "Choose your dates.",
+            "chooseRange": "Set a time range.",
             "placeholder": "A very important meeting"
+        }
+    },
+    "event": {
+        "hello": "Hi👋, ",
+        "createdAt": "created at ",
+        "ago": " ago",
+        "go": "Start to check your time.",
+        "input": {
+            "name": "Enter your name.",
+            "checkTime": "Check your time.",
+            "placeholder":"your cool name"
         }
     },
     "global": {
@@ -18,7 +29,8 @@
             "back": "BACK",
             "auto": "AUTO",
             "close": "Close",
-            "donate": "Donate"
+            "donate": "Donate",
+            "logout": "Log out"
         },
         "weekdays": ["SUN","MON","TUE","WED","THU","FRI","SAT"],
         "settings": {
@@ -30,18 +42,25 @@
                 "sun": "SUN",
                 "mon": "MON"
             },
-            "timeFormat": {
-               "title":"Time Format",
-               "12": "12h",
-                "24": "24h"
-            }
+            "timeFormat": "Time Format",
+            "about": "About Author"
         },
         "toast": {
-
+            "loading": "Loading...",
+            "success": "Here we go.",
+            "error": "Something went wrong:(",
+            "linkCopied": "Link Copied!",
+            "nameFirst": "Fill your name first."
         },
         "donateAlert": {
             "title": "This Could Be an Ad",
-            "content": "But since we care about your experience, its <b> not</b>. Consider<b> donate </b>to support us."
+            "content": "But since we care about your experience, its not. Consider donate to support us."
+        },
+        "panel": {
+            "dates": "Dates",
+            "days": "Days",
+            "yourTime": "Your Time",
+            "groupTime": "Group Time"
         }
     }
 }

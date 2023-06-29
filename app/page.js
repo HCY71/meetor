@@ -5,8 +5,10 @@ import {
 import Form from '../components/Form'
 import Header from '../components/atoms/Header'
 import Subtitle from '../components/atoms/Subtitle'
+import { useLang } from '@/context/LangContext'
 
 export default function Home() {
+  const { context } = useLang()
   return (
     <>
       <VStack spacing={ 5 }>
@@ -15,14 +17,14 @@ export default function Home() {
           spacing='0'
         >
           <Header>
-            Just Create an Event
+            { context.home.header.first }
           </Header>
           <Header>
-            Scheduler and Simply Share It.
+            { context.home.header.second }
           </Header>
         </VStack>
         <Subtitle>
-          13,210 events scheduled.
+          13,210 { context.home.subheader }
         </Subtitle>
       </VStack>
       <Form />

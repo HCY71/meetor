@@ -16,14 +16,16 @@ import { FaPlay } from 'react-icons/fa'
 import { FieldArray, useFormikContext } from "formik"
 
 import { colors } from '@/public/theme'
+import { useLang } from '@/context/LangContext'
 
 const Dates = () => {
     const [ dates, setDates ] = useState([])
     const [ size, setSize ] = useState(new Array(35).fill(0))
     const { values, errors, touched } = useFormikContext()
-    const { days, currentDate, generateCalendar, monthControls } = useDate()
+    const { currentDate, generateCalendar, monthControls } = useDate()
 
     const { colorMode } = useColorMode()
+    const { context } = useLang()
 
     const toggler = (helper, isThere, index, day) => {
         if (isThere) helper.remove(index)
@@ -80,7 +82,7 @@ const Dates = () => {
                         right='0'
                         transform='translateX(120%)'
                     >
-                        BACK
+                        { context.global.button.back }
                     </Center>
                 </HStack>
                 <Center
@@ -98,7 +100,7 @@ const Dates = () => {
                 </Center>
             </HStack>
             <HStack w='100%' color={ colors[ colorMode ].font.dim }>
-                { days.map((d) =>
+                { context.global.weekdays.map((d) =>
                     <Center w='100%' key={ d }>
                         { d }
                     </Center>

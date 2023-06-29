@@ -21,6 +21,7 @@ import { Formik } from "formik"
 import { secondFormData } from "@/lib/initialValues"
 import useLocalStorage from "@/hooks/useLocalStorage"
 import { colors } from "@/public/theme"
+import { useLang } from "@/context/LangContext"
 
 const SecondForm = () => {
     const { isOpen, onOpen, onClose } = useDisclosure()
@@ -46,14 +47,16 @@ const Steps = ({ openModal }) => {
 
 const First = ({ inputRef, openModal }) => {
     const [ name, setName ] = useLocalStorage('name')
+    const { context } = useLang()
     const handleSubmit = (value) => {
         openModal()
         setName(value.name)
     }
+
     return (
         <Step
             step={ 1 }
-            title={ 'Enter your name.' }
+            title={ context.event.input.name }
         >
             <Formik
                 initialValues={ secondFormData.initialValues }
@@ -65,13 +68,11 @@ const First = ({ inputRef, openModal }) => {
                         <HStack as='form' w='100%' onSubmit={ handleSubmit }>
                             <CustomInput
                                 id='name'
-                                placeholder='Enter your name'
+                                placeholder={ context.event.input.placeholder }
                                 onChange={ handleChange }
                                 ref={ inputRef }
                             />
-                            <Submit>
-                                Submit
-                            </Submit>
+                            <Submit />
                         </HStack>
                         <FormErrorMessage>
                             { errors.name }
@@ -85,15 +86,15 @@ const First = ({ inputRef, openModal }) => {
 
 const Second = ({ inputRef }) => {
     const [ name ] = useLocalStorage('name')
-
+    const { context } = useLang()
     return (
         <Step
             step={ 2 }
-            title={ 'Check your time.' }
+            title={ context.event.input.checkTime }
             isDisable={ name ? true : false }
         >
             <CustomTabs
-                tab={ [ 'Your Time', 'Group Time' ] }
+                tab={ [ context.global.panel.yourTime, context.global.panel.groupTime ] }
                 panel={ [
                     <TimeTable />,
                     <TimeTable readOnly />
@@ -108,12 +109,13 @@ const Second = ({ inputRef }) => {
 
 const LoggedIn = () => {
     const [ name, setName ] = useLocalStorage('name')
+    const { context } = useLang()
     const handleLogout = () => setName()
     const { colorMode } = useColorMode()
     return (
         <VStack>
             <SubHeader>
-                Hi👋, { name }
+                { context.event.hello + name }
             </SubHeader>
             <HStack
                 fontSize='1.5rem'
@@ -124,10 +126,10 @@ const LoggedIn = () => {
                 spacing={ 4 }
             >
                 <Center>
-                    Start to check your time.
+                    { context.event.go }
                 </Center>
                 <CustomButton onClick={ handleLogout }>
-                    Log out
+                    { context.global.button.logout }
                 </CustomButton>
             </HStack>
         </VStack>

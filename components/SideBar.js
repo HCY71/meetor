@@ -17,10 +17,13 @@ import {
 import CustomButton from './atoms/CustomButton'
 import CustomSwitch from './atoms/CustomSwitch'
 import { colors } from '@/public/theme'
+import { useLang } from '@/context/LangContext'
+import { useConfigs } from '@/context/ConfigsContext'
 
 const SideBar = () => {
     const { colorMode, toggleColorMode } = useColorMode()
-
+    const { context } = useLang()
+    const { configs, setConfigs } = useConfigs()
     return (
         <Popover placement='bottom-end' isLazy>
             { ({ isOpen }) => (
@@ -29,39 +32,40 @@ const SideBar = () => {
                         <MenuIcon isOpen={ isOpen } />
                     </PopoverTrigger>
                     <PopoverContent p={ 2 } bg={ colors[ colorMode ].bg.primary }>
-                        <PopoverHeader fontWeight='bold' borderBottom='none' fontSize='20px'>Settings</PopoverHeader>
+                        <PopoverHeader fontWeight='bold' borderBottom='none' fontSize='20px'>{ context.global.settings.title }</PopoverHeader>
                         <PopoverBody pt='0' as={ VStack } align='flex-start' spacing={ 4 }>
-                            <Template title='Theme' center>
+                            <Template title={ context.global.settings.theme } center>
                                 <CustomSwitch onClick={ toggleColorMode } />
                                 <CustomButton
-                                    ghost
+                                    ghost={ !configs.useSystemColorMode }
                                     fontSize='0.75rem'
                                     fontWeight='medium'
-                                    color={ colors[ colorMode ].font.primary }
+                                    color={ !configs.useSystemColorMode ? colors[ colorMode ].font.primary : colors[ colorMode ].font.invert }
                                     cursor='pointer'
                                     p={ '8px 16px' }
                                     h='fit-content'
                                     border={ colors[ colorMode ].border.buttonGhost }
                                     borderRadius='md'
+                                    onClick={ () => setConfigs({ ...configs, useSystemColorMode: !configs.useSystemColorMode }) }
                                 >
-                                    AUTO
+                                    { context.global.button.auto }
                                 </CustomButton>
                             </Template>
-                            <Template title='Language' center>
-                                <CustomButton w='100%' >EN</CustomButton>
-                                <CustomButton w='100%' ghost >繁</CustomButton>
+                            <Template title={ context.global.settings.language } center>
+                                <Toggle isGhost={ configs.lang !== 'en' } onClick={ () => setConfigs({ ...configs, lang: "en" }) }>EN</Toggle>
+                                <Toggle isGhost={ configs.lang !== 'zh-tw' } onClick={ () => setConfigs({ ...configs, lang: "zh-tw" }) }>繁</Toggle>
                             </Template>
-                            <Template title='Week Start' center>
-                                <CustomButton w='100%' >SUN</CustomButton>
-                                <CustomButton w='100%' ghost>MON</CustomButton>
+                            <Template title={ context.global.settings.weekStart.title } center>
+                                <Toggle isGhost={ configs.weekStartsOn !== 0 } onClick={ () => setConfigs({ ...configs, weekStartsOn: 0 }) }>{ context.global.settings.weekStart.sun }</Toggle>
+                                <Toggle isGhost={ configs.weekStartsOn !== 1 } onClick={ () => setConfigs({ ...configs, weekStartsOn: 1 }) }>  { context.global.settings.weekStart.mon }</Toggle>
                             </Template>
-                            <Template title='Time Format' center>
-                                <CustomButton w='100%' >12H</CustomButton>
-                                <CustomButton w='100%' ghost>24H</CustomButton>
+                            <Template title={ context.global.settings.timeFormat } center>
+                                <Toggle isGhost={ !configs.usePM } onClick={ () => setConfigs({ ...configs, usePM: true }) }>12H</Toggle>
+                                <Toggle isGhost={ configs.usePM } onClick={ () => setConfigs({ ...configs, usePM: false }) }>24H</Toggle>
                             </Template>
                         </PopoverBody>
                         <PopoverFooter>
-                            About author
+                            { context.global.settings.about }
                         </PopoverFooter>
                     </PopoverContent>
                 </>
@@ -119,6 +123,14 @@ const Template = ({ title, children, center }) => {
                 { children }
             </HStack>
         </VStack>
+    )
+}
+
+const Toggle = ({ isGhost, onClick, children }) => {
+    return (
+        <CustomButton w='100%' ghost={ isGhost } onClick={ onClick }>
+            { children }
+        </CustomButton>
     )
 }
 

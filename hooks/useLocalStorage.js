@@ -9,7 +9,7 @@ const useLocalStorage = (key, initValue = null) => {
 
     const setLocalStorage = (value) => {
         if (value) {
-            localStorage.setItem(key, value)
+            localStorage.setItem(key, typeof (value) === 'object' ? JSON.stringify(value) : value)
             setValue(value)
         }
         else {

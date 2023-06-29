@@ -8,8 +8,10 @@ import {
     ModalBody,
 } from '@chakra-ui/react'
 import CustomButton from './CustomButton'
+import { useLang } from '@/context/LangContext'
 
 const CustomModal = ({ controls }) => {
+    const { context } = useLang()
     const handleClose = () => {
         controls.onClose()
         window.location.reload()
@@ -28,20 +30,17 @@ const CustomModal = ({ controls }) => {
                         fontSize={ '2.5rem' }
                         fontWeight='bold'
                         textAlign='center'
-                    >This Could Be an Ad</ModalHeader>
+                    >
+                        { context.global.donateAlert.title }</ModalHeader>
                     <ModalBody fontSize='18px' mb='1rem'>
-                        But since we care about your experience, its
-                        <b> not</b>.
-                        Consider
-                        <b> donate </b>
-                        to support us.
+                        { context.global.donateAlert.content }
                     </ModalBody>
                     <ModalFooter>
                         <CustomButton colorScheme='blue' mr={ 3 } onClick={ handleClose } ghost>
-                            Close
+                            { context.global.button.close }
                         </CustomButton>
                         <CustomButton onClick={ handleDonate }>
-                            Donate
+                            { context.global.button.donate }
                         </CustomButton>
                     </ModalFooter>
                 </ModalContent>

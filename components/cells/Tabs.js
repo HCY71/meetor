@@ -9,10 +9,12 @@ import {
     useColorMode
 } from '@chakra-ui/react'
 import { toast } from 'react-hot-toast'
+import { useLang } from '@/context/LangContext'
 
 const CustomTabs = ({ onMouseDown = [ null, null ], tab, panel, isDisabled = false, inputRef = null, ...props }) => {
+    const { context } = useLang()
     const handleDisable = () => {
-        toast('Fill your name first.', {
+        toast(context.global.toast.nameFirst, {
             icon: '😵‍💫',
         })
         inputRef.current.focus()
