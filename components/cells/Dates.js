@@ -14,30 +14,45 @@ import useDate from "@/hooks/useDate"
 import { getDate, isToday, isPast, addDays, formatISO } from "date-fns"
 import { FaPlay } from 'react-icons/fa'
 import { FieldArray, useFormikContext } from "formik"
+import { toast } from "react-hot-toast"
 
 import { colors } from '@/public/theme'
 import { useLang } from '@/context/LangContext'
+import { useConfigs } from '@/context/ConfigsContext'
+import { checkWeekStart } from '@/public/utils/timeFormat'
+
+import SelectionArea from '@viselect/react'
+import useDragSelect from "@/hooks/useDragSelect"
 
 const Dates = () => {
     const [ dates, setDates ] = useState([])
     const [ size, setSize ] = useState(new Array(35).fill(0))
-    const { values, errors, touched } = useFormikContext()
+    const { values, errors, touched, setFieldValue } = useFormikContext()
     const { currentDate, generateCalendar, monthControls } = useDate()
 
     const { colorMode } = useColorMode()
     const { context } = useLang()
+    const { configs } = useConfigs()
 
-    const toggler = (helper, isThere, index, day) => {
-        if (isThere) helper.remove(index)
-        else helper.push(day)
-    }
+    const { onMove } = useDragSelect()
+    const [ selectedDates, setSelectedDates ] = useState([])
+
     useEffect(() => {
         if (currentDate.startOfMonth) {
-            const result = size.map((s, index) => generateCalendar(currentDate.startOfMonth, index))
+            const result = size.map((s, index) => generateCalendar(currentDate.startOfMonth, index, configs.weekStartsOn))
             setDates(result)
         }
-    }, [ currentDate.startOfMonth, size, generateCalendar ])
+    }, [ currentDate.startOfMonth, size, generateCalendar, configs.weekStartsOn ])
 
+    useEffect(() => {
+        setFieldValue('dates', selectedDates)
+    }, [ selectedDates ])
+
+    const handlePast = () => {
+        toast(context.global.toast.selectPast, {
+            icon: '😵‍💫',
+        })
+    }
     return (
         <VStack>
             <HStack
@@ -100,65 +115,71 @@ const Dates = () => {
                 </Center>
             </HStack>
             <HStack w='100%' color={ colors[ colorMode ].font.dim }>
-                { context.global.weekdays.map((d) =>
+                { checkWeekStart(context.global.weekdays, configs.weekStartsOn).map((d) =>
                     <Center w='100%' key={ d }>
                         { d }
                     </Center>
                 ) }
             </HStack>
             <FormControl isInvalid={ errors.dates && touched.dates }>
-                <Grid
-                    w='100%'
-                    gridTemplateRows='repeat(5,1fr)'
-                    gridTemplateColumns='repeat(7,1fr)'
-                    gridRowGap={ 1 }
-                    gridColumnGap={ 1 }
+                <SelectionArea
+                    className="container"
+                    onMove={ (e) => onMove(e, setSelectedDates) }
+                    selectables=".selectable"
                 >
-                    <FieldArray
-                        name="dates"
-                        render={ arrayHelpers => (
-                            <>
-                                { dates.length && dates.map(d =>
-                                    <GridItem
-                                        w='100%'
-                                        p={ 3 }
-                                        border='solid 2px rgba(0,0,0,0)'
-                                        borderRadius='4px'
-                                        color={
-                                            values.dates.includes(formatISO(d)) ?
-                                                colors[ colorMode ].font.invert :
-                                                monthControls.isCurrentMonth(d) && !isPast(addDays(d, 1)) ? colors[ colorMode ].font.primary : colors[ colorMode ].font.dimMore
-                                        }
-                                        fontWeight={
-                                            isToday(d) ? 'bold' : 'normal'
-                                        }
-                                        bg={ values.dates.includes(formatISO(d)) ? colors[ colorMode ].bg.invert : 'transparent' }
-                                        textAlign='center'
-                                        key={ d }
-                                        onClick={
-                                            !isPast(addDays(d, 1)) ?
-                                                () => toggler(arrayHelpers, values.dates.includes(formatISO(d)), values.dates.indexOf(formatISO(d)), formatISO(d))
-                                                : null
-                                        }
-                                        cursor={ !isPast(addDays(d, 1)) ? 'pointer' : null }
-                                        userSelect='none'
-                                        transition='.2s'
-                                        _hover={ {
-                                            borderColor: !isPast(addDays(d, 1)) ? colors[ colorMode ].bg.invert : 'rgba(0,0,0,0)'
-                                        } }
-                                    >
-                                        { getDate(d) }
-                                    </GridItem>
-                                ) }
-                            </>
-                        ) }
-                    />
-                </Grid>
+                    <Grid
+                        w='100%'
+                        gridTemplateRows='repeat(5,1fr)'
+                        gridTemplateColumns='repeat(7,1fr)'
+                        gridRowGap=' 2px'
+                        gridColumnGap=' 2px'
+                    >
+                        <FieldArray
+                            name="dates"
+                            render={ () => (
+                                <>
+                                    { dates.length && dates.map(d =>
+                                        <GridItem
+                                            className={ !isPast(addDays(d, 1)) ? 'selectable' : null }
+                                            id={ formatISO(d) }
+
+                                            w='100%'
+                                            p={ 3 }
+                                            border='solid 2px rgba(0,0,0,0)'
+                                            borderRadius='4px'
+                                            color={
+                                                values.dates.includes(formatISO(d)) ?
+                                                    colors[ colorMode ].font.invert :
+                                                    monthControls.isCurrentMonth(d) && !isPast(addDays(d, 1)) ? colors[ colorMode ].font.primary : colors[ colorMode ].font.dimMore
+                                            }
+                                            fontWeight={
+                                                isToday(d) ? 'bold' : 'normal'
+                                            }
+                                            bg={ values.dates.includes(formatISO(d)) ? colors[ colorMode ].bg.invert : 'transparent' }
+                                            textAlign='center'
+                                            key={ d }
+
+                                            cursor={ !isPast(addDays(d, 1)) ? 'pointer' : null }
+                                            userSelect='none'
+                                            transition='.2s'
+                                            _hover={ {
+                                                borderColor: !isPast(addDays(d, 1)) ? colors[ colorMode ].bg.invert : 'rgba(0,0,0,0)'
+                                            } }
+                                            onMouseDown={ !isPast(addDays(d, 1)) ? null : handlePast }
+                                        >
+                                            { getDate(d) }
+                                        </GridItem>
+                                    ) }
+                                </>
+                            ) }
+                        />
+                    </Grid>
+                </SelectionArea>
                 <FormErrorMessage>
                     { errors.dates }
                 </FormErrorMessage>
             </FormControl>
-        </VStack>
+        </VStack >
     )
 }
 

@@ -1,7 +1,9 @@
+'use client'
 import { useState, useEffect } from 'react'
 
 const useLocalStorage = (key, initValue = null) => {
     const [ value, setValue ] = useState(initValue)
+
     useEffect(() => {
         const currentValue = localStorage.getItem(key)
         if (currentValue) setValue(currentValue)

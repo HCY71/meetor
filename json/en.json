@@ -50,7 +50,8 @@
             "success": "Here we go.",
             "error": "Something went wrong:(",
             "linkCopied": "Link Copied!",
-            "nameFirst": "Fill your name first."
+            "nameFirst": "Fill your name first.",
+            "selectPast": "The past has passed by."
         },
         "donateAlert": {
             "title": "This Could Be an Ad",

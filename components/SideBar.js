@@ -36,7 +36,7 @@ const SideBar = () => {
                         <PopoverBody pt='0' as={ VStack } align='flex-start' spacing={ 4 }>
                             <Template title={ context.global.settings.theme } center>
                                 <CustomSwitch onClick={ toggleColorMode } />
-                                <CustomButton
+                                {/* <CustomButton
                                     ghost={ !configs.useSystemColorMode }
                                     fontSize='0.75rem'
                                     fontWeight='medium'
@@ -49,7 +49,7 @@ const SideBar = () => {
                                     onClick={ () => setConfigs({ ...configs, useSystemColorMode: !configs.useSystemColorMode }) }
                                 >
                                     { context.global.button.auto }
-                                </CustomButton>
+                                </CustomButton> */}
                             </Template>
                             <Template title={ context.global.settings.language } center>
                                 <Toggle isGhost={ configs.lang !== 'en' } onClick={ () => setConfigs({ ...configs, lang: "en" }) }>EN</Toggle>
@@ -96,7 +96,7 @@ const MenuIcon = forwardRef(({ isOpen, ...props }, ref) => {
                 w={ isOpen ? '35%' : '20%' }
                 transform={ isOpen ? 'translate(30%, 0%) rotate(-90deg)' : 'translate(30%, 90%)' }
             />
-        </Button >
+        </Button>
     )
 })
 MenuIcon.displayName = 'MenuIcon'
@@ -133,5 +133,7 @@ const Toggle = ({ isGhost, onClick, children }) => {
         </CustomButton>
     )
 }
+
+export { MenuIconComposition }
 
 export default SideBar

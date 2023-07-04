@@ -24,6 +24,7 @@ import { toast } from "react-hot-toast"
 import { uid } from "uid"
 import { colors } from "@/public/theme"
 import { useLang } from "@/context/LangContext"
+import { useConfigs } from "@/context/ConfigsContext"
 
 const Form = () => {
     const { POST } = useSupabase()
@@ -134,6 +135,7 @@ const Third = () => {
 
 const SliderThumb = ({ index, value }) => {
     const { colorMode } = useColorMode()
+    const { configs } = useConfigs()
     return (
         <RangeSliderThumb
             boxSize={ 8 }
@@ -141,7 +143,7 @@ const SliderThumb = ({ index, value }) => {
             border='solid 1px'
             borderColor={ colors[ colorMode ].border.sliderTrack }
             _after={ {
-                content: `"${displayTime(value)}"`,
+                content: `"${displayTime(value, configs.usePM)}"`,
                 position: 'absolute',
                 bottom: '-30px',
                 textAlign: 'center',
