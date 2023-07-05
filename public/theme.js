@@ -25,14 +25,18 @@ const colors = {
                 active: 'gray.900'
             },
             timetableSelected: 'yellow.300',
-            nav: 'hsla(0,0%,100%,.8)'
+            timetableSelectedAlpha: 'rgba(255,124,0, .3)',
+            nav: {
+                primary: 'hsla(0,0%,100%,.8)',
+                invert: 'rgba(2,4,8,.9)'
+            }
         },
         border: {
             nav: 'solid 1px rgba(229, 231, 235, 1)',
             button: 'solid 2px black',
             buttonGhost: 'solid 1px black',
             focus: 'black',
-            table: 'solid 1px black',
+            table: 'solid 1px rgba(0,0,0,0.8)',
             table2: 'dotted 1px black',
             sliderTrack: 'gray.100',
             dim: 'gray.600',
@@ -58,14 +62,18 @@ const colors = {
                 active: 'whiteAlpha.900'
             },
             timetableSelected: 'yellow.400',
-            nav: 'rgba(2,4,8,.9)'
+            timetableSelectedAlpha: 'rgba(255,124,0, .3)',
+            nav: {
+                invert: 'hsla(0,0%,100%,.8)',
+                primary: 'rgba(2,4,8,.9)'
+            }
         },
         border: {
             nav: 'solid 2px rgba(100, 100, 100, .4)',
             button: 'solid 2px white',
             buttonGhost: 'solid 1px white',
             focus: 'white',
-            table: 'solid 1px white',
+            table: 'solid 1px rgba(255,255,255,0.8)',
             table2: 'dotted 1px white',
             sliderTrack: 'gray.800',
             dim: 'gray.600',

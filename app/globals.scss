@@ -12,14 +12,11 @@ $background-colors: (
 );
 $border-color: rgb(229, 231, 235);
 
-@if $dark-theme {
-
-}
-
 * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+  position: relative;
 }
 
 html,
@@ -32,6 +29,12 @@ body {
 a {
   color: inherit;
   text-decoration: none;
+}
+.next-link-custom {
+  width: 100%;
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .max-width {
@@ -47,7 +50,7 @@ a {
 
 .container {
   user-select: none;
-  width: 100%;
+  min-width: 100%;
 }
 
 .date-grid{
@@ -58,3 +61,77 @@ a {
   grid-column-gap: 2px;
 }
 
+
+/* Make clicks pass-through */
+#nprogress {
+  pointer-events: none;
+}
+
+#nprogress .bar {
+  background: map-get($background-colors, 'invert' );
+
+  position: fixed;
+  z-index: 1031;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 3px;
+  border-radius: 10px;
+}
+
+.chakra-ui-dark #nprogress .bar {
+  background: white;
+  height: 2px;
+}
+
+/* Fancy blur effect */
+#nprogress .peg {
+  display: block;
+  position: absolute;
+  right: 0px;
+  width: 100px;
+  height: 100%;
+  box-shadow: 0 0 10px black, 0 0 5px black;
+  opacity: 1.0;
+
+  -webkit-transform: rotate(3deg) translate(0px, -4px);
+      -ms-transform: rotate(3deg) translate(0px, -4px);
+          transform: rotate(3deg) translate(0px, -4px);
+}
+
+.nprogress-custom-parent {
+  overflow: hidden;
+  position: relative;
+}
+
+.nprogress-custom-parent #nprogress .spinner,
+.nprogress-custom-parent #nprogress .bar {
+  position: absolute;
+}
+
+@-webkit-keyframes nprogress-spinner {
+  0%   { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+@keyframes nprogress-spinner {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+.time-table::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.time-table::-webkit-scrollbar-thumb {
+  border-radius: 12px;
+  width: 12px;
+  border: 4px solid map-get($background-colors, 'invert');
+  background: map-get($background-colors, 'invert');
+}
+
+.chakra-ui-dark .time-table::-webkit-scrollbar-thumb {
+  border: 4px solid $border-color;
+  background: $border-color;
+}

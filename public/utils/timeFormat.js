@@ -7,10 +7,11 @@ const displayTime = (value, usePM) => {
     const ampm = hour < 12 ? 'AM' : 'PM'
     const hour12 = hour % 12 || 12
     const minuteString = minute === 0 ? '' : `:${minute}`
+    const minuteString24H = minute === 0 ? ':00' : `:${minute}`
 
     const hourString = hour.toString()
 
-    if (!usePM) return (hourString.length === 1 ? "0" + hourString + ":00" : hourString + ":00")
+    if (!usePM) return (hourString.length === 1 ? "0" + hourString + minuteString24H : hourString + minuteString24H)
     return `${hour12}${minuteString}${ampm}`
 }
 
@@ -33,4 +34,8 @@ const getTimeDistance = (event, currentDate, lang) => {
     return formatDistance(parseISO(event.created_at), currentDate.date, { locale: lang === 'zh-tw' ? zhTW : null })
 }
 
-export { displayTime, getMonthAndDate, getTimeDistance, displayDay, checkWeekStart }
+const getFullDateAndTime = (date) => {
+    return format(parseISO(date), 'yyyy-MM-dd')
+}
+
+export { displayTime, getMonthAndDate, getTimeDistance, displayDay, checkWeekStart, getFullDateAndTime }

@@ -5,6 +5,8 @@
             "second": "和簡單地分享連結"
         },
         "subheader": "個行程已安排。",
+        "recent": "最近的行程",
+        "clear": "清除紀錄",
         "input": {
             "name": "幫行程取個名字",
             "chooseDates": "選擇日期/星期",
@@ -22,6 +24,13 @@
             "checkTime": "確認你的時間",
             "placeholder":"你超酷的名字"
         }
+    },
+    "notFound": {
+        "title": "我是誰？我在哪？",
+        "tryGoHome": "試試GO HOME"
+    },
+    "eventNotFound": {
+        "title": "找不到行程"
     },
     "global": {
         "button":{
@@ -62,6 +71,10 @@
             "days": "星期",
             "yourTime": "你的時間",
             "groupTime":"我們的時間"
+        },
+         "timeTable": {
+            "available": "有空",
+            "at": " 的 "
         }
     }
 }

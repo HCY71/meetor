@@ -24,7 +24,7 @@ const Navbar = ({ loading }) => {
             p={ { base: 5, md: 10 } }
             justifyContent='space-between'
             borderBottom={ colors[ colorMode ].border.nav }
-            bg={ colors[ colorMode ].bg.nav }
+            bg={ colors[ colorMode ].bg.nav.primary }
             backdropFilter='saturate(200%) blur(6px)'
             zIndex={ 1 }
             transition='.2s'
@@ -59,7 +59,7 @@ const Navbar = ({ loading }) => {
             p={ { base: 5, md: 10 } }
             justifyContent='space-between'
             borderBottom={ colors[ colorMode ].border.nav }
-            bg={ colors[ colorMode ].bg.nav }
+            bg={ colors[ colorMode ].bg.nav.primary }
             backdropFilter='saturate(200%) blur(6px)'
             zIndex={ 1 }
             transition='.2s'

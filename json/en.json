@@ -5,6 +5,8 @@
             "second": "Scheduler and Simply Share It."
         },
         "subheader": "events scheduled.",
+        "recent": "Recent events",
+        "clear": "Clear History",
         "input": {
             "name": "Give your event a name",
             "chooseDates": "Choose your dates.",
@@ -22,6 +24,13 @@
             "checkTime": "Check your time.",
             "placeholder":"your cool name"
         }
+    },
+    "notFound": {
+        "title": "Where am I? who am I? ",
+        "tryGoHome": "Try GO HOME"
+    },
+    "eventNotFound": {
+        "title": "Event Not Found"
     },
     "global": {
         "button":{
@@ -62,6 +71,10 @@
             "days": "Days",
             "yourTime": "Your Time",
             "groupTime": "Group Time"
+        },
+        "timeTable": {
+            "available": "available on",
+            "at": " at "
         }
     }
 }

@@ -4,6 +4,7 @@ import './globals.scss'
 import { Providers } from "./providers"
 
 import PageContainer from '@/components/PageContainer'
+import { useProgress } from '@/hooks/useProgress'
 
 // export const metadata = {
 //   title: 'Create Next App',
@@ -11,6 +12,7 @@ import PageContainer from '@/components/PageContainer'
 // }
 
 export default function RootLayout({ children }) {
+  useProgress()
   return (
     <html lang="en" suppressHydrationWarning={ true }>
       <body suppressHydrationWarning={ true }>
