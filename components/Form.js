@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import {
     VStack,
     RangeSlider,
@@ -47,10 +48,12 @@ const Form = () => {
         <Formik
             initialValues={ formData.initialValues }
             validationSchema={ formData.validationSchema }
+            onValidate={ () => console.log('sss') }
             onSubmit={ handleSubmit }
         >
             { ({ handleSubmit }) => (
                 <form onSubmit={ handleSubmit }>
+                    <ToastError />
                     <Steps />
                 </form>
             ) }
@@ -58,8 +61,25 @@ const Form = () => {
     )
 }
 
+const ToastError = () => {
+    const { errors, touched } = useFormikContext()
+    const { context } = useLang()
+    const isEmpty = (obj) => {
+        return Object.keys(obj).length === 0
+    }
 
-
+    useEffect(() => {
+        if (!isEmpty(errors) && !isEmpty(touched)) {
+            toast(context.global.toast.emptyForm, {
+                icon: '😵‍💫'
+            })
+        }
+    }, [ errors, touched ])
+    return (
+        <>
+        </>
+    )
+}
 const Steps = () => {
     return (
         <VStack w='520px' mt='10' spacing={ 10 }>

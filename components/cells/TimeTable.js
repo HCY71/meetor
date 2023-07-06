@@ -11,14 +11,11 @@ import {
     PopoverContent,
     PopoverHeader,
     PopoverBody,
-    PopoverFooter,
     PopoverArrow,
-    PopoverCloseButton,
-    PopoverAnchor,
     useDisclosure,
     useColorMode
 } from "@chakra-ui/react"
-import { getMonthAndDate, displayTime, displayDay, getFullDateAndTime } from '@/public/utils/timeFormat'
+import { getMonthAndDate, displayTime, displayDay, getFullDateAndTime, translateDay } from '@/public/utils/timeFormat'
 import CustomTag from "../atoms/CustomTag"
 
 import { colors } from "@/public/theme"
@@ -95,7 +92,7 @@ const TimeTable = ({ readOnly }) => {
 
     const checkGroupTime = () => {
         const group = {}
-        users.forEach(u => {
+        if (users) users.forEach(u => {
             u.time.forEach(t => {
                 if (group[ t ]) group[ t ].push(u.user)
                 else group[ t ] = [ u.user ]
@@ -140,7 +137,7 @@ const TimeTable = ({ readOnly }) => {
                                     <Center>{ displayDay(d, configs.lang) }</Center>
                                 </GridItem> :
                                 <GridItem key={ d } >
-                                    <Center>{ d }</Center>
+                                    <Center>{ translateDay(d, configs.lang) }</Center>
                                 </GridItem>
                         )) }
                         { table.map((data, indexRow) =>
@@ -154,6 +151,7 @@ const TimeTable = ({ readOnly }) => {
 
                                     whoIs={ groupTime[ d ] }
                                     users={ users }
+                                    type={ type }
                                 /> :
                                 <GridItemTemplate
                                     id={ d }
@@ -171,7 +169,7 @@ const TimeTable = ({ readOnly }) => {
     )
 }
 
-const GridPopover = ({ whoIs, users, ...props }) => {
+const GridPopover = ({ whoIs, users, type, ...props }) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const { configs } = useConfigs()
     const { context } = useLang()
@@ -193,26 +191,30 @@ const GridPopover = ({ whoIs, users, ...props }) => {
                     { ...props }
                 />
             </PopoverTrigger>
-            <PopoverContent>
+
+            <PopoverContent w='fit-content'>
                 <PopoverHeader fontWeight='semibold'>
-                    <HStack spacing={ 1 }>
-                        <Text fontWeight='bold'>
-                            { `${whoIs?.length ? whoIs.length : 0} / ${users?.length}` }
-                        </Text>
-                        <Text>
-                            { context.global.timeTable.available }
-                        </Text>
-                    </HStack>
-                    <Text>{ getFullDateAndTime(props.id) + context.global.timeTable.at + displayTime(props.id.slice(props.id.lastIndexOf('-') + 1, props.id.length), configs.usePM) }</Text>
+                    { users &&
+                        <HStack spacing={ 1 }>
+                            <Text fontWeight='bold'>
+                                { `${whoIs?.length ? whoIs.length : 0} / ${users?.length}` }
+                            </Text>
+                            <Text>
+                                { context.global.timeTable.available }
+                            </Text>
+                        </HStack>
+                    }
+                    <Text>{ getFullDateAndTime(props.id, type, configs.lang) + context.global.timeTable.at + displayTime(props.id.slice(props.id.lastIndexOf('-') + 1, props.id.length), configs.usePM) }</Text>
                 </PopoverHeader>
                 <PopoverArrow />
                 <PopoverBody>
                     <HStack>
-                        { users.map(u =>
-                            <CustomTag key={ u.user } isGhost={ whoIs?.some(w => w === u.user) }>
-                                { u.user }
-                            </CustomTag>
-                        ) }
+                        { users &&
+                            users.map(u =>
+                                <CustomTag key={ u.user } isGhost={ !whoIs?.some(w => w === u.user) }>
+                                    { u.user }
+                                </CustomTag>
+                            ) }
                     </HStack>
                 </PopoverBody>
             </PopoverContent>

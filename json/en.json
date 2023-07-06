@@ -38,7 +38,7 @@
             "back": "BACK",
             "auto": "AUTO",
             "close": "Close",
-            "donate": "Donate",
+            "donate": "Buy me a coffee",
             "logout": "Log out"
         },
         "weekdays": ["SUN","MON","TUE","WED","THU","FRI","SAT"],
@@ -60,6 +60,7 @@
             "error": "Something went wrong:(",
             "linkCopied": "Link Copied!",
             "nameFirst": "Fill your name first.",
+            "emptyForm":"You missed some fields.",
             "selectPast": "The past has passed by."
         },
         "donateAlert": {
