@@ -36,7 +36,7 @@ const RecentVisited = () => {
                 </Center>
             </HStack>
             { recent && (typeof (recent) === 'object') ? recent : JSON.parse(recent).reverse().map(r => (
-                <Link href={ `/${process.env.NEXT_PUBLIC_DOMAIN}/events/${r.id}` } className="next-link-custom" key={ r.id }>
+                <Link href={ `/events/${r.id}` } className="next-link-custom" key={ r.id }>
                     <HStack justify='space-between' p={ '0 16px' } >
                         <Center fontWeight='bold' fontSize='20px'>{ r.name }</Center>
                         <Center fontSize='14px'> { context.event.createdAt + getTimeDistance(r, currentDate, configs.lang) + context.event.ago } </Center>
