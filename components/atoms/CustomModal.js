@@ -9,9 +9,12 @@ import {
 } from '@chakra-ui/react'
 import CustomButton from './CustomButton'
 import { useLang } from '@/context/LangContext'
+import { useColorMode } from '@chakra-ui/react'
+import { colors } from '@/public/theme'
 
 const CustomModal = ({ controls }) => {
     const { context } = useLang()
+    const { colorMode } = useColorMode()
     const handleClose = () => {
         controls.onClose()
         window.location.reload()
@@ -21,17 +24,21 @@ const CustomModal = ({ controls }) => {
     }
     return (
         <>
-            <Modal blockScrollOnMount={ false } isOpen={ controls.isOpen } onClose={ handleClose }>
+            <Modal blockScrollOnMount={ false } isOpen={ controls.isOpen } onClose={ handleClose } size='lg'>
                 <ModalOverlay />
                 <ModalContent
                     p='1rem'
+                    bg={ colors[ colorMode ].bg.primary }
+                    boxShadow='rgba(255, 255, 255, 0.7) 0px 0px 76.9166px, rgba(255, 255, 255, 0.4) 0px 0px 26.3055px, rgba(255, 255, 255, 0.3) 0px 0px 13.1528px, rgb(255, 255, 255) 0px 0px 3.75793px, rgb(255, 255, 255) 0px 0px 1.87897px;'
+                    border='solid 1px rgba(255,255,255,0.8)'
                 >
                     <ModalHeader
                         fontSize={ '2.5rem' }
                         fontWeight='bold'
                         textAlign='center'
                     >
-                        { context.global.donateAlert.title }</ModalHeader>
+                        { context.global.donateAlert.title }
+                    </ModalHeader>
                     <ModalBody fontSize='18px' mb='1rem'>
                         { context.global.donateAlert.content }
                     </ModalBody>
@@ -39,7 +46,11 @@ const CustomModal = ({ controls }) => {
                         <CustomButton colorScheme='blue' mr={ 3 } onClick={ handleClose } ghost>
                             { context.global.button.close }
                         </CustomButton>
-                        <CustomButton onClick={ handleDonate }>
+                        <CustomButton
+                            onClick={ handleDonate }
+                            boxShadow='rgba(255, 255, 255, 0.7) 0px 0px 76.9166px, rgba(255, 255, 255, 0.4) 0px 0px 26.3055px, rgba(255, 255, 255, 0.3) 0px 0px 13.1528px, rgb(255, 255, 255) 0px 0px 3.75793px, rgb(255, 255, 255) 0px 0px 1.87897px;'
+                            border='solid 1px rgba(255,255,255,0.8)'
+                        >
                             { context.global.button.donate }
                         </CustomButton>
                     </ModalFooter>

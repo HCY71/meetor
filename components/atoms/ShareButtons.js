@@ -1,7 +1,6 @@
 import { Icon, useColorMode } from "@chakra-ui/react"
 import { FiShare, FiLink } from 'react-icons/fi'
 import { usePathname } from "next/navigation"
-import { baseUrl } from "@/public/baseUrl"
 import { toast } from 'react-hot-toast'
 
 import { colors } from "@/public/theme"
@@ -9,7 +8,7 @@ import { useLang } from "@/context/LangContext"
 
 const CopyLink = () => {
     const path = usePathname()
-    const link = baseUrl + path
+    const link = process.env.NEXT_PUBLIC_DOMAIN + path
     const { context } = useLang()
     const copyLink = () => {
         navigator.clipboard.writeText(link)
@@ -21,7 +20,7 @@ const CopyLink = () => {
 }
 const Share = () => {
     const path = usePathname()
-    const link = baseUrl + path
+    const link = process.env.NEXT_PUBLIC_DOMAIN + path
     const shareData = {
         title: "MeetMe.app",
         text: "Schedule an event with MeetMe.",

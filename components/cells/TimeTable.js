@@ -150,6 +150,7 @@ const TimeTable = ({ readOnly }) => {
                                     bg={ generateColors(groupTime[ d ]?.length / users?.length, colorMode === 'dark') }
 
                                     whoIs={ groupTime[ d ] }
+
                                     users={ users }
                                     type={ type }
                                 /> :
