@@ -22,7 +22,7 @@ const CustomModal = ({ controls }) => {
     }
     return (
         <>
-            <Modal blockScrollOnMount={ false } isOpen={ controls.isOpen } onClose={ handleClose } size='lg'>
+            <Modal blockScrollOnMount={ false } isOpen={ controls.isOpen } onClose={ handleClose } size={ { base: 'xs', md: 'lg' } }>
                 <ModalOverlay />
                 <ModalContent
                     p='1rem'
@@ -31,13 +31,13 @@ const CustomModal = ({ controls }) => {
                     border='solid 1px rgba(255,255,255,0.8)'
                 >
                     <ModalHeader
-                        fontSize={ '2.5rem' }
+                        fontSize={ { base: '1.5rem', md: '2.5rem' } }
                         fontWeight='bold'
                         textAlign='center'
                     >
                         { context.global.donateAlert.title }
                     </ModalHeader>
-                    <ModalBody fontSize='18px' mb='1rem'>
+                    <ModalBody fontSize={ { base: '1rem', md: '1.125rem' } }>
                         { context.global.donateAlert.content }
                     </ModalBody>
                     <ModalFooter>

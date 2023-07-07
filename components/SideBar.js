@@ -25,7 +25,7 @@ const SideBar = () => {
     const { context } = useLang()
     const { configs, setConfigs } = useConfigs()
     return (
-        <Popover placement='bottom-end' isLazy >
+        <Popover placement='bottom-end' isLazy autoFocus={ false }>
             { ({ isOpen }) => (
                 <>
                     <PopoverTrigger>
@@ -83,9 +83,6 @@ const MenuIcon = forwardRef(({ isOpen, ...props }, ref) => {
             h='100%'
             w='36px'
             ref={ ref }
-            _hover={ {
-                bg: 'unset',
-            } }
             { ...props }
         >
             <MenuIconComposition

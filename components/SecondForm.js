@@ -50,7 +50,7 @@ const First = ({ inputRef, openModal }) => {
     const { context } = useLang()
     const handleSubmit = (value) => {
         openModal()
-        setName(value.name)
+        setName(value.name.trim())
     }
 
     return (

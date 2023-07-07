@@ -15,16 +15,16 @@ const Navbar = ({ loading }) => {
                 bg='transparent'
                 userSelect='none'
                 cursor='pointer'
-                w='120px'
-                h='80px'
+                h='100%'
+                w='36px'
             >
                 <MenuIconComposition
-                    w={ '35%' }
-                    transform={ 'translate(0, -90%)' }
+                    w={ '36px' }
+                    transform={ 'translate3d(0, -90%, 0) rotate(0deg)' }
                 />
                 <MenuIconComposition
-                    w={ '20%' }
-                    transform={ 'translate(30%, 90%)' }
+                    w={ '24px' }
+                    transform={ 'translate3d(25%, 90%, 0) rotate(0deg)' }
                 />
             </Center>
         </Template>
@@ -53,7 +53,7 @@ const Template = ({ children }) => {
             borderBottom={ colors[ colorMode ].border.nav }
             bg={ colors[ colorMode ].bg.nav.primary }
             backdropFilter='saturate(200%) blur(6px)'
-            zIndex={ 1 }
+            zIndex={ 10 }
             transition='.2s'
             p={ { base: '0 12px', md: '0 40px' } }
         >

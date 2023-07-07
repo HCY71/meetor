@@ -25,9 +25,11 @@ import useLocalStorage from "@/hooks/useLocalStorage"
 import { useParams } from "next/navigation"
 import { useConfigs } from "@/context/ConfigsContext"
 import { useLang } from "@/context/LangContext"
+import { useTouchDevices } from "@/hooks/useTouchDevices"
 
 import SelectionArea from '@viselect/react'
 import useDragSelect from "@/hooks/useDragSelect"
+import { motion } from "framer-motion"
 
 const TimeTable = ({ readOnly }) => {
     const { GET_BY_ID, POST_USER_TIME, SUBSCRIBE, data } = useSupabase()
@@ -110,7 +112,7 @@ const TimeTable = ({ readOnly }) => {
 
 
     return (
-        <Center fontWeight='bold' fontSize='12px' margin={ '0 auto' } pos='relative'>
+        <Center fontWeight='bold' fontSize='12px' margin={ '0 auto' } pos='relative' >
             <VStack
                 spacing={ 0 }
                 pt={ '0rem' }
@@ -137,18 +139,19 @@ const TimeTable = ({ readOnly }) => {
             </VStack>
             <VStack w='100%' className="time-table" overflowX='auto' pos='relative' p='0 0px 8px 0px' alignItems='flex-start'>
                 <SelectionArea
-                    className="container"
+                    className={ readOnly ? 'container' : "container  no-touch-action" }
                     onMove={ readOnly ? null : (e) => onMove(e, setSelectedTime) }
                     selectables=".selectable"
                 >
                     <Grid
-                        gridTemplateRows={ `repeat(${times.length}, 1fr)` }
+                        gridTemplateRows={ `repeat(${times.length}, auto)` }
                         gridTemplateColumns={ `repeat(${dates.length}, 1fr)` }
                         w='100%'
+                        h='fit-content'
                     >
                         { dates.map(d => (
                             type === 'dates' ?
-                                <GridItem key={ d } w='100%' minW='100px'>
+                                <GridItem key={ d } w='100%' minW={ { base: '100px' } } >
                                     <Center>{ getMonthAndDate(d, configs.lang) }</Center>
                                     <Center>{ displayDay(d, configs.lang) }</Center>
                                 </GridItem> :
@@ -187,10 +190,10 @@ const TimeTable = ({ readOnly }) => {
 }
 
 const GridGroupPopover = ({ whoIs, users, type, ...props }) => {
-    const { isOpen, onOpen, onClose } = useDisclosure()
+    const { isOpen, onOpen, onToggle, onClose } = useDisclosure()
     const { configs } = useConfigs()
     const { context } = useLang()
-
+    const { isTouch } = useTouchDevices()
     return (
         <Popover
             returnFocusOnClose={ false }
@@ -199,12 +202,15 @@ const GridGroupPopover = ({ whoIs, users, type, ...props }) => {
             closeOnBlur={ true }
             isLazy
             lazyBehavior='unmount'
+            autoFocus={ false }
         >
             <PopoverTrigger>
                 <GridGroupTime
-                    onClick={ onOpen }
-                    onMouseOver={ onOpen }
-                    onMouseLeave={ onClose }
+                    as={ motion.div }
+                    onTapStart={ isTouch ? onOpen : null }
+                    onTapCancel={ isTouch ? onClose : null }
+                    onMouseOver={ isTouch ? null : onOpen }
+                    onMouseLeave={ isTouch ? null : onClose }
                     { ...props }
                 />
             </PopoverTrigger>
@@ -257,6 +263,7 @@ const GridItemTemplate = forwardRef(({ ...props }, ref) => {
             className="selectable"
             w='100%'
             minW='100px'
+            h={ { base: '30px', md: '35px' } }
             border={ colors[ colorMode ].border.table }
             p={ '4px 8px' }
             borderRadius='sm'
@@ -266,7 +273,7 @@ const GridItemTemplate = forwardRef(({ ...props }, ref) => {
             ref={ ref }
             { ...props }
         >
-            <Center color='transparent' userSelect='none' h='25px' />
+            <Center color='transparent' userSelect='none' />
         </GridItem>
     )
 })
