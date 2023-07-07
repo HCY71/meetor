@@ -18,9 +18,17 @@ const RecentVisited = () => {
     if (!recent || !recent.length) return
 
     return (
-        <VStack bg={ colors[ colorMode ].bg.nav.invert } borderRadius='md' p={ 5 } color={ colors[ colorMode ].font.invert } w='520px'>
+        <VStack
+            bg={ colors[ colorMode ].bg.nav.invert }
+            borderRadius='md' p={ 5 }
+            color={ colors[ colorMode ].font.invert }
+            w='100%'
+            maxW={ { base: '100%', md: '520px' } }
+            fontSize={ { base: '1rem', md: '1.25rem' } }
+            mt={ { base: '1rem', md: '1.5rem' } }
+        >
             <HStack alignSelf='flex-start'>
-                <Center fontWeight='bold' fontSize='20px' >{ context.home.recent }</Center>
+                <Center fontWeight='bold' >{ context.home.recent }</Center>
                 <Center
                     fontSize='0.75rem'
                     fontWeight='medium'
@@ -37,9 +45,9 @@ const RecentVisited = () => {
             </HStack>
             { recent && (typeof (recent) === 'object') ? recent : JSON.parse(recent).reverse().map(r => (
                 <Link href={ `/events/${r.id}` } className="next-link-custom" key={ r.id }>
-                    <HStack justify='space-between' p={ '0 16px' } >
-                        <Center fontWeight='bold' fontSize='20px'>{ r.name }</Center>
-                        <Center fontSize='14px'> { context.event.createdAt + getTimeDistance(r, currentDate, configs.lang) + context.event.ago } </Center>
+                    <HStack justify='space-between' p={ { base: '0 8px', md: '0 16px' } } >
+                        <Center fontWeight='bold'>{ r.name }</Center>
+                        <Center fontSize={ { base: '.75rem', md: '.875rem' } }> { context.event.createdAt + getTimeDistance(r, currentDate, configs.lang) + context.event.ago } </Center>
                     </HStack>
                 </Link>
             )) }

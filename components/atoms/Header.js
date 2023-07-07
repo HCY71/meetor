@@ -5,7 +5,7 @@ const Header = ({ children, ...props }) => {
     const { colorMode } = useColorMode()
     return (
         <Text
-            fontSize='3.5rem'
+            fontSize={ { base: '2.5rem', md: '3.5rem' } }
             fontWeight='700'
             lineHeight='1'
             letterSpacing='0px'

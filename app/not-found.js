@@ -11,7 +11,7 @@ export default function NotFound() {
         <VStack spacing={ 15 }>
             <VStack>
                 <Header fontSize='10rem'>404</Header>
-                <Header>{ context.notFound.title }</Header>
+                <Header fontSize={ { base: '1.5rem', md: '2rem' } }>{ context.notFound.title }</Header>
             </VStack>
             <VStack>
                 <Text fontWeight='bold'>{ context.notFound.tryGoHome }</Text>

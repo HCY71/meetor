@@ -1,7 +1,7 @@
 {
     "home": {
         "header": {
-            "first": "Just Create an Event",
+            "first": "Create an Event",
             "second": "Scheduler and Simply Share It."
         },
         "subheader": "events scheduled.",
@@ -76,6 +76,9 @@
         "timeTable": {
             "available": "available on",
             "at": " at "
+        },
+        "footer": {
+            "title": "If you love this, consider"
         }
     }
 }

@@ -7,7 +7,7 @@ import {
     useDisclosure,
     useColorMode
 } from "@chakra-ui/react"
-import { useRef } from "react"
+import { useRef, useState, useEffect } from "react"
 import Step from "./cells/Step"
 import CustomTabs from "./cells/Tabs"
 import TimeTable from "./cells/TimeTable"
@@ -86,7 +86,14 @@ const First = ({ inputRef, openModal }) => {
 
 const Second = ({ inputRef }) => {
     const [ name ] = useLocalStorage('name')
+    const [ tabIndex, setTabIndex ] = useState(1)
     const { context } = useLang()
+    useEffect(() => {
+        if (name) setTabIndex(0)
+    }, [ name ])
+    const handleTabsChange = (index) => {
+        setTabIndex(index)
+    }
     return (
         <Step
             step={ 2 }
@@ -101,8 +108,10 @@ const Second = ({ inputRef }) => {
                 ] }
                 inputRef={ inputRef }
                 isDisabled={ name ? false : true }
-                defaultIndex={ 1 }
+                index={ tabIndex }
+                onChange={ handleTabsChange }
             />
+            { name }
         </Step>
     )
 }
@@ -118,7 +127,7 @@ const LoggedIn = () => {
                 { context.event.hello + name }
             </SubHeader>
             <HStack
-                fontSize='1.5rem'
+                fontSize={ { base: '1rem', md: '1.5rem' } }
                 fontWeight='500'
                 lineHeight='1.5'
                 textAlign='center'

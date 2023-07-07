@@ -8,6 +8,7 @@ import {
     ModalBody,
 } from '@chakra-ui/react'
 import CustomButton from './CustomButton'
+import DonateButton from './DonateButton'
 import { useLang } from '@/context/LangContext'
 import { useColorMode } from '@chakra-ui/react'
 import { colors } from '@/public/theme'
@@ -18,9 +19,6 @@ const CustomModal = ({ controls }) => {
     const handleClose = () => {
         controls.onClose()
         window.location.reload()
-    }
-    const handleDonate = () => {
-        console.log('donate')
     }
     return (
         <>
@@ -46,13 +44,7 @@ const CustomModal = ({ controls }) => {
                         <CustomButton colorScheme='blue' mr={ 3 } onClick={ handleClose } ghost>
                             { context.global.button.close }
                         </CustomButton>
-                        <CustomButton
-                            onClick={ handleDonate }
-                            boxShadow='rgba(255, 255, 255, 0.7) 0px 0px 76.9166px, rgba(255, 255, 255, 0.4) 0px 0px 26.3055px, rgba(255, 255, 255, 0.3) 0px 0px 13.1528px, rgb(255, 255, 255) 0px 0px 3.75793px, rgb(255, 255, 255) 0px 0px 1.87897px;'
-                            border='solid 1px rgba(255,255,255,0.8)'
-                        >
-                            { context.global.button.donate }
-                        </CustomButton>
+                        <DonateButton />
                     </ModalFooter>
                 </ModalContent>
             </Modal>

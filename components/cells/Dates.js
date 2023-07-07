@@ -76,7 +76,7 @@ const Dates = () => {
                 </Center>
                 <HStack
                     fontWeight='bold'
-                    fontSize='1.5rem'
+                    fontSize={ { base: '1rem', md: '1.5rem' } }
                     pos='relative'
                 >
                     <Center>
@@ -114,7 +114,7 @@ const Dates = () => {
                     <ControlIcon />
                 </Center>
             </HStack>
-            <HStack w='100%' color={ colors[ colorMode ].font.dim }>
+            <HStack w='100%' color={ colors[ colorMode ].font.dim } fontSize={ { base: '.9rem', md: '1rem' } }>
                 { checkWeekStart(context.global.weekdays, configs.weekStartsOn).map((d) =>
                     <Center w='100%' key={ d }>
                         { d }

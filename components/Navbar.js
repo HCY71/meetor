@@ -1,38 +1,17 @@
 import {
     HStack,
-    Text,
-    Button
+    Center,
 } from '@chakra-ui/react'
 import { MenuIconComposition } from './SideBar'
-import { useRouter } from 'next/navigation'
 import SideBar from './SideBar'
+import { useRouter } from 'next/navigation'
 import { colors } from '@/public/theme'
 import { useColorMode } from '@chakra-ui/react'
 
 const Navbar = ({ loading }) => {
-    const { colorMode } = useColorMode()
-    const router = useRouter()
-    const goHome = () => {
-        router.push('/')
-    }
     if (loading) return (
-        <HStack
-            w='100%'
-            pos='fixed'
-            top='0'
-            h='80px'
-            p={ { base: 5, md: 10 } }
-            justifyContent='space-between'
-            borderBottom={ colors[ colorMode ].border.nav }
-            bg={ colors[ colorMode ].bg.nav.primary }
-            backdropFilter='saturate(200%) blur(6px)'
-            zIndex={ 1 }
-            transition='.2s'
-        >
-            <Text fontWeight='bold' onClick={ goHome }>
-                Meetor
-            </Text>
-            <Button
+        <Template>
+            <Center
                 bg='transparent'
                 userSelect='none'
                 cursor='pointer'
@@ -47,29 +26,48 @@ const Navbar = ({ loading }) => {
                     w={ '20%' }
                     transform={ 'translate(30%, 90%)' }
                 />
-            </Button>
-        </HStack>
+            </Center>
+        </Template>
     )
+    return (
+        <Template>
+            <SideBar />
+        </Template>
+    )
+}
+
+
+const Template = ({ children }) => {
+    const { colorMode } = useColorMode()
+    const router = useRouter()
+    const goHome = () => {
+        router.push('/')
+    }
     return (
         <HStack
             w='100%'
             pos='fixed'
             top='0'
-            h='80px'
-            p={ { base: 5, md: 10 } }
+            h={ { base: '60px', md: '80px' } }
             justifyContent='space-between'
             borderBottom={ colors[ colorMode ].border.nav }
             bg={ colors[ colorMode ].bg.nav.primary }
             backdropFilter='saturate(200%) blur(6px)'
             zIndex={ 1 }
             transition='.2s'
+            p={ { base: '0 12px', md: '0 40px' } }
         >
-            <Text fontWeight='bold' onClick={ goHome }>
+            <Center
+                fontWeight='bold'
+                fontSize={ '20px' }
+                onClick={ goHome }
+                cursor='pointer'
+                h='100%'
+            >
                 Meetor
-            </Text>
-            <SideBar />
+            </Center>
+            { children }
         </HStack>
     )
 }
-
 export default Navbar

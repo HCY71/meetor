@@ -48,11 +48,10 @@ const Form = () => {
         <Formik
             initialValues={ formData.initialValues }
             validationSchema={ formData.validationSchema }
-            onValidate={ () => console.log('sss') }
             onSubmit={ handleSubmit }
         >
             { ({ handleSubmit }) => (
-                <form onSubmit={ handleSubmit }>
+                <form onSubmit={ handleSubmit } style={ { 'maxWidth': '100%' } }>
                     <ToastError />
                     <Steps />
                 </form>
@@ -82,7 +81,7 @@ const ToastError = () => {
 }
 const Steps = () => {
     return (
-        <VStack w='520px' mt='10' spacing={ 10 }>
+        <VStack w='520px' mt={ { base: '5', md: '10' } } spacing={ { base: 5, md: 10 } } maxW='100%'>
             <First />
             <Second />
             <Third />
@@ -162,6 +161,7 @@ const SliderThumb = ({ index, value }) => {
             index={ index }
             border='solid 1px'
             borderColor={ colors[ colorMode ].border.sliderTrack }
+            zIndex={ 0 }
             _after={ {
                 content: `"${displayTime(value, configs.usePM)}"`,
                 position: 'absolute',

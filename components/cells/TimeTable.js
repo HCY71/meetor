@@ -111,11 +111,27 @@ const TimeTable = ({ readOnly }) => {
 
     return (
         <Center fontWeight='bold' fontSize='12px' margin={ '0 auto' } pos='relative'>
-            <VStack spacing={ 0 } pt={ '0rem' } pos={ 'absolute' } left='-50px' top='5px' h='101.3%' >
+            <VStack
+                spacing={ 0 }
+                pt={ '0rem' }
+                pos={ 'absolute' }
+                left={ { base: '-0px', md: '-50px' } }
+                top='5px'
+                h='101.3%'
+                zIndex={ 1 }
+                alignItems={ { base: 'flex-start', md: 'center' } }
+            >
                 { times.map(t => (
                     t % 1 === 0 &&
                     <Center key={ t } h='100%'>
-                        { displayTime(t, configs.usePM) }
+                        <Center
+                            borderRadius='sm'
+                            border={ { base: colors[ colorMode ].border.table, md: "none" } }
+                            bg={ { base: colors[ colorMode ].bg.nav.primary, md: "none" } }
+                            p='2px'
+                        >
+                            { displayTime(t, configs.usePM) }
+                        </Center>
                     </Center>
                 )) }
             </VStack>
@@ -143,7 +159,7 @@ const TimeTable = ({ readOnly }) => {
                         { table.map((data, indexRow) =>
                             data.map(d =>
                             (readOnly ?
-                                <GridPopover
+                                <GridGroupPopover
                                     id={ d }
                                     key={ d }
                                     index={ indexRow }
@@ -166,11 +182,11 @@ const TimeTable = ({ readOnly }) => {
                     </Grid>
                 </SelectionArea>
             </VStack>
-        </Center>
+        </Center >
     )
 }
 
-const GridPopover = ({ whoIs, users, type, ...props }) => {
+const GridGroupPopover = ({ whoIs, users, type, ...props }) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const { configs } = useConfigs()
     const { context } = useLang()
@@ -250,9 +266,7 @@ const GridItemTemplate = forwardRef(({ ...props }, ref) => {
             ref={ ref }
             { ...props }
         >
-            <Center color='transparent' userSelect='none'>
-                ITS TIME
-            </Center>
+            <Center color='transparent' userSelect='none' h='25px' />
         </GridItem>
     )
 })

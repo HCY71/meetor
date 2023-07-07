@@ -21,7 +21,7 @@ const Step = ({ step, title, children, isDisable = false }) => {
 const Title = ({ step, children, isDisable }) => {
     const { colorMode } = useColorMode()
     return (
-        <HStack visibility={ isDisable ? 'hidden' : 'visible' }>
+        <HStack display={ isDisable ? 'none' : 'flex' }>
             <Center
                 borderRadius='50%'
                 bg={ colors[ colorMode ].bg.invert }

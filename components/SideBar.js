@@ -25,7 +25,7 @@ const SideBar = () => {
     const { context } = useLang()
     const { configs, setConfigs } = useConfigs()
     return (
-        <Popover placement='bottom-end' isLazy>
+        <Popover placement='bottom-end' isLazy >
             { ({ isOpen }) => (
                 <>
                     <PopoverTrigger>
@@ -76,12 +76,12 @@ const SideBar = () => {
 
 const MenuIcon = forwardRef(({ isOpen, ...props }, ref) => {
     return (
-        <Button
+        <Center
             bg='transparent'
             userSelect='none'
             cursor='pointer'
-            w='120px'
-            h='80px'
+            h='100%'
+            w='36px'
             ref={ ref }
             _hover={ {
                 bg: 'unset',
@@ -89,14 +89,14 @@ const MenuIcon = forwardRef(({ isOpen, ...props }, ref) => {
             { ...props }
         >
             <MenuIconComposition
-                w={ isOpen ? '20%' : '35%' }
-                transform={ isOpen ? 'translate(-30%, 80%) rotate(-90deg)' : 'translate(0, -90%)' }
+                w={ isOpen ? '24px' : '36px' }
+                transform={ isOpen ? 'translate3d(-25%, 80%, 0) rotate(-90deg)' : 'translate3d(0, -90%, 0) rotate(0deg)' }
             />
             <MenuIconComposition
-                w={ isOpen ? '35%' : '20%' }
-                transform={ isOpen ? 'translate(30%, 0%) rotate(-90deg)' : 'translate(30%, 90%)' }
+                w={ isOpen ? '36px' : '24px' }
+                transform={ isOpen ? 'translate3d(25%, 0%, 0) rotate(-90deg)' : 'translate3d(25%, 90%, 0) rotate(0deg)' }
             />
-        </Button>
+        </Center>
     )
 })
 MenuIcon.displayName = 'MenuIcon'
@@ -105,12 +105,14 @@ const MenuIconComposition = ({ ...props }) => {
     const { colorMode } = useColorMode()
     return (
         <Box
-            h='14%'
+            // h={ { base: '6px', md: '8px' } }
+            h='8px'
             bg={ colors[ colorMode ].bg.invert }
             pos='absolute'
             borderRadius='1000px'
             opacity={ .8 }
             transition='.2s'
+            willChange='transform'
             { ...props }
         />
     )

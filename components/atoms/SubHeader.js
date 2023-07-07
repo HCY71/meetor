@@ -5,7 +5,7 @@ const SubHeader = ({ children }) => {
     const { colorMode } = useColorMode()
     return (
         <Text
-            fontSize='2.5rem'
+            fontSize={ { base: '2rem', md: '2.5rem' } }
             fontWeight='700'
             lineHeight='1'
             letterSpacing='0px'

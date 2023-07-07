@@ -54,6 +54,7 @@ const Days = () => {
                                         bg={ values.days.includes(day) ? colors[ colorMode ].bg.invert : 'transparent' }
                                         color={ values.days.includes(day) ? colors[ colorMode ].font.invert : colors[ colorMode ].font.primary }
                                         transition='.2s'
+                                        fontSize={ { base: '.875rem', md: '1rem' } }
                                     >
                                         { day }
                                     </Center>

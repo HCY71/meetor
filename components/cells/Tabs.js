@@ -25,10 +25,9 @@ const CustomTabs = ({ onMouseDown = [ null, null ], tab, panel, isDisabled = fal
             variant={ colorMode === 'light' ? 'black' : 'white' }
             w='100%'
             isFitted
-
             { ...props }
         >
-            <TabList as={ HStack } spacing={ 2 }>
+            <TabList as={ HStack } spacing={ { base: 1, md: 2 } }>
                 <Center
                     onClick={ isDisabled ? handleDisable : null }
                     pointerEvents={ isDisabled ? 'initial' : 'none' }

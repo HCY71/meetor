@@ -49,10 +49,10 @@ const Page = () => {
     }, [ isLoading, data ])
 
     if (notFound) return (
-        <VStack spacing={ 15 }>
+        <VStack spacing={ 15 } >
             <VStack spacing={ 5 }>
-                <Header fontSize='5rem'>{ context.eventNotFound.title }</Header>
-                <Header fontSize='2rem'>{ context.notFound.title }</Header>
+                <Header fontSize={ { base: '4rem', md: '5rem' } }>{ context.eventNotFound.title }</Header>
+                <Header fontSize={ { base: '1.5rem', md: '2rem' } }>{ context.notFound.title }</Header>
             </VStack>
             <VStack>
                 <Text fontWeight='bold'>{ context.notFound.tryGoHome }</Text>
@@ -65,7 +65,7 @@ const Page = () => {
         </VStack>
     )
     return (
-        <VStack spacing={ 5 } w='min(100%, 520px)' >
+        <VStack spacing={ 5 } w='520px' maxW='100%'>
             { event
                 &&
                 <VStack spacing={ 0 }>

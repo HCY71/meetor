@@ -22,10 +22,10 @@ export default function Home() {
   }, [ name ])
   return (
     <>
-      <VStack spacing={ 5 }>
+      <VStack spacing={ { base: 3, md: 5 } }>
         <VStack
-          className='max-width'
           spacing='0'
+          maxW={ { base: '100%', lg: '900px' } }
         >
           <Header>
             { context.home.header.first }
@@ -37,8 +37,8 @@ export default function Home() {
         <Subtitle>
           13,210 { context.home.subheader }
         </Subtitle>
-        <RecentVisited />
-      </VStack>
+      </VStack >
+      <RecentVisited />
       <Form />
     </>
   )
