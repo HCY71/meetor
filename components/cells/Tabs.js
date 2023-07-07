@@ -4,6 +4,7 @@ import {
     TabList,
     TabPanels,
     TabPanel,
+    Tag,
     Center,
     HStack,
     useColorMode
@@ -11,7 +12,7 @@ import {
 import { toast } from 'react-hot-toast'
 import { useLang } from '@/context/LangContext'
 
-const CustomTabs = ({ onMouseDown = [ null, null ], tab, panel, isDisabled = false, inputRef = null, ...props }) => {
+const CustomTabs = ({ onMouseDown = [ null, null ], tab, panel, isDisabled = false, inputRef = null, tips = [], ...props }) => {
     const { context } = useLang()
     const handleDisable = () => {
         toast(context.global.toast.nameFirst, {
@@ -47,13 +48,27 @@ const CustomTabs = ({ onMouseDown = [ null, null ], tab, panel, isDisabled = fal
             </TabList>
             <TabPanels>
                 <TabPanel p='1rem 0'>
+                    { tips[ 0 ] && <TagTemplate>{ `💡 ${tips[ 0 ]}` }</TagTemplate> }
                     { panel[ 0 ] }
                 </TabPanel>
                 <TabPanel p='1rem 0'>
+                    { tips[ 1 ] && <TagTemplate>{ `💡 ${tips[ 1 ]}` }</TagTemplate> }
                     { panel[ 1 ] }
                 </TabPanel>
             </TabPanels>
         </Tabs >
+    )
+}
+
+const TagTemplate = ({ children, ...props }) => {
+    return (
+        <Tag
+            colorScheme='orange'
+            mb='12px'
+            { ...props }
+        >
+            { children }
+        </Tag>
     )
 }
 

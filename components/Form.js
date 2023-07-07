@@ -112,11 +112,12 @@ const Second = () => {
     const { setFieldValue } = useFormikContext()
     const { context } = useLang()
     return (
-        <Step step={ 2 } title={ context.home.input.chooseDates }>
+        <Step step={ 2 } title={ context.home.input.chooseDates } >
             <CustomTabs
                 onMouseDown={ [ () => setFieldValue('type', 'dates'), () => setFieldValue('type', 'days') ] }
                 tab={ [ context.global.panel.dates, context.global.panel.days ] }
                 panel={ [ <Dates />, <Days /> ] }
+                tips={ [ context.global.tips.dragSelect, context.global.tips.dragSelect ] }
             />
         </Step >
     )

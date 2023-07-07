@@ -30,6 +30,7 @@ const Days = () => {
                 className="container"
                 onMove={ (e) => onMove(e, setSelectedDays) }
                 selectables=".selectable"
+                features={ { singleTap: { intersect: 'touch' } } }
             >
                 <HStack w='100%' spacing={ 1 }>
                     <FieldArray

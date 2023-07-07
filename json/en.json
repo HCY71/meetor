@@ -79,6 +79,11 @@
         },
         "footer": {
             "title": "If you love this, consider"
+        },
+        "tips": {
+            "dragSelect": "You can drag to multi-select",
+            "hoverToShow": "Hover to show details",
+            "tapToShow": "Tap to show details"
         }
     }
 }

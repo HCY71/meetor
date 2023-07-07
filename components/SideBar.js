@@ -1,11 +1,11 @@
 import { forwardRef } from 'react'
+// import Link from 'next/link'
 import {
     HStack,
     VStack,
     Center,
     Box,
     Text,
-    Button,
     Popover,
     PopoverTrigger,
     PopoverContent,
@@ -13,6 +13,7 @@ import {
     PopoverBody,
     PopoverFooter,
     useColorMode,
+    Link
 } from '@chakra-ui/react'
 import CustomButton from './atoms/CustomButton'
 import CustomSwitch from './atoms/CustomSwitch'
@@ -33,7 +34,7 @@ const SideBar = () => {
                     </PopoverTrigger>
                     <PopoverContent p={ 2 } bg={ colors[ colorMode ].bg.primary }>
                         <PopoverHeader fontWeight='bold' borderBottom='none' fontSize='20px'>{ context.global.settings.title }</PopoverHeader>
-                        <PopoverBody pt='0' as={ VStack } align='flex-start' spacing={ 4 }>
+                        <PopoverBody pt='0' pb='20px' as={ VStack } align='flex-start' spacing={ 4 }>
                             <Template title={ context.global.settings.theme } center>
                                 <CustomSwitch onClick={ toggleColorMode } />
                                 {/* <CustomButton
@@ -65,7 +66,9 @@ const SideBar = () => {
                             </Template>
                         </PopoverBody>
                         <PopoverFooter>
-                            { context.global.settings.about }
+                            <Link href='https://erkin-portfolio.com' target='_blank' rel='noopener noreferrer'>
+                                { `${context.global.settings.about}` + ' ➚' }
+                            </Link>
                         </PopoverFooter>
                     </PopoverContent>
                 </>

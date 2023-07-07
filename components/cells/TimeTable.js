@@ -139,9 +139,10 @@ const TimeTable = ({ readOnly }) => {
             </VStack>
             <VStack w='100%' className="time-table" overflowX='auto' pos='relative' p='0 0px 8px 0px' alignItems='flex-start'>
                 <SelectionArea
+                    selectables=".selectable"
                     className={ readOnly ? 'container' : "container  no-touch-action" }
                     onMove={ readOnly ? null : (e) => onMove(e, setSelectedTime) }
-                    selectables=".selectable"
+                    features={ { singleTap: { intersect: 'touch' } } }
                 >
                     <Grid
                         gridTemplateRows={ `repeat(${times.length}, auto)` }

@@ -1,6 +1,7 @@
 import Link from "next/link"
 import CustomButton from "./CustomButton"
 import { useLang } from "@/context/LangContext"
+import { BsArrowUpRight } from 'react-icons/bs'
 
 const DonateButton = () => {
     const { context } = useLang()

@@ -79,6 +79,11 @@
         },
         "footer": {
             "title": "喜歡這個專案，可以考慮"
+        },
+        "tips": {
+            "dragSelect": "你可以拖曳來多選",
+            "hoverToShow": "在格子上移動游標可查看細節",
+            "tapToShow": "按住可查看細節"
         }
     }
 }

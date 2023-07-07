@@ -126,6 +126,7 @@ const Dates = () => {
                     className="container"
                     onMove={ (e) => onMove(e, setSelectedDates) }
                     selectables=".selectable"
+                    features={ { singleTap: { intersect: 'touch' } } }
                 >
                     <Grid
                         w='100%'

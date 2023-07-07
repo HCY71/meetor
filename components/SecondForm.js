@@ -22,6 +22,7 @@ import { secondFormData } from "@/lib/initialValues"
 import useLocalStorage from "@/hooks/useLocalStorage"
 import { colors } from "@/public/theme"
 import { useLang } from "@/context/LangContext"
+import { useTouchDevices } from "@/hooks/useTouchDevices"
 
 const SecondForm = () => {
     const { isOpen, onOpen, onClose } = useDisclosure()
@@ -88,6 +89,7 @@ const Second = ({ inputRef }) => {
     const [ name ] = useLocalStorage('name')
     const [ tabIndex, setTabIndex ] = useState(1)
     const { context } = useLang()
+    const { isTouch } = useTouchDevices()
     useEffect(() => {
         if (name) setTabIndex(0)
     }, [ name ])
@@ -106,6 +108,7 @@ const Second = ({ inputRef }) => {
                     <TimeTable />,
                     <TimeTable readOnly />
                 ] }
+                tips={ [ context.global.tips.dragSelect, isTouch ? context.global.tips.tapToShow : context.global.tips.hoverToShow ] }
                 inputRef={ inputRef }
                 isDisabled={ name ? false : true }
                 index={ tabIndex }
