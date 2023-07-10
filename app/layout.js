@@ -6,6 +6,8 @@ import { Providers } from "../components/Providers"
 import PageContainer from '@/components/PageContainer'
 import { useProgress } from '@/hooks/useProgress'
 
+import { Analytics } from '@vercel/analytics/react'
+
 export default function RootLayout({ children }) {
   useProgress()
   return (
@@ -39,6 +41,7 @@ export default function RootLayout({ children }) {
             { children }
           </PageContainer>
         </Providers>
+        <Analytics />
       </body>
     </html>
   )
