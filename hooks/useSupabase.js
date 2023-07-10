@@ -15,6 +15,14 @@ const useSupabase = () => {
         setIsLoading(false)
         if (error) throw error
     }, [])
+    const GET_COUNT = useCallback(async (from, select) => {
+        setIsLoading(true)
+        const { count, error } = await supabase.from(from).select(select, { count: 'exact', head: true })
+        setData(count)
+        setError(error)
+        setIsLoading(false)
+        if (error) throw error
+    }, [])
     const GET_BY_ID = useCallback(async (from, id) => {
         setIsLoading(true)
         const { data, error } = await supabase.from(from).select().eq('id', id)
@@ -88,7 +96,7 @@ const useSupabase = () => {
     }, [])
 
 
-    return { GET, GET_BY_ID, POST, POST_USER_TIME, SUBSCRIBE, isLoading, data, error }
+    return { GET, GET_COUNT, GET_BY_ID, POST, POST_USER_TIME, SUBSCRIBE, isLoading, data, error }
 }
 
 export default useSupabase

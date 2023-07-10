@@ -11,15 +11,23 @@ import RecentVisited from '@/components/cells/RecentVisited'
 import { useLang } from '@/context/LangContext'
 
 import useLocalStorage from '@/hooks/useLocalStorage'
+import useSupabase from '@/hooks/useSupabase'
+
+import { numberWithCommas } from '@/public/utils/numberFormatter'
 
 export default function Home() {
   const { context } = useLang()
   const [ name, setName ] = useLocalStorage('name', '')
-  const [ recent ] = useLocalStorage('recent', [])
+  const { data, isLoading, GET_COUNT } = useSupabase()
 
   useEffect(() => {
     if (name) setName()
   }, [ name ])
+
+  useEffect(() => {
+    GET_COUNT('events', '*')
+  }, [])
+
   return (
     <>
       <VStack spacing={ { base: 3, md: 5 } }>
@@ -34,9 +42,11 @@ export default function Home() {
             { context.home.header.second }
           </Header>
         </VStack>
-        <Subtitle>
-          13,210 { context.home.subheader }
-        </Subtitle>
+        { (!isLoading & data) &&
+          <Subtitle>
+            { numberWithCommas(data + 1310) } { context.home.subheader }
+          </Subtitle>
+        }
       </VStack >
       <RecentVisited />
       <Form />
