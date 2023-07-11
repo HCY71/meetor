@@ -1,9 +1,6 @@
 'use client'
-import { useEffect } from 'react'
-import {
-  VStack,
-  Center,
-} from '@chakra-ui/react'
+import { useEffect, useState } from 'react'
+import { VStack } from '@chakra-ui/react'
 import Form from '../components/Form'
 import Header from '../components/atoms/Header'
 import Subtitle from '../components/atoms/Subtitle'
@@ -18,6 +15,7 @@ import { numberWithCommas } from '@/public/utils/numberFormatter'
 export default function Home() {
   const { context } = useLang()
   const [ name, setName ] = useLocalStorage('name', '')
+  const [ showCounter, setShowCounter ] = useState(false)
   const { data, isLoading, GET_COUNT } = useSupabase()
 
   useEffect(() => {
@@ -27,6 +25,11 @@ export default function Home() {
   useEffect(() => {
     GET_COUNT('events', '*')
   }, [])
+
+  useEffect(() => {
+    if (!isLoading && data) setShowCounter(true)
+  }, [ isLoading, data ])
+
 
   return (
     <>
@@ -42,7 +45,7 @@ export default function Home() {
             { context.home.header.second }
           </Header>
         </VStack>
-        { (!isLoading & data) &&
+        { (showCounter) &&
           <Subtitle>
             { numberWithCommas(data + 1310) } { context.home.subheader }
           </Subtitle>
