@@ -14,7 +14,7 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning={ true }>
       <head>
         <title>Meetor | The best alternative to when2meet</title>
-        <meta name="description" content="Meetor aim to simplify your scheduling efforts. It's truly simple and completely free to use." />
+        <meta name="description" content="Meetor is the Effortless and Secure When2Meet Alternative - Simplify scheduling without the need for sign-ups, with our free and user-friendly interface." />
 
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
