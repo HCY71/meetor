@@ -117,27 +117,28 @@ const TimeTable = ({ readOnly }) => {
                 spacing={ 0 }
                 pt={ '0rem' }
                 pos={ 'absolute' }
-                left={ { base: '-0px', md: '-50px' } }
+                left={ { base: '-0px', md: '-48px' } }
                 top='5px'
-                h='101.3%'
                 zIndex={ 1 }
                 alignItems={ { base: 'flex-start', md: 'center' } }
             >
+                <Center h={ type === 'dates' ? '35px' : '20px' } />
                 { times.map(t => (
                     t % 1 === 0 &&
-                    <Center key={ t } h='100%'>
+                    <Center key={ t } h={ { base: '60px', md: '70px' } } alignItems='flex-start'>
                         <Center
                             borderRadius='sm'
                             border={ { base: colors[ colorMode ].border.table, md: "none" } }
                             bg={ { base: colors[ colorMode ].bg.nav.primary, md: "none" } }
                             p='2px'
+                            top='-10px'
                         >
                             { displayTime(t, configs.usePM) }
                         </Center>
                     </Center>
                 )) }
             </VStack>
-            <VStack w='100%' className="time-table" overflowX='auto' pos='relative' p='0 0px 8px 0px' alignItems='flex-start'>
+            <VStack w='100%' className="time-table" overflowX='auto' pos='relative' p='0 0px 8px 0px' alignItems='flex-start' minH='300px'>
                 <SelectionArea
                     selectables=".selectable"
                     className={ readOnly ? 'container' : "container  no-touch-action" }
@@ -152,11 +153,11 @@ const TimeTable = ({ readOnly }) => {
                     >
                         { dates.map(d => (
                             type === 'dates' ?
-                                <GridItem key={ d } w='100%' minW={ { base: '100px' } } >
+                                <GridItem key={ d } w='100%' minW={ { base: '100px' } } mb='8px'>
                                     <Center>{ getMonthAndDate(d, configs.lang) }</Center>
                                     <Center>{ displayDay(d, configs.lang) }</Center>
                                 </GridItem> :
-                                <GridItem key={ d } >
+                                <GridItem key={ d } mb='8px' >
                                     <Center>{ translateDay(d, configs.lang) }</Center>
                                 </GridItem>
                         )) }
@@ -191,7 +192,7 @@ const TimeTable = ({ readOnly }) => {
 }
 
 const GridGroupPopover = ({ whoIs, users, type, ...props }) => {
-    const { isOpen, onOpen, onToggle, onClose } = useDisclosure()
+    const { isOpen, onOpen, onClose } = useDisclosure()
     const { configs } = useConfigs()
     const { context } = useLang()
     const { isTouch } = useTouchDevices()

@@ -1,5 +1,6 @@
 'use client'
 import './globals.scss'
+import { useEffect } from 'react'
 
 import { Providers } from "../components/Providers"
 
@@ -7,9 +8,16 @@ import PageContainer from '@/components/PageContainer'
 import { useProgress } from '@/hooks/useProgress'
 
 import { Analytics } from '@vercel/analytics/react'
+import { initGA, logPageView } from '@/public/utils/GA'
 
 export default function RootLayout({ children }) {
   useProgress()
+
+  useEffect(() => {
+    initGA()
+    logPageView()
+  }, [])
+
   return (
     <html lang="en" suppressHydrationWarning={ true }>
       <head>
@@ -35,6 +43,7 @@ export default function RootLayout({ children }) {
         <meta property="twitter:image:height" content="630" />
 
       </head>
+
       <body suppressHydrationWarning={ true }>
         <Providers>
           <PageContainer>
