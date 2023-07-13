@@ -67,14 +67,12 @@ const Days = () => {
                                                 setSelectedDays(prev => prev.filter(t => t !== day))
                                             }
                                             selectingMode.current = null
-                                            // selection.current = { start: selection.current.start, end: formatISO(d) }
                                         }, { once: true })
                                     } }
                                     onPointerOver={ () => {
                                         if (selectingMode.current) {
                                             if (selectingMode.current === 'add' && !isSelected(values.days, day)) setSelectedDays(prev => [ ...prev, day ])
                                             else if (selectingMode.current === 'remove') setSelectedDays(prev => prev.filter(t => t !== day))
-                                            // const isInRange = isDateInRange(new Date(1987, 1, 11), new Date(2050, 6, 10), d)
                                         }
                                     } }
                                 >

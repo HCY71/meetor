@@ -70,15 +70,16 @@ const TimeTable = ({ readOnly }) => {
 
     // update
     useEffect(() => {
-        if (selectedTime !== null && !selectingMode.current) {
-            toast.promise(
-                POST_USER_TIME(eventId, { user, time: selectedTime }),
-                {
-                    loading: context.global.toast.loading,
-                    success: context.global.toast.saved,
-                    error: context.global.toast.error,
-                }
-            )
+        if (selectedTime !== null && !selectingMode.current && !isLoading) {
+            const uniqueTime = [ ...new Set(selectedTime) ]
+            POST_USER_TIME(eventId, { user, time: uniqueTime })
+            // toast.promise(
+            //     {
+            //         loading: context.global.toast.loading,
+            //         success: context.global.toast.saved,
+            //         error: context.global.toast.error,
+            //     }
+            // )
         }
     }, [ selectedTime, POST_USER_TIME, user, eventId, selectingMode.current ])
 
