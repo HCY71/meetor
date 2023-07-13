@@ -148,7 +148,7 @@ const TimeTable = ({ readOnly }) => {
 
 
     return (
-        <Center fontWeight='bold' fontSize='12px' margin={ '0 auto' } pos='relative' >
+        <Center fontWeight='bold' fontSize='12px' margin={ '0 auto' } >
             <VStack
                 spacing={ 0 }
                 pt={ '0rem' }

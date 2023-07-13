@@ -23,7 +23,8 @@ $border-color-dark: rgba(0,0,0,0.8);
 html,
 body {
   max-width: 100vw;
-  overflow-x: hidden;
+  // debug
+  overflow-x: clip;
   overscroll-behavior-x: none;
   font-family: ui-sans-serif, system-ui, -apple-system, "system-ui", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }

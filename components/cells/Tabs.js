@@ -46,7 +46,7 @@ const CustomTabs = ({ onMouseDown = [ null, null ], tab, panel, isDisabled = fal
                     <Tab onMouseDown={ onMouseDown[ 1 ] }>{ tab[ 1 ] }</Tab>
                 </Center>
             </TabList>
-            <TabPanels>
+            <TabPanels >
                 <TabPanel p='1rem 0'>
                     { tips[ 0 ] && <TagTemplate>{ `💡 ${tips[ 0 ]}` }</TagTemplate> }
                     { panel[ 0 ] }

@@ -4,7 +4,7 @@ import { zhTW } from "date-fns/locale"
 const displayTime = (value, usePM) => {
     const hour = Math.floor(value)
     const minute = (value % 1) * 60
-    const ampm = hour < 12 ? 'AM' : 'PM'
+    const ampm = hour < 12 ? 'AM' : (hour === 24 ? 'AM' : 'PM')
     const hour12 = hour % 12 || 12
     const minuteString = minute === 0 ? '' : `:${minute}`
     const minuteString24H = minute === 0 ? ':00' : `:${minute}`
