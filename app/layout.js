@@ -26,6 +26,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning={ true }>
       <head>
+        <meta name="theme-color" content="#fff" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#000" media="(prefers-color-scheme: dark)" />
+
         <title>Meetor | The Best Alternative to When2meet</title>
         <meta name="description" content="Meetor is the Effortless and Secure When2Meet Alternative - Simplify scheduling without the need for sign-ups, with our free and user-friendly interface." />
 
