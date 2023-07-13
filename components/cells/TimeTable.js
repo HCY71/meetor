@@ -174,7 +174,7 @@ const TimeTable = ({ readOnly }) => {
                     </Center>
                 )) }
             </VStack>
-            <VStack w='100%' className="time-table" overflowX='auto' pos='relative' p='0 0px 8px 0px' alignItems='flex-start' minH='300px'>
+            <VStack w='100%' className="time-table" overflowX='auto' pos='relative' p='0 4px 8px 0px' alignItems='flex-start' minH='300px'>
                 <Grid
                     gridTemplateRows={ `repeat(${times.length}, auto)` }
                     gridTemplateColumns={ `repeat(${dates.length}, 1fr)` }
