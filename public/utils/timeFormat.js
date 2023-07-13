@@ -52,10 +52,17 @@ const translateDay = (d, lang) => {
     return days[ d ] || d
 }
 
+const reorderSunDay = (days, startsOn) => {
+    if (days[ 0 ] === 'SUN' || days[ 0 ] === '日') {
+        if (startsOn === 0) return days
+        else if (startsOn === 1 && days[ 1 ]) return [ ...days.slice(1, days.length), days[ 0 ] ]
+    }
+}
+
 
 const isDateInRange = (startDate, endDate, date) => {
     const startAndEnd = [ parseISO(startDate), parseISO(endDate) ].sort(compareAsc)
     const result = compareDesc(startAndEnd[ 0 ], parseISO(date)) === 1 && compareDesc(parseISO(date), startAndEnd[ 1 ]) === 1
     return result
 }
-export { displayTime, getMonthAndDate, getTimeDistance, displayDay, checkWeekStart, getFullDateAndTime, translateDay, isDateInRange }
+export { displayTime, getMonthAndDate, getTimeDistance, displayDay, checkWeekStart, getFullDateAndTime, translateDay, isDateInRange, reorderSunDay }

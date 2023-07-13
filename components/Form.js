@@ -51,14 +51,14 @@ const Form = () => {
                 "THU": 4,
                 "FRI": 5,
                 "SAT": 6,
-                "SUN": 7,
+                "SUN": 0,
                 "一": 1,
                 "二": 2,
                 "三": 3,
                 "四": 4,
                 "五": 5,
                 "六": 6,
-                "日": 7
+                "日": 0
             }
             value.days.sort(function sortByDay(a, b) {
                 let day1 = a.toLowerCase()

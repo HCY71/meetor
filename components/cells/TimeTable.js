@@ -15,7 +15,7 @@ import {
     useDisclosure,
     useColorMode
 } from "@chakra-ui/react"
-import { getMonthAndDate, displayTime, displayDay, getFullDateAndTime, translateDay } from '@/public/utils/timeFormat'
+import { getMonthAndDate, displayTime, displayDay, getFullDateAndTime, translateDay, reorderSunDay } from '@/public/utils/timeFormat'
 import CustomTag from "../atoms/CustomTag"
 
 import { colors } from "@/public/theme"
@@ -42,7 +42,7 @@ const TimeTable = ({ readOnly }) => {
     const [ groupTime, setGroupTime ] = useState({})
     const [ users, setUsers ] = useState([])
     const { configs } = useConfigs()
-    const { context } = useLang()
+    // const { context } = useLang()
 
     const selectingMode = useRef('init')
     const selection = useRef({ start: null, end: null })
@@ -96,11 +96,17 @@ const TimeTable = ({ readOnly }) => {
     const timesCopy = [ ...times ]
     timesCopy.pop()
 
-    const table = timesCopy.map(t =>
-        dates.map(d => {
-            return d + "-" + t
-        })
-    )
+    const table = timesCopy.map(t => {
+        if (type === 'dates') return dates.map(d => d + '-' + t)
+        if (configs.weekStartsOn === 0) return dates.map(d => d + "-" + t)
+
+        if (configs.weekStartsOn === 1) {
+            const reordered = reorderSunDay(dates, configs.weekStartsOn)
+            return reordered.map(d => {
+                return d + "-" + t
+            })
+        }
+    })
 
     const checkIsSelect = (from, d) => {
         return from.some(t => t === d)
@@ -181,16 +187,17 @@ const TimeTable = ({ readOnly }) => {
                     w='100%'
                     h='fit-content'
                 >
-                    { dates.map((d, id) => (
-                        type === 'dates' ?
-                            <GridItem key={ d + id } w='100%' minW={ { base: '100px' } } mb='8px'>
-                                <Center>{ getMonthAndDate(d, configs.lang) }</Center>
-                                <Center>{ displayDay(d, configs.lang) }</Center>
-                            </GridItem> :
+                    { type === 'dates' ?
+                        dates.map((d, id) => (<GridItem key={ d + id } w='100%' minW={ { base: '100px' } } mb='8px'>
+                            <Center>{ getMonthAndDate(d, configs.lang) }</Center>
+                            <Center>{ displayDay(d, configs.lang) }</Center>
+                        </GridItem>)) :
+                        reorderSunDay(dates, configs.weekStartsOn).map((d, id) => (
                             <GridItem key={ d + id } mb='8px' >
                                 <Center>{ translateDay(d, configs.lang) }</Center>
                             </GridItem>
-                    )) }
+                        ))
+                    }
                     { table.map((data, indexRow) =>
                         data.map((d, indexCol) =>
                         (readOnly ?
@@ -239,7 +246,8 @@ const TimeTable = ({ readOnly }) => {
                                 } }
                             />
                         ))
-                    ) }
+                    )
+                    }
                 </Grid>
             </VStack>
         </Center >
