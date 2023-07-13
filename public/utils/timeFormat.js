@@ -57,6 +57,7 @@ const reorderSunDay = (days, startsOn) => {
         if (startsOn === 0) return days
         else if (startsOn === 1 && days[ 1 ]) return [ ...days.slice(1, days.length), days[ 0 ] ]
     }
+    else return days
 }
 
 
