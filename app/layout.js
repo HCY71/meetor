@@ -18,6 +18,11 @@ export default function RootLayout({ children }) {
     logPageView()
   }, [])
 
+  // disable swipe to go back on iOS
+  useEffect(() => {
+    window.addEventListener('touchstart', (e) => e.preventDefault())
+  }, [])
+
   return (
     <html lang="en" suppressHydrationWarning={ true }>
       <head>
