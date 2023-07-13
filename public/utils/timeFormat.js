@@ -1,4 +1,4 @@
-import { format, parseISO, formatDistance } from "date-fns"
+import { format, parseISO, formatDistance, compareDesc, compareAsc } from "date-fns"
 import { zhTW } from "date-fns/locale"
 
 const displayTime = (value, usePM) => {
@@ -52,4 +52,10 @@ const translateDay = (d, lang) => {
     return days[ d ] || d
 }
 
-export { displayTime, getMonthAndDate, getTimeDistance, displayDay, checkWeekStart, getFullDateAndTime, translateDay }
+
+const isDateInRange = (startDate, endDate, date) => {
+    const startAndEnd = [ parseISO(startDate), parseISO(endDate) ].sort(compareAsc)
+    const result = compareDesc(startAndEnd[ 0 ], parseISO(date)) === 1 && compareDesc(parseISO(date), startAndEnd[ 1 ]) === 1
+    return result
+}
+export { displayTime, getMonthAndDate, getTimeDistance, displayDay, checkWeekStart, getFullDateAndTime, translateDay, isDateInRange }

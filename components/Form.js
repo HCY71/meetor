@@ -7,6 +7,7 @@ import {
     RangeSliderThumb,
     FormErrorMessage,
     FormControl,
+    Center,
     useColorMode
 } from "@chakra-ui/react"
 
@@ -17,6 +18,8 @@ import Dates from "./cells/Dates"
 import CustomTabs from "./cells/Tabs"
 import CustomInput from "./atoms/CustomInput"
 import { useFormikContext, Formik } from "formik"
+
+import { compareAsc, parseISO, formatISO } from "date-fns"
 
 import { displayTime } from "@/public/utils/timeFormat"
 import { formData } from "@/lib/initialValues"
@@ -30,13 +33,45 @@ import { useConfigs } from "@/context/ConfigsContext"
 const Form = () => {
     const { POST } = useSupabase()
     const { context } = useLang()
-    const handleSubmit = (value) => {
+
+    const cleanupValues = (value) => {
         if (value.type === 'dates') {
-            value.dates = value.dates.map(date => date.slice(0, date.indexOf('+')))
+            // sort
+            const datesAfterSort = value.dates.map(d => parseISO(d)).sort(compareAsc).map(d => formatISO(d))
+
+            // remove timezone
+            const datesWithoutTimezone = datesAfterSort.map(date => (date.indexOf('+') !== -1) ? date.slice(0, date.indexOf('+')) : date)
+            value.id = uid()
+            return { ...value, dates: datesWithoutTimezone }
+        } else {
+            const sorter = {
+                "MON": 1,
+                "TUE": 2,
+                "WED": 3,
+                "THU": 4,
+                "FRI": 5,
+                "SAT": 6,
+                "SUN": 7,
+                "一": 1,
+                "二": 2,
+                "三": 3,
+                "四": 4,
+                "五": 5,
+                "六": 6,
+                "日": 7
+            }
+            value.days.sort(function sortByDay(a, b) {
+                let day1 = a.toLowerCase()
+                let day2 = b.toLowerCase()
+                return sorter[ day1 ] - sorter[ day2 ]
+            })
+            value.id = uid()
+            return value
         }
-        value.id = uid()
+    }
+    const handleSubmit = (value) => {
         toast.promise(
-            POST('events', value),
+            POST('events', cleanupValues(value)),
             {
                 loading: context.global.toast.loading,
                 success: context.global.toast.success,
@@ -130,21 +165,24 @@ const Third = () => {
     return (
         <Step step={ 3 } title={ context.home.input.chooseRange }>
             <FormControl isInvalid={ errors.range && touched.range }>
-                <RangeSlider
-                    id='range'
-                    aria-label={ [ 'min', 'max' ] }
-                    defaultValue={ values.range }
-                    min={ 0 }
-                    max={ 24 }
-                    step={ 1 }
-                    onChange={ (val) => setFieldValue('range', val) }
-                >
-                    <RangeSliderTrack bg={ colors[ colorMode ].border.sliderTrack } h='12px' borderRadius='md'>
-                        <RangeSliderFilledTrack bg={ colors[ colorMode ].bg.invert } />
-                    </RangeSliderTrack>
-                    <SliderThumb index={ 0 } value={ values.range[ 0 ] } />
-                    <SliderThumb index={ 1 } value={ values.range[ 1 ] } />
-                </RangeSlider>
+                <Center>
+                    <RangeSlider
+                        id='range'
+                        aria-label={ [ 'min', 'max' ] }
+                        defaultValue={ values.range }
+                        min={ 0 }
+                        max={ 24 }
+                        step={ 1 }
+                        onChange={ (val) => setFieldValue('range', val) }
+                        w={ { base: '81%' } }
+                    >
+                        <RangeSliderTrack bg={ colors[ colorMode ].border.sliderTrack } h='12px' borderRadius='md'>
+                            <RangeSliderFilledTrack bg={ colors[ colorMode ].bg.invert } />
+                        </RangeSliderTrack>
+                        <SliderThumb index={ 0 } value={ values.range[ 0 ] } />
+                        <SliderThumb index={ 1 } value={ values.range[ 1 ] } />
+                    </RangeSlider>
+                </Center>
                 <FormErrorMessage mt={ 8 }>
                     { errors.range }
                 </FormErrorMessage>

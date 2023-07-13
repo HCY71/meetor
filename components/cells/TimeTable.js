@@ -1,4 +1,4 @@
-import { useEffect, useState, forwardRef } from "react"
+import { useEffect, useState, forwardRef, useRef, use } from "react"
 import {
     Center,
     Text,
@@ -27,12 +27,12 @@ import { useConfigs } from "@/context/ConfigsContext"
 import { useLang } from "@/context/LangContext"
 import { useTouchDevices } from "@/hooks/useTouchDevices"
 
-import SelectionArea from '@viselect/react'
-import useDragSelect from "@/hooks/useDragSelect"
 import { motion } from "framer-motion"
 
+import { toast } from "react-hot-toast"
+
 const TimeTable = ({ readOnly }) => {
-    const { GET_BY_ID, POST_USER_TIME, SUBSCRIBE, data } = useSupabase()
+    const { GET_BY_ID, POST_USER_TIME, SUBSCRIBE, data, isLoading } = useSupabase()
     const { eventId } = useParams()
     const [ user ] = useLocalStorage('name')
     const [ range, setRange ] = useState([])
@@ -42,8 +42,10 @@ const TimeTable = ({ readOnly }) => {
     const [ groupTime, setGroupTime ] = useState({})
     const [ users, setUsers ] = useState([])
     const { configs } = useConfigs()
+    const { context } = useLang()
 
-    const { onMove } = useDragSelect()
+    const selectingMode = useRef('init')
+    const selection = useRef({ start: null, end: null })
 
     useEffect(() => {
         GET_BY_ID('events', eventId)
@@ -54,8 +56,9 @@ const TimeTable = ({ readOnly }) => {
 
     }, [ GET_BY_ID, SUBSCRIBE, readOnly, eventId ])
 
+    // init data
     useEffect(() => {
-        if (data && data?.length) {
+        if (data && data?.length && selectingMode.current === 'init') {
             setRange(data[ 0 ].range)
             setType(data[ 0 ].type)
             setUsers(data[ 0 ].users)
@@ -65,12 +68,22 @@ const TimeTable = ({ readOnly }) => {
         }
     }, [ data, user ])
 
+    // update
     useEffect(() => {
-        if (selectedTime !== null) POST_USER_TIME(eventId, { user, time: selectedTime })
-    }, [ selectedTime, POST_USER_TIME, user, eventId ])
+        if (selectedTime !== null && !selectingMode.current) {
+            toast.promise(
+                POST_USER_TIME(eventId, { user, time: selectedTime }),
+                {
+                    loading: context.global.toast.loading,
+                    success: context.global.toast.saved,
+                    error: context.global.toast.error,
+                }
+            )
+        }
+    }, [ selectedTime, POST_USER_TIME, user, eventId, selectingMode.current ])
 
     useEffect(() => {
-        checkGroupTime()
+        if (readOnly) checkGroupTime()
     }, [ users ])
 
     const { colorMode } = useColorMode()
@@ -92,6 +105,14 @@ const TimeTable = ({ readOnly }) => {
         return from.some(t => t === d)
     }
 
+    const checkInRange = (from, to, key) => {
+        if (from === null || to === null) return false
+        const rowRange = [ from.row, to.row ].sort((a, b) => a - b)
+        const colRange = [ from.col, to.col ].sort((a, b) => a - b)
+        if (key.row >= rowRange[ 0 ] && key.row <= rowRange[ 1 ] && key.col >= colRange[ 0 ] && key.col <= colRange[ 1 ]) return true
+        else return false
+    }
+
     const checkGroupTime = () => {
         const group = {}
         if (users) users.forEach(u => {
@@ -110,6 +131,20 @@ const TimeTable = ({ readOnly }) => {
         else return `hsla(51, 89%, ${(100 - 33 * percent)}%, ${percent * .8 + 20})`
     }
 
+    // auto select
+    useEffect(() => {
+        if (selectingMode.current === 'add') {
+            const result = table.map((t, indexRow) => t.filter((d, indexCol) => checkInRange(selection.current.start, selection.current.end, { row: indexRow, col: indexCol }) && !checkIsSelect(selectedTime, d)))
+            const cleanedResult = result.flat()
+            setSelectedTime(prev => [ ...prev, ...cleanedResult ])
+        }
+        else if (selectingMode.current === 'remove') {
+            const result = table.map((t, indexRow) => t.filter((d, indexCol) => checkInRange(selection.current.start, selection.current.end, { row: indexRow, col: indexCol }) && checkIsSelect(selectedTime, d)))
+            const cleanedResult = result.flat()
+            setSelectedTime(prev => prev.filter(t => !cleanedResult.includes(t)))
+        }
+    }, [ selection.current.start, selection.current.end, selectingMode.current ])
+
 
     return (
         <Center fontWeight='bold' fontSize='12px' margin={ '0 auto' } pos='relative' >
@@ -125,7 +160,7 @@ const TimeTable = ({ readOnly }) => {
                 <Center h={ type === 'dates' ? '35px' : '20px' } />
                 { times.map(t => (
                     t % 1 === 0 &&
-                    <Center key={ t } h={ { base: '60px', md: '70px' } } alignItems='flex-start'>
+                    <Center key={ t + '-time-col' } h={ { base: '60px', md: '70px' } } alignItems='flex-start'>
                         <Center
                             borderRadius='sm'
                             border={ { base: colors[ colorMode ].border.table, md: "none" } }
@@ -139,53 +174,72 @@ const TimeTable = ({ readOnly }) => {
                 )) }
             </VStack>
             <VStack w='100%' className="time-table" overflowX='auto' pos='relative' p='0 0px 8px 0px' alignItems='flex-start' minH='300px'>
-                <SelectionArea
-                    selectables=".selectable"
-                    className={ readOnly ? 'container' : "container  no-touch-action" }
-                    onMove={ readOnly ? null : (e) => onMove(e, setSelectedTime) }
-                    features={ { singleTap: { intersect: 'touch' } } }
+                <Grid
+                    gridTemplateRows={ `repeat(${times.length}, auto)` }
+                    gridTemplateColumns={ `repeat(${dates.length}, 1fr)` }
+                    w='100%'
+                    h='fit-content'
                 >
-                    <Grid
-                        gridTemplateRows={ `repeat(${times.length}, auto)` }
-                        gridTemplateColumns={ `repeat(${dates.length}, 1fr)` }
-                        w='100%'
-                        h='fit-content'
-                    >
-                        { dates.map(d => (
-                            type === 'dates' ?
-                                <GridItem key={ d } w='100%' minW={ { base: '100px' } } mb='8px'>
-                                    <Center>{ getMonthAndDate(d, configs.lang) }</Center>
-                                    <Center>{ displayDay(d, configs.lang) }</Center>
-                                </GridItem> :
-                                <GridItem key={ d } mb='8px' >
-                                    <Center>{ translateDay(d, configs.lang) }</Center>
-                                </GridItem>
-                        )) }
-                        { table.map((data, indexRow) =>
-                            data.map(d =>
-                            (readOnly ?
-                                <GridGroupPopover
-                                    id={ d }
-                                    key={ d }
-                                    index={ indexRow }
-                                    bg={ generateColors(groupTime[ d ]?.length / users?.length, colorMode === 'dark') }
+                    { dates.map((d, id) => (
+                        type === 'dates' ?
+                            <GridItem key={ d + id } w='100%' minW={ { base: '100px' } } mb='8px'>
+                                <Center>{ getMonthAndDate(d, configs.lang) }</Center>
+                                <Center>{ displayDay(d, configs.lang) }</Center>
+                            </GridItem> :
+                            <GridItem key={ d + id } mb='8px' >
+                                <Center>{ translateDay(d, configs.lang) }</Center>
+                            </GridItem>
+                    )) }
+                    { table.map((data, indexRow) =>
+                        data.map((d, indexCol) =>
+                        (readOnly ?
+                            <GridGroupPopover
+                                id={ d }
+                                key={ d + indexCol }
+                                index={ indexRow }
+                                bg={ generateColors(groupTime[ d ]?.length / users?.length, colorMode === 'dark') }
 
-                                    whoIs={ groupTime[ d ] }
+                                whoIs={ groupTime[ d ] }
 
-                                    users={ users }
-                                    type={ type }
-                                /> :
-                                <GridItemTemplate
-                                    id={ d }
-                                    key={ d }
-                                    index={ indexRow }
+                                users={ users }
+                                type={ type }
+                            />
+                            :
+                            <GridItemTemplate
+                                id={ d }
+                                key={ d + indexCol }
+                                index={ indexRow }
 
-                                    bg={ checkIsSelect(selectedTime, d) ? colors[ colorMode ].bg.timetableSelected : 'transparent' }
-                                />)
-                            )
-                        ) }
-                    </Grid>
-                </SelectionArea>
+                                bg={ checkIsSelect(selectedTime, d) ? colors[ colorMode ].bg.timetableSelected : 'transparent' }
+
+                                onPointerDown={ (e) => {
+                                    e.preventDefault()
+                                    selectingMode.current = checkIsSelect(selectedTime, d) ? 'remove' : 'add'
+                                    if (selectingMode.current === 'add' && !checkIsSelect(selectedTime, d)) setSelectedTime(prev => [ ...prev, d ])
+                                    else if (selectingMode.current === 'remove') setSelectedTime(prev => prev.filter(t => t !== d))
+
+                                    selection.current = { start: { row: indexRow, col: indexCol }, end: null }
+                                    e.currentTarget.releasePointerCapture(e.pointerId)
+
+                                    document.addEventListener('pointerup', () => {
+                                        if (selectingMode.current === 'remove') {
+                                            setSelectedTime(prev => prev.filter(t => t !== d))
+                                        }
+                                        selectingMode.current = null
+                                    }, { once: true })
+
+                                } }
+                                onPointerOver={ () => {
+                                    if (selectingMode.current) {
+                                        if (selectingMode.current === 'add' && !checkIsSelect(selectedTime, d)) setSelectedTime(prev => [ ...prev, d ])
+                                        else if (selectingMode.current === 'remove') setSelectedTime(prev => prev.filter(t => t !== d))
+                                        selection.current = { start: selection.current.start, end: { row: indexRow, col: indexCol } }
+                                    }
+                                } }
+                            />
+                        ))
+                    ) }
+                </Grid>
             </VStack>
         </Center >
     )
@@ -236,7 +290,7 @@ const GridGroupPopover = ({ whoIs, users, type, ...props }) => {
                     <HStack>
                         { users &&
                             users.map(u =>
-                                <CustomTag key={ u.user } isGhost={ !whoIs?.some(w => w === u.user) }>
+                                <CustomTag key={ u.user + '-user-tag' } isGhost={ !whoIs?.some(w => w === u.user) }>
                                     { u.user }
                                 </CustomTag>
                             ) }
@@ -262,7 +316,7 @@ const GridItemTemplate = forwardRef(({ ...props }, ref) => {
     const { colorMode } = useColorMode()
     return (
         <GridItem
-            className="selectable"
+            className="no-touch-action"
             w='100%'
             minW='100px'
             h={ { base: '30px', md: '35px' } }

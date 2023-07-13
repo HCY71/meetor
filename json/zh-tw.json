@@ -57,6 +57,7 @@
         "toast": {
             "loading": "忙碌中...",
             "success": "出發囉",
+            "saved": "已同步！",
             "error": "出了點問題：（",
             "linkCopied": "連結已複製!",
             "nameFirst": "先填上名字吧!",

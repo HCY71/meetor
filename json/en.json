@@ -57,6 +57,7 @@
         "toast": {
             "loading": "Loading...",
             "success": "Here we go.",
+            "saved": "Saved!",
             "error": "Something went wrong:(",
             "linkCopied": "Link Copied!",
             "nameFirst": "Fill your name first.",

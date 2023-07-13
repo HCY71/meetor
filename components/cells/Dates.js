@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
     Grid,
     GridItem,
@@ -19,10 +19,7 @@ import { toast } from "react-hot-toast"
 import { colors } from '@/public/theme'
 import { useLang } from '@/context/LangContext'
 import { useConfigs } from '@/context/ConfigsContext'
-import { checkWeekStart } from '@/public/utils/timeFormat'
-
-import SelectionArea from '@viselect/react'
-import useDragSelect from "@/hooks/useDragSelect"
+import { checkWeekStart, isDateInRange } from '@/public/utils/timeFormat'
 
 const Dates = () => {
     const [ dates, setDates ] = useState([])
@@ -34,8 +31,10 @@ const Dates = () => {
     const { context } = useLang()
     const { configs } = useConfigs()
 
-    const { onMove } = useDragSelect()
     const [ selectedDates, setSelectedDates ] = useState([])
+
+    const selectingMode = useRef(null)
+    const selection = useRef({ start: null, end: null })
 
     useEffect(() => {
         if (currentDate.startOfMonth) {
@@ -48,11 +47,28 @@ const Dates = () => {
         setFieldValue('dates', selectedDates)
     }, [ selectedDates ])
 
+    // auto select dates
+    useEffect(() => {
+        if (dates.length && selectingMode.current === 'add') {
+            const formattedDates = dates.filter(d => isDateInRange(selection.current.start, selection.current.end, formatISO(d)) && !isSelected(selectedDates, formatISO(d))).map(d => formatISO(d))
+            setSelectedDates(prev => [ ...prev, ...formattedDates ])
+        }
+        else if (dates.length && selectingMode.current === 'remove') {
+            const formattedDates = dates.filter(d => isDateInRange(selection.current.start, selection.current.end, formatISO(d)) && isSelected(selectedDates, formatISO(d))).map(d => formatISO(d))
+            setSelectedDates(prev => prev.filter(t => !formattedDates.includes(t)))
+        }
+    }, [ selection.current.start, selection.current.end, selectingMode.current ])
+
     const handlePast = () => {
         toast(context.global.toast.selectPast, {
             icon: '😵‍💫',
         })
     }
+
+    const isSelected = (values, date) => {
+        return values.includes(date)
+    }
+
     return (
         <VStack>
             <HStack
@@ -122,60 +138,84 @@ const Dates = () => {
                 ) }
             </HStack>
             <FormControl isInvalid={ errors.dates && touched.dates }>
-                <SelectionArea
-                    className="container"
-                    onMove={ (e) => onMove(e, setSelectedDates) }
-                    selectables=".selectable"
-                    features={ { singleTap: { intersect: 'touch' } } }
+                <Grid
+                    w='100%'
+                    gridTemplateRows='repeat(5,1fr)'
+                    gridTemplateColumns='repeat(7,1fr)'
+                    gridRowGap=' 2px'
+                    gridColumnGap=' 2px'
                 >
-                    <Grid
-                        w='100%'
-                        gridTemplateRows='repeat(5,1fr)'
-                        gridTemplateColumns='repeat(7,1fr)'
-                        gridRowGap=' 2px'
-                        gridColumnGap=' 2px'
-                    >
-                        <FieldArray
-                            name="dates"
-                            render={ () => (
-                                <>
-                                    { dates.length && dates.map(d =>
-                                        <GridItem
-                                            className={ !isPast(addDays(d, 1)) ? 'selectable' : null }
-                                            id={ formatISO(d) }
+                    <FieldArray
+                        name="dates"
+                        render={ () => (
+                            <>
+                                { dates.length && dates.map(d =>
+                                    <GridItem
+                                        className='no-touch-action'
 
-                                            w='100%'
-                                            p={ 3 }
-                                            border='solid 2px rgba(0,0,0,0)'
-                                            borderRadius='4px'
-                                            color={
-                                                values.dates.includes(formatISO(d)) ?
-                                                    colors[ colorMode ].font.invert :
-                                                    monthControls.isCurrentMonth(d) && !isPast(addDays(d, 1)) ? colors[ colorMode ].font.primary : colors[ colorMode ].font.dimMore
-                                            }
-                                            fontWeight={
-                                                isToday(d) ? 'bold' : 'normal'
-                                            }
-                                            bg={ values.dates.includes(formatISO(d)) ? colors[ colorMode ].bg.invert : 'transparent' }
-                                            textAlign='center'
-                                            key={ d }
+                                        w='100%'
+                                        p={ 3 }
+                                        border='solid 2px rgba(0,0,0,0)'
+                                        borderRadius='4px'
+                                        color={
+                                            isSelected(values.dates, formatISO(d)) ?
+                                                colors[ colorMode ].font.invert :
+                                                monthControls.isCurrentMonth(d) && !isPast(addDays(d, 1)) ? colors[ colorMode ].font.primary : colors[ colorMode ].font.dimMore
+                                        }
+                                        fontWeight={
+                                            isToday(d) ? 'bold' : 'normal'
+                                        }
+                                        bg={ isSelected(values.dates, formatISO(d)) ? colors[ colorMode ].bg.invert : 'transparent' }
+                                        textAlign='center'
+                                        key={ d }
 
-                                            cursor={ !isPast(addDays(d, 1)) ? 'pointer' : null }
-                                            userSelect='none'
-                                            transition='.2s'
-                                            _hover={ {
-                                                borderColor: !isPast(addDays(d, 1)) ? colors[ colorMode ].bg.invert : 'rgba(0,0,0,0)'
-                                            } }
-                                            onMouseDown={ !isPast(addDays(d, 1)) ? null : handlePast }
-                                        >
-                                            { getDate(d) }
-                                        </GridItem>
-                                    ) }
-                                </>
-                            ) }
-                        />
-                    </Grid>
-                </SelectionArea>
+                                        cursor={ !isPast(addDays(d, 1)) ? 'pointer' : null }
+                                        userSelect='none'
+                                        transition='.2s'
+                                        _hover={ {
+                                            borderColor: !isPast(addDays(d, 1)) ? colors[ colorMode ].bg.invert : 'rgba(0,0,0,0)'
+                                        } }
+                                        onPointerDown={
+                                            !isPast(addDays(d, 1)) ?
+                                                (e) => {
+                                                    e.preventDefault()
+                                                    selectingMode.current = isSelected(values.dates, formatISO(d)) ? 'remove' : 'add'
+                                                    if (selectingMode.current === 'add') setSelectedDates(prev => [ ...prev, formatISO(d) ])
+                                                    else if (selectingMode.current === 'remove') setSelectedDates(prev => prev.filter(t => t !== formatISO(d)))
+
+                                                    selection.current = { start: formatISO(d), end: null }
+                                                    e.currentTarget.releasePointerCapture(e.pointerId)
+
+                                                    document.addEventListener('pointerup', () => {
+                                                        if (selectingMode.current === 'remove') {
+                                                            setSelectedDates(prev => prev.filter(t => t !== formatISO(d)))
+                                                        }
+
+                                                        selectingMode.current = null
+
+
+                                                    }, { once: true })
+
+                                                } : handlePast
+                                        }
+                                        onPointerOver={
+                                            !isPast(addDays(d, 1)) ?
+                                                () => {
+                                                    if (selectingMode.current) {
+                                                        if (selectingMode.current === 'add' && !isSelected(values.dates, formatISO(d))) setSelectedDates(prev => [ ...prev, formatISO(d) ])
+                                                        else if (selectingMode.current === 'remove') setSelectedDates(prev => prev.filter(t => t !== formatISO(d)))
+                                                        selection.current = { start: selection.current.start, end: formatISO(d) }
+                                                    }
+                                                } : null
+                                        }
+                                    >
+                                        { getDate(d) }
+                                    </GridItem>
+                                ) }
+                            </>
+                        ) }
+                    />
+                </Grid>
                 <FormErrorMessage>
                     { errors.dates }
                 </FormErrorMessage>

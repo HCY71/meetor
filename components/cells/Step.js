@@ -7,9 +7,9 @@ import {
 } from '@chakra-ui/react'
 
 import { colors } from '@/public/theme'
-const Step = ({ step, title, children, isDisable = false }) => {
+const Step = ({ step, title, children, isDisable = false, ...props }) => {
     return (
-        <VStack w='100%' alignItems='flex-start'>
+        <VStack w='100%' alignItems='flex-start' { ...props }>
             <Title step={ step } isDisable={ isDisable }>
                 { title }
             </Title>
