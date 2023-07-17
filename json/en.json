@@ -77,7 +77,8 @@
         },
         "timeTable": {
             "available": "available on",
-            "at": " at "
+            "at": " at ",
+            "all":  "All are"
         },
         "footer": {
             "title": "If you love this, consider"

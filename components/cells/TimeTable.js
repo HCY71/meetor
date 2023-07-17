@@ -384,7 +384,11 @@ const GridGroupPopover = ({ whoIs, users, type, allDayMode, ...props }) => {
                     { users &&
                         <HStack spacing={ 1 }>
                             <Text fontWeight='bold'>
-                                { `${whoIs?.length ? whoIs.length : 0} / ${users?.length}` }
+                                { whoIs?.length === users?.length ?
+                                    context.global.timeTable.all
+                                    :
+                                    `${whoIs?.length ? whoIs.length : 0} / ${users?.length}`
+                                }
                             </Text>
                             <Text>
                                 { context.global.timeTable.available }
