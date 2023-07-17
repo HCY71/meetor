@@ -68,7 +68,7 @@ const Page = () => {
         <VStack spacing={ 5 } w='520px' maxW='100%'>
             { event
                 &&
-                <VStack spacing={ 0 }>
+                <VStack spacing={ { base: 2, md: 3 } }>
                     <Header>
                         { event.name }
                     </Header>

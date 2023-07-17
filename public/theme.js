@@ -1,9 +1,12 @@
 import { extendTheme } from '@chakra-ui/react'
-import { tabsAnatomy } from '@chakra-ui/anatomy'
+import { tabsAnatomy, switchAnatomy } from '@chakra-ui/anatomy'
 import { createMultiStyleConfigHelpers } from '@chakra-ui/react'
 
 const { definePartsStyle, defineMultiStyleConfig } =
     createMultiStyleConfigHelpers(tabsAnatomy.keys)
+
+const { definePartsStyle: switchPartStyle, defineMultiStyleConfig: switchStyleConfig } =
+    createMultiStyleConfigHelpers(switchAnatomy.keys)
 
 const colors = {
     light: {
@@ -81,6 +84,34 @@ const colors = {
 
     }
 }
+
+// Switch
+const darkSwitch = switchPartStyle({
+    track: {
+        bg: 'gray.800',
+        border: 'solid 1px',
+        borderColor: 'gray.600',
+        _checked: {
+            bg: 'white'
+        }
+    },
+    thumb: {
+        border: 'solid 1px',
+        borderColor: 'gray.500',
+    }
+})
+const lightSwitch = switchPartStyle({
+    track: {
+        bg: 'gray.100',
+        border: 'solid 1px',
+        borderColor: 'gray.200',
+        _checked: {
+            bg: 'black'
+        }
+    },
+})
+
+// Tabs
 const blackVariant = definePartsStyle(() => {
     return {
         tab: {
@@ -141,6 +172,13 @@ const variants = {
 }
 const tabsTheme = defineMultiStyleConfig({ variants })
 
+const switchVariants = {
+    dark: darkSwitch,
+    light: lightSwitch
+}
+
+const switchTheme = switchStyleConfig({ variants: switchVariants })
+
 const theme = extendTheme({
     config: {
         disableTransitionOnChange: false,
@@ -156,6 +194,7 @@ const theme = extendTheme({
     },
     components: {
         Tabs: tabsTheme,
+        Switch: switchTheme
     },
 })
 

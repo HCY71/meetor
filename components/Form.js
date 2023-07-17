@@ -1,6 +1,7 @@
 import { useEffect } from "react"
 import {
     VStack,
+    HStack,
     RangeSlider,
     RangeSliderTrack,
     RangeSliderFilledTrack,
@@ -17,6 +18,8 @@ import Days from "./cells/Days"
 import Dates from "./cells/Dates"
 import CustomTabs from "./cells/Tabs"
 import CustomInput from "./atoms/CustomInput"
+import ChakraSwitch from "./atoms/ChakraSwitch"
+import { TagTemplate } from "./cells/Tabs"
 import { useFormikContext, Formik } from "formik"
 
 import { compareAsc, parseISO, formatISO } from "date-fns"
@@ -163,30 +166,53 @@ const Third = () => {
     const { colorMode } = useColorMode()
     const { context } = useLang()
     return (
-        <Step step={ 3 } title={ context.home.input.chooseRange }>
-            <FormControl isInvalid={ errors.range && touched.range }>
-                <Center>
-                    <RangeSlider
-                        id='range'
-                        aria-label={ [ 'min', 'max' ] }
-                        defaultValue={ values.range }
-                        min={ 0 }
-                        max={ 24 }
-                        step={ 1 }
-                        onChange={ (val) => setFieldValue('range', val) }
-                        w={ { base: '81%' } }
-                    >
-                        <RangeSliderTrack bg={ colors[ colorMode ].border.sliderTrack } h='12px' borderRadius='md'>
-                            <RangeSliderFilledTrack bg={ colors[ colorMode ].bg.invert } />
-                        </RangeSliderTrack>
-                        <SliderThumb index={ 0 } value={ values.range[ 0 ] } />
-                        <SliderThumb index={ 1 } value={ values.range[ 1 ] } />
-                    </RangeSlider>
+        <Step step={ 3 } title={ context.home.input.chooseRange }
+            insert={
+                <HStack>
+                    <Center>|</Center>
+                    <Center>{ context.home.input.switch }</Center>
+                    <ChakraSwitch
+                        name='allDay'
+                        isChecked={ values.allDay }
+                        onChange={ (e) => setFieldValue('allDay', e.target.checked) }
+                        size={ { base: 'lg', md: 'md' } }
+                    />
+                </HStack>
+            }
+        >
+            { values.allDay ? (
+                // When is all day mode
+                <Center w='100%' mt={ 4 }>
+                    <TagTemplate>
+                        💡  { context.global.tips.allDay }
+                    </TagTemplate>
                 </Center>
-                <FormErrorMessage mt={ 8 }>
-                    { errors.range }
-                </FormErrorMessage>
-            </FormControl>
+            ) : (
+                // When is not all day mode
+                <FormControl isInvalid={ errors.range && touched.range }>
+                    <Center>
+                        <RangeSlider
+                            id='range'
+                            aria-label={ [ 'min', 'max' ] }
+                            defaultValue={ values.range }
+                            min={ 0 }
+                            max={ 24 }
+                            step={ 1 }
+                            onChange={ (val) => setFieldValue('range', val) }
+                            w={ { base: '81%' } }
+                        >
+                            <RangeSliderTrack bg={ colors[ colorMode ].border.sliderTrack } h='12px' borderRadius='md'>
+                                <RangeSliderFilledTrack bg={ colors[ colorMode ].bg.invert } />
+                            </RangeSliderTrack>
+                            <SliderThumb index={ 0 } value={ values.range[ 0 ] } />
+                            <SliderThumb index={ 1 } value={ values.range[ 1 ] } />
+                        </RangeSlider>
+                    </Center>
+                    <FormErrorMessage mt={ 8 }>
+                        { errors.range }
+                    </FormErrorMessage>
+                </FormControl>
+            ) }
         </Step >
     )
 }

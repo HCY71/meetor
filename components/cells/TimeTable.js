@@ -38,11 +38,12 @@ const TimeTable = ({ readOnly }) => {
     const [ range, setRange ] = useState([])
     const [ dates, setDates ] = useState([])
     const [ type, setType ] = useState('dates')
+    const [ allDayMode, setAllDayMode ] = useState(false)
     const [ selectedTime, setSelectedTime ] = useState([])
     const [ groupTime, setGroupTime ] = useState({})
     const [ users, setUsers ] = useState([])
     const { configs } = useConfigs()
-    // const { context } = useLang()
+    const { context } = useLang()
 
     const selectingMode = useRef('init')
     const selection = useRef({ start: null, end: null })
@@ -62,6 +63,7 @@ const TimeTable = ({ readOnly }) => {
             setRange(data[ 0 ].range)
             setType(data[ 0 ].type)
             setUsers(data[ 0 ].users)
+            setAllDayMode(data[ 0 ].allDay)
             if (data[ 0 ].type === 'dates') setDates(data[ 0 ].dates || [])
             else setDates(data[ 0 ].days || [])
             if (user !== '') setSelectedTime(data[ 0 ].users?.find(u => u.user === user)?.time || [])
@@ -152,7 +154,104 @@ const TimeTable = ({ readOnly }) => {
         }
     }, [ selection.current.start, selection.current.end, selectingMode.current ])
 
+    if (allDayMode) return (
+        <Center fontWeight='bold' fontSize='12px' margin={ '0 auto' } >
+            <VStack
+                spacing={ 0 }
+                pt={ '0rem' }
+                pos={ 'absolute' }
+                left={ { base: '-0px', md: '-50px' } }
+                top='5px'
+                zIndex={ 1 }
+            >
+                <Center h={ type === 'dates' ? '35px' : '20px' } />
+                <Center
+                    h={ { base: '60px', md: '70px' } }
+                    borderRadius='sm'
+                    border={ { base: colors[ colorMode ].border.table, md: "none" } }
+                    bg={ { base: colors[ colorMode ].bg.nav.primary, md: "none" } }
+                    p='2px'
+                    top='-15px'
+                    w={ { base: '30px', md: '50px' } }
+                    textAlign='center'
+                    whiteSpace='pre-wrap'
+                >
+                    { context.home.input.switch }
+                </Center>
+            </VStack>
+            <VStack w='100%' className="time-table" overflowX='auto' pos='relative' p='0 4px 8px 0px' alignItems='flex-start' minH='300px'>
+                <Grid
+                    gridTemplateRows={ `repeat(${times.length}, auto)` }
+                    gridTemplateColumns={ `repeat(${dates.length}, 1fr)` }
+                    w='100%'
+                    h='fit-content'
+                >
+                    { type === 'dates' ?
+                        dates.map((d, id) => (<GridItem key={ d + id } w='100%' minW={ { base: '100px' } } mb='8px'>
+                            <Center>{ getMonthAndDate(d, configs.lang) }</Center>
+                            <Center>{ displayDay(d, configs.lang) }</Center>
+                        </GridItem>)) :
+                        reorderSunDay(dates, configs.weekStartsOn).map((d, id) => (
+                            <GridItem key={ d + id } mb='8px' >
+                                <Center>{ translateDay(d, configs.lang) }</Center>
+                            </GridItem>
+                        ))
+                    }
+                    { dates.map((d, indexCol) =>
+                    (readOnly ?
+                        <GridGroupPopover
+                            id={ d }
+                            key={ d + indexCol }
+                            index={ 0 }
+                            borderBottom={ colors[ colorMode ].border.table }
+                            bg={ generateColors(groupTime[ d ]?.length / users?.length, colorMode === 'dark') }
 
+                            whoIs={ groupTime[ d ] }
+
+                            users={ users }
+                            type={ type }
+
+                            allDayMode={ allDayMode }
+                        />
+                        :
+                        <GridItemTemplate
+                            id={ d }
+                            key={ d + indexCol }
+                            index={ 0 }
+                            borderBottom={ colors[ colorMode ].border.table }
+
+                            bg={ checkIsSelect(selectedTime, d) ? colors[ colorMode ].bg.timetableSelected : 'transparent' }
+
+                            onPointerDown={ (e) => {
+                                e.preventDefault()
+                                selectingMode.current = checkIsSelect(selectedTime, d) ? 'remove' : 'add'
+                                if (selectingMode.current === 'add' && !checkIsSelect(selectedTime, d)) setSelectedTime(prev => [ ...prev, d ])
+                                else if (selectingMode.current === 'remove') setSelectedTime(prev => prev.filter(t => t !== d))
+
+                                selection.current = { start: { row: 0, col: indexCol }, end: null }
+                                e.currentTarget.releasePointerCapture(e.pointerId)
+
+                                document.addEventListener('pointerup', () => {
+                                    if (selectingMode.current === 'remove') {
+                                        setSelectedTime(prev => prev.filter(t => t !== d))
+                                    }
+                                    selectingMode.current = null
+                                }, { once: true })
+
+                            } }
+                            onPointerOver={ () => {
+                                if (selectingMode.current) {
+                                    if (selectingMode.current === 'add' && !checkIsSelect(selectedTime, d)) setSelectedTime(prev => [ ...prev, d ])
+                                    else if (selectingMode.current === 'remove') setSelectedTime(prev => prev.filter(t => t !== d))
+                                    selection.current = { start: selection.current.start, end: { row: 0, col: indexCol } }
+                                }
+                            } }
+                        />
+                    )) }
+                </Grid>
+            </VStack>
+        </Center >
+    )
     return (
         <Center fontWeight='bold' fontSize='12px' margin={ '0 auto' } >
             <VStack
@@ -254,7 +353,7 @@ const TimeTable = ({ readOnly }) => {
     )
 }
 
-const GridGroupPopover = ({ whoIs, users, type, ...props }) => {
+const GridGroupPopover = ({ whoIs, users, type, allDayMode, ...props }) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const { configs } = useConfigs()
     const { context } = useLang()
@@ -292,7 +391,11 @@ const GridGroupPopover = ({ whoIs, users, type, ...props }) => {
                             </Text>
                         </HStack>
                     }
-                    <Text>{ getFullDateAndTime(props.id, type, configs.lang) + context.global.timeTable.at + displayTime(props.id.slice(props.id.lastIndexOf('-') + 1, props.id.length), configs.usePM) }</Text>
+                    { allDayMode ?
+                        <Text>{ getFullDateAndTime(props.id + '-', type, configs.lang) }</Text>
+                        :
+                        <Text>{ getFullDateAndTime(props.id, type, configs.lang) + context.global.timeTable.at + displayTime(props.id.slice(props.id.lastIndexOf('-') + 1, props.id.length), configs.usePM) }</Text>
+                    }
                 </PopoverHeader>
                 <PopoverArrow />
                 <PopoverBody>

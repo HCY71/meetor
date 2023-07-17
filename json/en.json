@@ -9,9 +9,10 @@
         "clear": "Clear History",
         "input": {
             "name": "Give your event a name",
-            "chooseDates": "Choose your dates.",
-            "chooseRange": "Set a time range.",
-            "placeholder": "A very important meeting"
+            "chooseDates": "Choose your dates",
+            "chooseRange": "Set a time range",
+            "placeholder": "An important discussion",
+            "switch": "All Day"
         }
     },
     "event": {
@@ -20,9 +21,9 @@
         "ago": " ago",
         "go": "Start to check your time.",
         "input": {
-            "name": "Enter your name.",
-            "checkTime": "Check your time.",
-            "placeholder":"Your cool name"
+            "name": "Enter your name",
+            "checkTime": "Check your time",
+            "placeholder":"Rick"
         }
     },
     "notFound": {
@@ -84,7 +85,8 @@
         "tips": {
             "dragSelect": "You can drag to multi-select",
             "hoverToShow": "Hover to show details",
-            "tapToShow": "Tap to show details"
+            "tapToShow": "Tap to show details",
+            "allDay": "When using \"All Day\", the time range will be ignored."
         }
     }
 }

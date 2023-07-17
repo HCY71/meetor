@@ -60,7 +60,7 @@ const CustomTabs = ({ onMouseDown = [ null, null ], tab, panel, isDisabled = fal
     )
 }
 
-const TagTemplate = ({ children, ...props }) => {
+export const TagTemplate = ({ children, ...props }) => {
     return (
         <Tag
             colorScheme='orange'
