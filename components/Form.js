@@ -183,7 +183,7 @@ const Third = () => {
             { values.allDay ? (
                 // When is all day mode
                 <Center w='100%' mt={ 4 }>
-                    <TagTemplate>
+                    <TagTemplate fontSize={ { base: '.8rem', md: '1rem' } }>
                         💡  { context.global.tips.allDay }
                     </TagTemplate>
                 </Center>

@@ -87,7 +87,7 @@
             "dragSelect": "You can drag to multi-select",
             "hoverToShow": "Hover to show details",
             "tapToShow": "Tap to show details",
-            "allDay": "When using \"All Day\", the time range will be ignored."
+            "allDay": "In \"All Day\" mode, the time range will be ignored."
         }
     }
 }
