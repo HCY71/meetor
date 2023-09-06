@@ -34,7 +34,7 @@ const getTimeDistance = (event, currentDate, lang) => {
 }
 
 const getFullDateAndTime = (date, type, lang) => {
-    if (type === 'dates') return format(parseISO(date), 'yyyy-MM-dd')
+    if (type === 'dates') return format(parseISO(date.slice(0, date.lastIndexOf('-'))), 'yyyy-MM-dd')
     else if (lang === 'zh-tw') return '週' + translateDay(date.slice(0, date.lastIndexOf('-')), lang)
     else return translateDay(date.slice(0, date.lastIndexOf('-')), lang)
 }
