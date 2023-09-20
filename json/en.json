@@ -23,7 +23,7 @@
         "input": {
             "name": "Enter your name",
             "checkTime": "Check your time",
-            "placeholder":"Rick"
+            "placeholder":"John Doe"
         }
     },
     "notFound": {

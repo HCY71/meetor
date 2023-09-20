@@ -7,3 +7,11 @@ export const initGA = () => {
 export const logPageView = () => {
     ReactGA.send({ hitType: "pageview", page: window.location.pathname })
 }
+
+export const GAclickEvent = (category, label) => {
+    ReactGA.event({
+        category: category,
+        action: 'click',
+        label: label,
+    })
+}

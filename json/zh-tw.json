@@ -23,7 +23,7 @@
         "input": {
             "name": "填上你的姓名",
             "checkTime": "確認你的時間",
-            "placeholder":"阿偉"
+            "placeholder":"陳三鼎"
         }
     },
     "notFound": {

@@ -44,7 +44,7 @@ const CustomModal = ({ controls }) => {
                         <CustomButton colorScheme='blue' mr={ 3 } onClick={ handleClose } ghost>
                             { context.global.button.close }
                         </CustomButton>
-                        <DonateButton />
+                        <DonateButton isModal />
                     </ModalFooter>
                 </ModalContent>
             </Modal>

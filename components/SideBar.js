@@ -21,6 +21,8 @@ import { colors } from '@/public/theme'
 import { useLang } from '@/context/LangContext'
 import { useConfigs } from '@/context/ConfigsContext'
 
+import { GAclickEvent } from '@/public/utils/GA'
+
 const SideBar = () => {
     const { colorMode, toggleColorMode } = useColorMode()
     const { context } = useLang()
@@ -66,7 +68,7 @@ const SideBar = () => {
                             </Template>
                         </PopoverBody>
                         <PopoverFooter>
-                            <Link href='https://erkin-portfolio.com' target='_blank' rel='noopener noreferrer'>
+                            <Link href='https://erkin-portfolio.com' target='_blank' rel='noopener noreferrer' onClick={ () => GAclickEvent('sidebar', 'about_author') }>
                                 { `${context.global.settings.about}` + ' ➚' }
                             </Link>
                         </PopoverFooter>
