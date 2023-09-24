@@ -371,8 +371,8 @@ const GridGroupPopover = ({ whoIs, users, type, allDayMode, ...props }) => {
             <PopoverTrigger>
                 <GridGroupTime
                     as={ motion.div }
-                    onTapStart={ isTouch ? onOpen : null }
-                    onTapCancel={ isTouch ? onClose : null }
+                    onHoverStart={ isTouch ? onOpen : null }
+                    onHoverEnd={ isTouch ? onClose : null }
                     onMouseOver={ isTouch ? null : onOpen }
                     onMouseLeave={ isTouch ? null : onClose }
                     { ...props }
