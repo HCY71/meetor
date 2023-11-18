@@ -30,7 +30,7 @@ const colors = {
             timetableSelected: 'yellow.300',
             timetableSelectedAlpha: 'rgba(255,124,0, .3)',
             nav: {
-                primary: 'hsla(0,0%,100%,.8)',
+                primary: 'hsla(0,0%,100%,.75)',
                 invert: 'rgba(2,4,8,.9)'
             }
         },
@@ -67,8 +67,8 @@ const colors = {
             timetableSelected: 'yellow.400',
             timetableSelectedAlpha: 'rgba(255,124,0, .3)',
             nav: {
-                invert: 'hsla(0,0%,100%,.8)',
-                primary: 'rgba(2,4,8,.9)'
+                invert: 'hsla(0,0%,100%,.9)',
+                primary: 'rgba(2,4,8,.75)'
             }
         },
         border: {

@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { VStack } from '@chakra-ui/react'
+import { VStack, Skeleton } from '@chakra-ui/react'
 import Form from '../components/Form'
 import Header from '../components/atoms/Header'
 import Subtitle from '../components/atoms/Subtitle'
@@ -45,10 +45,11 @@ export default function Home() {
             { context.home.header.second }
           </Header>
         </VStack>
-        { (showCounter) &&
+        { (showCounter) ?
           <Subtitle>
             { numberWithCommas(data + 1310) } { context.home.subheader }
-          </Subtitle>
+          </Subtitle> :
+          <Skeleton w={ { base: '60%', md: '30%' } } h={ { base: '24px', md: '32px' } } />
         }
       </VStack >
       <RecentVisited />
@@ -56,3 +57,5 @@ export default function Home() {
     </>
   )
 }
+
+
