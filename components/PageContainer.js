@@ -3,6 +3,7 @@ import { Toaster } from "react-hot-toast"
 import Navbar from "./Navbar"
 import Content from "./Content"
 import Footer from "./Footer"
+import PageSkeleton from "./cells/PageSkeleton"
 import { useLang } from "@/context/LangContext"
 
 const PageContainer = ({ children }) => {
@@ -11,9 +12,7 @@ const PageContainer = ({ children }) => {
         <>
             <Navbar loading />
             <Content>
-                <Center>
-                    Loading...
-                </Center>
+                <PageSkeleton />
             </Content>
         </>
     )

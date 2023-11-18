@@ -41,7 +41,11 @@ a {
   }
 }
 
-
+.fully-hidden-tag {
+  display: none;
+  opacity: 0;
+  visibility: hidden;
+}
 .selection-area {
   background: unset;
   border: unset;

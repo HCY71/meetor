@@ -10,7 +10,7 @@ const Footer = () => {
         <HStack
             borderTop={ colors[ colorMode ].border.nav }
             bg={ colors[ colorMode ].bg.nav.primary }
-            backdropFilter='saturate(200%) blur(6px)'
+            backdropFilter='saturate(120%) blur(8px)'
             zIndex={ 1 }
             p={ { base: '4px 20px', md: '12px 40px' } }
             transition='.2s'

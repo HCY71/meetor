@@ -28,7 +28,7 @@ const SideBar = () => {
     const { context } = useLang()
     const { configs, setConfigs } = useConfigs()
     return (
-        <Popover placement='bottom-end' isLazy autoFocus={ false }>
+        <Popover placement='bottom-end' isLazy autoFocus={ false } closeOnBlur={ true }>
             { ({ isOpen }) => (
                 <>
                     <PopoverTrigger>
@@ -87,16 +87,17 @@ const MenuIcon = forwardRef(({ isOpen, ...props }, ref) => {
             cursor='pointer'
             h='100%'
             w='36px'
+            justifyContent='flex-end'
             ref={ ref }
             { ...props }
         >
             <MenuIconComposition
-                w={ isOpen ? '24px' : '36px' }
-                transform={ isOpen ? 'translate3d(-25%, 80%, 0) rotate(-90deg)' : 'translate3d(0, -90%, 0) rotate(0deg)' }
+                w={ isOpen ? '60%' : '100%' }
+                transform={ 'translate3d(0, -100%, 0) rotate(0deg)' }
             />
             <MenuIconComposition
-                w={ isOpen ? '36px' : '24px' }
-                transform={ isOpen ? 'translate3d(25%, 0%, 0) rotate(-90deg)' : 'translate3d(25%, 90%, 0) rotate(0deg)' }
+                w={ isOpen ? '100%' : '60%' }
+                transform={ 'translate3d(0, 100%, 0) rotate(0deg)' }
             />
         </Center>
     )
@@ -107,12 +108,11 @@ const MenuIconComposition = ({ ...props }) => {
     const { colorMode } = useColorMode()
     return (
         <Box
-            // h={ { base: '6px', md: '8px' } }
-            h='8px'
+            h='6px'
             bg={ colors[ colorMode ].bg.invert }
             pos='absolute'
             borderRadius='1000px'
-            opacity={ .8 }
+            opacity={ 1 }
             transition='.2s'
             willChange='transform'
             { ...props }

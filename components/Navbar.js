@@ -19,12 +19,12 @@ const Navbar = ({ loading }) => {
                 w='36px'
             >
                 <MenuIconComposition
-                    w={ '36px' }
-                    transform={ 'translate3d(0, -90%, 0) rotate(0deg)' }
+                    w={ '100%' }
+                    transform={ 'translate3d(0, -100%, 0) rotate(0deg)' }
                 />
                 <MenuIconComposition
-                    w={ '24px' }
-                    transform={ 'translate3d(25%, 90%, 0) rotate(0deg)' }
+                    w={ '67%' }
+                    transform={ 'translate3d(25%, 100%, 0) rotate(0deg)' }
                 />
             </Center>
         </Template>
@@ -52,7 +52,7 @@ const Template = ({ children }) => {
             justifyContent='space-between'
             borderBottom={ colors[ colorMode ].border.nav }
             bg={ colors[ colorMode ].bg.nav.primary }
-            backdropFilter='saturate(200%) blur(6px)'
+            backdropFilter='saturate(100%) blur(8px)'
             zIndex={ 10 }
             transition='.2s'
             p={ { base: '0 12px', md: '0 40px' } }
