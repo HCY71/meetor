@@ -2,7 +2,7 @@ import { HStack, VStack, Skeleton, SkeletonCircle, SkeletonText } from "@chakra-
 
 const PageSkeleton = () => {
     return (
-        <VStack align='center' w='100%'>
+        <VStack align='center' w='100%' maxW='1200px'>
             <Skeleton w={ { base: '80%', md: '40%' } } h='52px' />
             <Skeleton w={ { base: '95%', md: '60%' } } h='52px' />
             <div className="fully-hidden-tag">Create an Event
