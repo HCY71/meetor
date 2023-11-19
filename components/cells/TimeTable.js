@@ -29,8 +29,6 @@ import { useTouchDevices } from "@/hooks/useTouchDevices"
 
 import { motion } from "framer-motion"
 
-import { toast } from "react-hot-toast"
-
 const TimeTable = ({ readOnly }) => {
     const { GET_BY_ID, POST_USER_TIME, SUBSCRIBE, data, isLoading } = useSupabase()
     const { eventId } = useParams()
@@ -358,6 +356,7 @@ const GridGroupPopover = ({ whoIs, users, type, allDayMode, ...props }) => {
     const { configs } = useConfigs()
     const { context } = useLang()
     const { isTouch } = useTouchDevices()
+    const { colorMode } = useColorMode()
     return (
         <Popover
             returnFocusOnClose={ false }
@@ -379,7 +378,7 @@ const GridGroupPopover = ({ whoIs, users, type, allDayMode, ...props }) => {
                 />
             </PopoverTrigger>
 
-            <PopoverContent w='fit-content' maxW='100%'>
+            <PopoverContent w='fit-content' maxW='360px' bg={ colors[ colorMode ].bg.primary }>
                 <PopoverHeader fontWeight='semibold'>
                     { users &&
                         <HStack spacing={ 1 }>
@@ -401,7 +400,7 @@ const GridGroupPopover = ({ whoIs, users, type, allDayMode, ...props }) => {
                         <Text>{ getFullDateAndTime(props.id, type, configs.lang) + context.global.timeTable.at + displayTime(props.id.slice(props.id.lastIndexOf('-') + 1, props.id.length), configs.usePM) }</Text>
                     }
                 </PopoverHeader>
-                <PopoverArrow />
+                <PopoverArrow bg={ colors[ colorMode ].bg.primary } />
                 <PopoverBody>
                     <HStack flexWrap='wrap'>
                         { users &&
@@ -413,7 +412,7 @@ const GridGroupPopover = ({ whoIs, users, type, allDayMode, ...props }) => {
                     </HStack>
                 </PopoverBody>
             </PopoverContent>
-        </Popover>
+        </Popover >
     )
 }
 
