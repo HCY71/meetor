@@ -379,7 +379,7 @@ const GridGroupPopover = ({ whoIs, users, type, allDayMode, ...props }) => {
                 />
             </PopoverTrigger>
 
-            <PopoverContent w='fit-content'>
+            <PopoverContent w='fit-content' maxW='100%'>
                 <PopoverHeader fontWeight='semibold'>
                     { users &&
                         <HStack spacing={ 1 }>
@@ -403,7 +403,7 @@ const GridGroupPopover = ({ whoIs, users, type, allDayMode, ...props }) => {
                 </PopoverHeader>
                 <PopoverArrow />
                 <PopoverBody>
-                    <HStack>
+                    <HStack flexWrap='wrap'>
                         { users &&
                             users.map(u =>
                                 <CustomTag key={ u.user + '-user-tag' } isGhost={ !whoIs?.some(w => w === u.user) }>
