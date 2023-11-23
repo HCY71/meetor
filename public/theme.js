@@ -23,6 +23,7 @@ const colors = {
         bg: {
             primary: 'white',
             invert: 'black',
+            sidebar: 'white',
             button: {
                 hover: 'gray.800',
                 active: 'gray.900'
@@ -60,6 +61,7 @@ const colors = {
         bg: {
             primary: '#020408',
             invert: 'white',
+            sidebar: 'gray.900',
             button: {
                 hover: 'gray.100',
                 active: 'whiteAlpha.900'
@@ -89,8 +91,9 @@ const colors = {
 const darkSwitch = switchPartStyle({
     track: {
         bg: 'gray.800',
-        border: 'solid 1px',
-        borderColor: 'gray.600',
+        // border: 'solid 1px',
+        // borderColor: 'gray.600',
+        boxShadow: 'inset 0px -1px 3px rgba(255,255,255,0.1)',
         _checked: {
             bg: 'white'
         }

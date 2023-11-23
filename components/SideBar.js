@@ -34,11 +34,15 @@ const SideBar = () => {
                     <PopoverTrigger>
                         <MenuIcon isOpen={ isOpen } />
                     </PopoverTrigger>
-                    <PopoverContent p={ 2 } bg={ colors[ colorMode ].bg.primary }>
+                    <PopoverContent p={ 2 } bg={ colors[ colorMode ].bg.sidebar } boxShadow={ colorMode === 'light' ? '0 8px 32px rgb(0,0,0,0.10)' : null }>
                         <PopoverHeader fontWeight='bold' borderBottom='none' fontSize='20px'>{ context.global.settings.title }</PopoverHeader>
                         <PopoverBody pt='0' pb='20px' as={ VStack } align='flex-start' spacing={ 4 }>
                             <Template title={ context.global.settings.theme } center>
-                                <CustomSwitch onClick={ toggleColorMode } />
+                                <CustomSwitch
+                                    onClick={ toggleColorMode }
+                                    // boxShadow='inset 0px -1px 2px rgba(255,255,255,0.1)'
+                                    boxShadow={ colorMode === 'light' ? 'inset 0px -1px 4px rgba(0,0,0,0.06)' : 'inset 0px -1px 2px rgba(255,255,255,0.1)' }
+                                />
                                 {/* <CustomButton
                                     ghost={ !configs.useSystemColorMode }
                                     fontSize='0.75rem'
