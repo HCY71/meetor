@@ -6,7 +6,7 @@ const Subtitle = ({ children }) => {
     const { colorMode } = useColorMode()
     return (
         <Text
-            fontSize='1rem'
+            fontSize={ { base: '1rem' } }
             color={ colors[ colorMode ].font.subtitle }
         >
             { children }

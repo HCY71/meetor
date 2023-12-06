@@ -1,9 +1,10 @@
 {
     "home": {
         "header": {
-            "first": "Create an Event",
-            "second": "Scheduler and Simply Share It."
+            "first": "Create an Event,",
+            "second": "and Share It."
         },
+        "description": "Meetor provides a seamless, mobile-friendly, and login-free experience. Just create an event, share the link, and goes for scheduling.",
         "subheader": "events scheduled.",
         "recent": "Recent events",
         "clear": "Clear History",

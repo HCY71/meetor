@@ -5,6 +5,8 @@ const Header = ({ children, ...props }) => {
     const { colorMode } = useColorMode()
     return (
         <Text
+
+            as={ 'h1' }
             fontSize={ { base: '2.5rem', md: '3.5rem' } }
             fontWeight='700'
             lineHeight='1'

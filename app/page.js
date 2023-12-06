@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { VStack, Skeleton } from '@chakra-ui/react'
+import { VStack, Skeleton, Text } from '@chakra-ui/react'
 import Form from '../components/Form'
 import Header from '../components/atoms/Header'
 import Subtitle from '../components/atoms/Subtitle'
@@ -11,12 +11,16 @@ import useLocalStorage from '@/hooks/useLocalStorage'
 import useSupabase from '@/hooks/useSupabase'
 
 import { numberWithCommas } from '@/public/utils/numberFormatter'
+import { useColorMode } from '@chakra-ui/react'
+import { colors } from '@/public/theme'
 
 export default function Home() {
   const { context } = useLang()
   const [ name, setName ] = useLocalStorage('name', '')
   const [ showCounter, setShowCounter ] = useState(false)
   const { data, isLoading, GET_COUNT } = useSupabase()
+
+  const { colorMode } = useColorMode()
 
   useEffect(() => {
     if (name) setName()
@@ -44,6 +48,9 @@ export default function Home() {
           <Header>
             { context.home.header.second }
           </Header>
+          <Text fontSize={ { base: '14px', md: '16px' } } mt={ { base: '8px', md: '20px' } } w={ { base: '100%', md: '60%' } } color={ colors[ colorMode ].font.dim }>
+            { context.home.description }
+          </Text>
         </VStack>
         { (showCounter) ?
           <Subtitle>
