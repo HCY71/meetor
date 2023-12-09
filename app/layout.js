@@ -10,6 +10,8 @@ import { useProgress } from '@/hooks/useProgress'
 import { Analytics } from '@vercel/analytics/react'
 import { initGA, logPageView } from '@/public/utils/GA'
 
+import introConsole from '@/lib/introConsole'
+
 export default function RootLayout({ children }) {
   useProgress()
 
@@ -21,6 +23,13 @@ export default function RootLayout({ children }) {
   // disable swipe to go back on iOS
   useEffect(() => {
     window.addEventListener('touchstart', (e) => e.preventDefault())
+  }, [])
+
+  // show console message
+  useEffect(() => {
+    setTimeout(() => {
+      introConsole()
+    }, 2000)
   }, [])
 
   return (
