@@ -3,6 +3,7 @@
         "description": "在效率和敏捷至關重要的現代社會中，Meetor協助完成高效率會議安排。這個工具超越了傳統的排程工具如When2Meet，為今日快節奏的專業人士提供了一個使用者友善、手機相容的解決方案。Meetor憑借直觀的設計和實用的功能，簡化了會議規劃過程。探索Meetor如何重新定義排程藝術，成為現代專業人士不可或缺的工具。",
         "meetorOverview": "Meetor 簡介",
         "meetorOverviewDescription": "Meetor是一款基於網頁的應用程式，允許使用者創建活動並與他人共享、共同編輯。這款應用設計考慮了移動設備的友善性，而且使用者無需創建帳號、留下資料即可使用。",
+        "howToUse": "如何使用Meetor",
         "meetorSteps": [
             {
                 "title": "自定義介面",
@@ -24,7 +25,8 @@
                 "content": "就這樣！完成在Meetor設定您的可用時間後，只需前往「我們的時間」頁面即可查看匯整後的時程表。在這裡，顏色編碼的時間段直觀地顯示了最受歡迎的選擇，較深的顏色表示更高的可用性。通過快速懸停或長按任何時間段，即可獲取詳細的時間資訊。",
                 "image": "/steps/04.jpg"
             }
-        ]
+        ],
+        "aboutAuthor": "關於作者"
     },
     "home": {
         "header": "建立行程， \n和分享連結。",
@@ -36,7 +38,7 @@
             "name": "幫行程取個名字",
             "chooseDates": "選擇日期/星期",
             "chooseRange": "設定一個時間範圍",
-            "placeholder": "超級重要的討論",
+            "placeholder": "朱戈諒復出大會",
             "switch": "整天"
         }
     },
@@ -48,7 +50,7 @@
         "input": {
             "name": "填上你的姓名",
             "checkTime": "確認你的時間",
-            "placeholder":"陳三鼎"
+            "placeholder":"朱戈諒"
         }
     },
     "notFound": {

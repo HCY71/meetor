@@ -3,6 +3,7 @@
         "description": "In a world where efficiency and agility are key, Meetor stands as a beacon for streamlined meeting coordination. This innovative platform transcends traditional scheduling tools like When2Meet, offering a user-friendly, mobile-compatible solution for today’s fast-paced professionals. Embrace the ease of organizing meetings with Meetor, where intuitive design meets practical functionality, simplifying your meeting planning process. Discover how Meetor redefines the art of scheduling, making it a vital tool in the arsenal of modern professionals.",
         "meetorOverview": "Meetor Overview",
         "meetorOverviewDescription": "Meetor is a web-based application that allows users to create events and share them with others. The application is designed to be mobile-friendly and does not require users to create an account.",
+        "howToUse": "How to Use Meetor",
         "meetorSteps": [
             {
                 "title": "Personalize Interface",
@@ -24,7 +25,8 @@
                 "content": "And that's done, when you've set your availability in Meetor, simply head to the 'Group' page to see a unified schedule. Here, color-coded time slots visually represent the most popular choices, with darker shades indicating higher availability. Gain insights into participant availability with a quick hover or long-press on any time slot.",
                 "image": "/steps/04.jpg"
             }
-        ]
+        ],
+        "aboutAuthor": "About Author"
     },
     "home": {
         "header": "Create an Event, \nand Share It.",
@@ -36,7 +38,7 @@
             "name": "Give your event a name",
             "chooseDates": "Choose your dates",
             "chooseRange": "Set a time range",
-            "placeholder": "An important discussion",
+            "placeholder": "No more slackers",
             "switch": "All Day"
         }
     },
@@ -48,7 +50,7 @@
         "input": {
             "name": "Enter your name",
             "checkTime": "Check your time",
-            "placeholder": "John Doe"
+            "placeholder": "Jingle Bell"
         }
     },
     "notFound": {

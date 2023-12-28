@@ -15,7 +15,8 @@ const page = () => {
             <BodyText mt='5'>{ context.about.description }</BodyText>
             <H2>{ context.about.meetorOverview }</H2>
             <BodyText>{ context.about.meetorOverviewDescription }</BodyText>
-            <H1>How to Use Meetor</H1>
+            <Divider mt='10' bg={ colors[ colorMode ].border.dim } />
+            <H1>{ context.about.howToUse }</H1>
             <Box display='flex' flexDir='column' gap='6'>
                 { context.about.meetorSteps.map((step, i) => (
                     <Box key={ i }>
@@ -26,7 +27,7 @@ const page = () => {
                 )) }
             </Box>
             <Divider mt='10' bg={ colors[ colorMode ].border.dim } />
-            <H1>About Author</H1>
+            <H1>{ context.about.aboutAuthor }</H1>
             <Box display='flex' mt='5' gap={ { base: '8', md: '10' } }>
                 <Box>
                     <Image src="./man.png" alt="profile picture" w={ '120px' } h='auto' />
