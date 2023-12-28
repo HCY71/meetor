@@ -1,5 +1,5 @@
 import { forwardRef } from 'react'
-// import Link from 'next/link'
+import Link from 'next/link'
 import {
     HStack,
     VStack,
@@ -13,7 +13,7 @@ import {
     PopoverBody,
     PopoverFooter,
     useColorMode,
-    Link
+    // Link
 } from '@chakra-ui/react'
 import CustomButton from './atoms/CustomButton'
 import CustomSwitch from './atoms/CustomSwitch'
@@ -21,15 +21,13 @@ import { colors } from '@/public/theme'
 import { useLang } from '@/context/LangContext'
 import { useConfigs } from '@/context/ConfigsContext'
 
-import { GAclickEvent } from '@/public/utils/GA'
-
 const SideBar = () => {
     const { colorMode, toggleColorMode } = useColorMode()
     const { context } = useLang()
     const { configs, setConfigs } = useConfigs()
     return (
         <Popover placement='bottom-end' isLazy autoFocus={ false } closeOnBlur={ true }>
-            { ({ isOpen }) => (
+            { ({ isOpen, onClose }) => (
                 <>
                     <PopoverTrigger>
                         <MenuIcon isOpen={ isOpen } />
@@ -72,9 +70,9 @@ const SideBar = () => {
                             </Template>
                         </PopoverBody>
                         <PopoverFooter>
-                            <Link href='https://erkin-portfolio.com' target='_blank' rel='noopener noreferrer' onClick={ () => GAclickEvent('sidebar', 'about_author') }>
-                                { `${context.global.settings.about}` + ' ➚' }
-                            </Link>
+                            <Box as={ Link } href='/about' rel='noopener noreferrer' fontWeight='bold' onClick={ onClose }>
+                                { `${context.global.settings.about}` }
+                            </Box>
                         </PopoverFooter>
                     </PopoverContent>
                 </>

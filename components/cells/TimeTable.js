@@ -50,7 +50,7 @@ const TimeTable = ({ readOnly }) => {
         GET_BY_ID('events', eventId)
 
         if (readOnly) {
-            SUBSCRIBE('events', setUsers)
+            SUBSCRIBE('events', setUsers, eventId)
         }
 
     }, [ GET_BY_ID, SUBSCRIBE, readOnly, eventId ])

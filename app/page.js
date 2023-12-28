@@ -43,10 +43,7 @@ export default function Home() {
           maxW={ { base: '100%', lg: '900px' } }
         >
           <Header>
-            { context.home.header.first }
-          </Header>
-          <Header>
-            { context.home.header.second }
+            { context.home.header }
           </Header>
           <Text fontSize={ { base: '14px', md: '16px' } } mt={ { base: '8px', md: '20px' } } w={ { base: '100%', md: '60%' } } color={ colors[ colorMode ].font.dim } maxW={ { base: '520px', md: 'unset' } }>
             { context.home.description }

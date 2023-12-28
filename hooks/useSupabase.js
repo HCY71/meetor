@@ -80,14 +80,16 @@ const useSupabase = () => {
         }
     }, [])
 
-    const SUBSCRIBE = useCallback(async (from, callback) => {
+    // DEBUG
+    const SUBSCRIBE = useCallback(async (from, callback, id) => {
         supabase
             .channel('schema-db-changes')
             .on('postgres_changes',
                 {
                     event: '*',
                     schema: 'public',
-                    table: from
+                    table: from,
+                    filter: `id=eq.${id}`,
                 },
                 payload => {
                     callback(payload.new?.users)

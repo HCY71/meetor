@@ -40,12 +40,6 @@ a {
     text-decoration: underline;
   }
 }
-
-.fully-hidden-tag {
-  display: none;
-  opacity: 0;
-  visibility: hidden;
-}
 .selection-area {
   background: unset;
   border: unset;
@@ -139,4 +133,8 @@ a {
 
 .chakra-ui-dark .time-table::-webkit-scrollbar-thumb {
   background: $border-color;
+}
+
+.link-button:hover span{
+    transform: translate(2px, -2px);
 }
