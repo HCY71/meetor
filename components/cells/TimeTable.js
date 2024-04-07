@@ -17,6 +17,7 @@ import {
 } from "@chakra-ui/react"
 import { getMonthAndDate, displayTime, displayDay, getFullDateAndTime, translateDay, reorderSunDay } from '@/public/utils/timeFormat'
 import CustomTag from "../atoms/CustomTag"
+import CustomButton from "../atoms/CustomButton"
 
 import { colors } from "@/public/theme"
 
@@ -26,6 +27,8 @@ import { useParams } from "next/navigation"
 import { useConfigs } from "@/context/ConfigsContext"
 import { useLang } from "@/context/LangContext"
 import { useTouchDevices } from "@/hooks/useTouchDevices"
+
+import { downloadObjectAsJson } from "@/lib/download"
 
 import { motion } from "framer-motion"
 
@@ -107,7 +110,6 @@ const TimeTable = ({ readOnly }) => {
             })
         }
     })
-
     const checkIsSelect = (from, d) => {
         return from.some(t => t === d)
     }
@@ -141,19 +143,33 @@ const TimeTable = ({ readOnly }) => {
     // auto select
     useEffect(() => {
         if (selectingMode.current === 'add') {
-            const result = table.map((t, indexRow) => t.filter((d, indexCol) => checkInRange(selection.current.start, selection.current.end, { row: indexRow, col: indexCol }) && !checkIsSelect(selectedTime, d)))
-            const cleanedResult = result.flat()
-            setSelectedTime(prev => [ ...prev, ...cleanedResult ])
+            if (allDayMode) {
+                const result = dates.filter((d, indexCol) => checkInRange(selection.current.start, selection.current.end, { row: 0, col: indexCol }) && !checkIsSelect(selectedTime, d))
+                const cleanedResult = result.flat()
+                setSelectedTime(prev => [ ...prev, ...cleanedResult ])
+            }
+            else {
+                const result = table.map((t, indexRow) => t.filter((d, indexCol) => (checkInRange(selection.current.start, selection.current.end, { row: indexRow, col: indexCol }) && !checkIsSelect(selectedTime, d))))
+                const cleanedResult = result.flat()
+                setSelectedTime(prev => [ ...prev, ...cleanedResult ])
+            }
         }
         else if (selectingMode.current === 'remove') {
-            const result = table.map((t, indexRow) => t.filter((d, indexCol) => checkInRange(selection.current.start, selection.current.end, { row: indexRow, col: indexCol }) && checkIsSelect(selectedTime, d)))
-            const cleanedResult = result.flat()
-            setSelectedTime(prev => prev.filter(t => !cleanedResult.includes(t)))
+            if (allDayMode) {
+                const result = dates.filter((d, indexCol) => checkInRange(selection.current.start, selection.current.end, { row: 0, col: indexCol }) && checkIsSelect(selectedTime, d))
+                const cleanedResult = result.flat()
+                setSelectedTime(prev => [ ...prev, ...cleanedResult ])
+
+            } else {
+                const result = table.map((t, indexRow) => t.filter((d, indexCol) => checkInRange(selection.current.start, selection.current.end, { row: indexRow, col: indexCol }) && checkIsSelect(selectedTime, d)))
+                const cleanedResult = result.flat()
+                setSelectedTime(prev => prev.filter(t => !cleanedResult.includes(t)))
+            }
         }
     }, [ selection.current.start, selection.current.end, selectingMode.current ])
 
     if (allDayMode) return (
-        <Center fontWeight='bold' fontSize='12px' margin={ '0 auto' } >
+        <Center fontWeight='bold' fontSize='12px' margin={ '0 auto' } flexDir={ 'column' } gap={ 5 } alignItems={ 'flex-start' }>
             <VStack
                 spacing={ 0 }
                 pt={ '0rem' }
@@ -248,10 +264,15 @@ const TimeTable = ({ readOnly }) => {
                     )) }
                 </Grid>
             </VStack>
+            { (readOnly && users) &&
+                <CustomButton onClick={ () => downloadObjectAsJson(users) } zIndex={ 10 } ghost>
+                    { context.event.export }
+                </CustomButton>
+            }
         </Center >
     )
     return (
-        <Center fontWeight='bold' fontSize='12px' margin={ '0 auto' } >
+        <Center fontWeight='bold' fontSize='12px' margin={ '0 auto' } flexDir={ 'column' } gap={ 5 } alignItems={ 'flex-start' }>
             <VStack
                 spacing={ 0 }
                 pt={ '0rem' }
@@ -290,7 +311,7 @@ const TimeTable = ({ readOnly }) => {
                             <Center>{ displayDay(d, configs.lang) }</Center>
                         </GridItem>)) :
                         reorderSunDay(dates, configs.weekStartsOn).map((d, id) => (
-                            <GridItem key={ d + id } mb='8px' >
+                            <GridItem key={ d + id } mb='8px'>
                                 <Center>{ translateDay(d, configs.lang) }</Center>
                             </GridItem>
                         ))
@@ -347,6 +368,11 @@ const TimeTable = ({ readOnly }) => {
                     }
                 </Grid>
             </VStack>
+            { (readOnly && users) &&
+                <CustomButton onClick={ () => downloadObjectAsJson(users) } zIndex={ 10 } ghost>
+                    { context.event.export }
+                </CustomButton>
+            }
         </Center >
     )
 }
@@ -412,7 +438,7 @@ const GridGroupPopover = ({ whoIs, users, type, allDayMode, ...props }) => {
                     </HStack>
                 </PopoverBody>
             </PopoverContent>
-        </Popover >
+        </Popover>
     )
 }
 

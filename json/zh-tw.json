@@ -38,7 +38,7 @@
             "name": "幫行程取個名字",
             "chooseDates": "選擇日期/星期",
             "chooseRange": "設定一個時間範圍",
-            "placeholder": "朱戈諒復出大會",
+            "placeholder": "ILLIT小組討論",
             "switch": "整天"
         }
     },
@@ -50,8 +50,9 @@
         "input": {
             "name": "填上你的姓名",
             "checkTime": "確認你的時間",
-            "placeholder":"朱戈諒"
-        }
+            "placeholder":"Yunah"
+        },
+        "export": "匯出"
     },
     "notFound": {
         "title": "我是誰？我在哪？",

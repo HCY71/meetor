@@ -38,7 +38,7 @@
             "name": "Give your event a name",
             "chooseDates": "Choose your dates",
             "chooseRange": "Set a time range",
-            "placeholder": "No more slackers",
+            "placeholder": "Arrakis meeting",
             "switch": "All Day"
         }
     },
@@ -50,8 +50,9 @@
         "input": {
             "name": "Enter your name",
             "checkTime": "Check your time",
-            "placeholder": "Jingle Bell"
-        }
+            "placeholder": "Lisan al Gaib"
+        },
+        "export": "Export"
     },
     "notFound": {
         "title": "Where am I? who am I? ",

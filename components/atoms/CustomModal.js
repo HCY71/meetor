@@ -25,7 +25,7 @@ const CustomModal = ({ controls }) => {
             <Modal blockScrollOnMount={ false } isOpen={ controls.isOpen } onClose={ handleClose } size={ { base: 'xs', md: 'lg' } }>
                 <ModalOverlay />
                 <ModalContent
-                    p='1rem'
+                    p={ { base: '.5rem', md: '1rem' } }
                     bg={ colors[ colorMode ].bg.primary }
                     boxShadow='rgba(255, 255, 255, 0.7) 0px 0px 76.9166px, rgba(255, 255, 255, 0.4) 0px 0px 26.3055px, rgba(255, 255, 255, 0.3) 0px 0px 13.1528px, rgb(255, 255, 255) 0px 0px 3.75793px, rgb(255, 255, 255) 0px 0px 1.87897px;'
                     border='solid 1px rgba(255,255,255,0.8)'
