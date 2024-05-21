@@ -56,6 +56,7 @@ export default function Home() {
           <Skeleton w={ { base: '60%', md: '30%' } } h={ { base: '24px', md: '32px' } } />
         }
       </VStack >
+
       <RecentVisited />
       <Form />
     </>

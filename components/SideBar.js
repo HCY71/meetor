@@ -68,6 +68,13 @@ const SideBar = () => {
                                 <Toggle isGhost={ !configs.usePM } onClick={ () => setConfigs({ ...configs, usePM: true }) }>12H</Toggle>
                                 <Toggle isGhost={ configs.usePM } onClick={ () => setConfigs({ ...configs, usePM: false }) }>24H</Toggle>
                             </Template>
+                            <Center w='full' mt='5'>
+                                {/* <!-- WebCurate Spotlight -->    */ }
+                                <a href="https://webcurate.co/p/meetor" target="_blank">
+                                    <img src="https://webcurate.co/assets/images/webcurate-featured-badge.svg" alt="Meetor Featured on WebCurate" style={ { maxWidth: '250px', maxHeight: '54px' } } />
+                                </a>
+                            </Center>
+
                         </PopoverBody>
                         <PopoverFooter>
                             <Box as={ Link } href='/about' rel='noopener noreferrer' fontWeight='bold' onClick={ onClose }>
