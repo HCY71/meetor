@@ -35,7 +35,7 @@ const page = () => {
                 <Box>
                     <Box display='flex' flexDir={ { base: 'column', md: 'row' } } gap='2' alignItems={ { base: 'start', md: 'end' } }>
                         <H2 lineHeight={ { base: .5, md: '1.15' } }>Erkin Hsu</H2>
-                        <BodyText textAlign='left'>A Frontend Developer</BodyText>
+                        <BodyText textAlign='left'>Developer</BodyText>
                     </Box>
                     <Link href="mailto:contact@erkin-portfolio.com" fontWeight='bold' rel="noopener noreferrer" target="_blank" mt='2' display='block'>contact@erkin-portfolio.com</Link>
                     <Box display='flex' gap='3' mt='5' alignSelf='end'>

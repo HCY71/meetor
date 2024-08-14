@@ -1,129 +1,121 @@
 {
-    "about": {
-        "description": "In a world where efficiency and agility are key, Meetor stands as a beacon for streamlined meeting coordination. This innovative platform transcends traditional scheduling tools like When2Meet, offering a user-friendly, mobile-compatible solution for today’s fast-paced professionals. Embrace the ease of organizing meetings with Meetor, where intuitive design meets practical functionality, simplifying your meeting planning process. Discover how Meetor redefines the art of scheduling, making it a vital tool in the arsenal of modern professionals.",
-        "meetorOverview": "Meetor Overview",
-        "meetorOverviewDescription": "Meetor is a web-based application that allows users to create events and share them with others. The application is designed to be mobile-friendly and does not require users to create an account.",
-        "howToUse": "How to Use Meetor",
-        "meetorSteps": [
-            {
-                "title": "Personalize Interface",
-                "content": "Embark on your Meetor experience by fine-tuning the interface to your liking. Enjoy the flexibility of customizing themes (black or white), language settings (English or Chinese), time format (12-hour or 24-hour), and your week's start day. Personalize to optimize your scheduling experience with Meetor.",
-                "image": "/steps/01.jpg"
-            },
-            {
-                "title": "Create an Event",
-                "content": "Initiate Your Meetor Event: Choose a distinctive name for your meeting, ensuring it stands out and is easily identifiable.\n\nDate Selection Made Simple: Select your desired dates or ranges with user-friendly drag-and-drop functionality. Utilize the 'Week' mode for extended multi-week scheduling.\n\nCustomize Your Time Slots: Tailor meeting times according to your schedule, with the option to extend or reduce the default 0800 to 1700 range. Effortlessly set full-day events with the 'All Day' feature.",
-                "image": "/steps/02.jpg"
-            },
-            {
-                "title": "Effortless Scheduling",
-                "content": "Once you finalize your Meetor event details, you will be navigated to the scheduling page. Utilize the user-friendly sharing buttons for easy event distribution, ensuring quick access for all participants. Simplify time coordination by allowing collaborators to enter their names and select their preferred time slots with a convenient drag-and-drop feature.",
-                "image": "/steps/03.jpg"
-            },
-            {
-                "title": "That's Done",
-                "content": "And that's done, when you've set your availability in Meetor, simply head to the 'Group' page to see a unified schedule. Here, color-coded time slots visually represent the most popular choices, with darker shades indicating higher availability. Gain insights into participant availability with a quick hover or long-press on any time slot.",
-                "image": "/steps/04.jpg"
-            }
-        ],
-        "aboutAuthor": "About Author"
-    },
-    "home": {
-        "header": "Create an Event, \nand Share It.",
-        "description": "Meetor provides a seamless, mobile-friendly, and login-free experience. Just create an event, share the link, and goes for scheduling.",
-        "subheader": "events scheduled.",
-        "recent": "Recent events",
-        "clear": "Clear History",
-        "input": {
-            "name": "Give your event a name",
-            "chooseDates": "Choose your dates",
-            "chooseRange": "Set a time range",
-            "placeholder": "Arrakis meeting",
-            "switch": "All Day"
-        }
-    },
-    "event": {
-        "hello": "Hi👋, ",
-        "createdAt": "created at ",
-        "ago": " ago",
-        "go": "Start to check your time.",
-        "input": {
-            "name": "Enter your name",
-            "checkTime": "Check your time",
-            "placeholder": "Lisan al Gaib"
-        },
-        "export": "Export"
-    },
-    "notFound": {
-        "title": "Where am I? who am I? ",
-        "tryGoHome": "Try GO HOME"
-    },
-    "eventNotFound": {
-        "title": "Event Not Found"
-    },
-    "global": {
-        "button": {
-            "submit": "Submit",
-            "back": "BACK",
-            "auto": "AUTO",
-            "close": "Later",
-            "donate": "Buy me a coffee",
-            "logout": "Log out"
-        },
-        "weekdays": [
-            "SUN",
-            "MON",
-            "TUE",
-            "WED",
-            "THU",
-            "FRI",
-            "SAT"
-        ],
-        "settings": {
-            "title": "Settings",
-            "theme": "Theme",
-            "language": "Language",
-            "weekStart": {
-                "title": "Week Start",
-                "sun": "SUN",
-                "mon": "MON"
-            },
-            "timeFormat": "Time Format",
-            "about": "About Meetor"
-        },
-        "toast": {
-            "loading": "Loading...",
-            "success": "Here we go.",
-            "saved": "Saved!",
-            "error": "Something went wrong:(",
-            "linkCopied": "Link Copied!",
-            "nameFirst": "Fill your name first.",
-            "emptyForm": "You missed some fields.",
-            "selectPast": "The past has passed by."
-        },
-        "donateAlert": {
-            "title": "This Could Be an Ad",
-            "content": "But since we care about your experience, its not. Consider donate to support us."
-        },
-        "panel": {
-            "dates": "Dates",
-            "days": "Days",
-            "yourTime": "Your Time",
-            "groupTime": "Group Time"
-        },
-        "timeTable": {
-            "available": "available on",
-            "at": " at ",
-            "all": "All are"
-        },
-        "footer": {
-            "title": "If you love this, consider"
-        },
-        "tips": {
-            "dragSelect": "You can drag to multi-select",
-            "hoverToShow": "Hover to show details",
-            "tapToShow": "Tap to show details",
-            "allDay": "In \"All Day\" mode, the time range will be ignored."
-        }
+  "about": {
+    "description": "In a world where efficiency and agility are key, Meetor stands as a beacon for streamlined meeting coordination. This innovative platform transcends traditional scheduling tools like When2Meet, offering a user-friendly, mobile-compatible solution for today’s fast-paced professionals. Embrace the ease of organizing meetings with Meetor, where intuitive design meets practical functionality, simplifying your meeting planning process. Discover how Meetor redefines the art of scheduling, making it a vital tool in the arsenal of modern professionals.",
+    "meetorOverview": "Meetor Overview",
+    "meetorOverviewDescription": "Meetor is a web-based application that allows users to create events and share them with others. The application is designed to be mobile-friendly and does not require users to create an account.",
+    "howToUse": "How to Use Meetor",
+    "meetorSteps": [
+      {
+        "title": "Personalize Interface",
+        "content": "Embark on your Meetor experience by fine-tuning the interface to your liking. Enjoy the flexibility of customizing themes (black or white), language settings (English or Chinese), time format (12-hour or 24-hour), and your week's start day. Personalize to optimize your scheduling experience with Meetor.",
+        "image": "/steps/01.jpg"
+      },
+      {
+        "title": "Create an Event",
+        "content": "Initiate Your Meetor Event: Choose a distinctive name for your meeting, ensuring it stands out and is easily identifiable.\n\nDate Selection Made Simple: Select your desired dates or ranges with user-friendly drag-and-drop functionality. Utilize the 'Week' mode for extended multi-week scheduling.\n\nCustomize Your Time Slots: Tailor meeting times according to your schedule, with the option to extend or reduce the default 0800 to 1700 range. Effortlessly set full-day events with the 'All Day' feature.",
+        "image": "/steps/02.jpg"
+      },
+      {
+        "title": "Effortless Scheduling",
+        "content": "Once you finalize your Meetor event details, you will be navigated to the scheduling page. Utilize the user-friendly sharing buttons for easy event distribution, ensuring quick access for all participants. Simplify time coordination by allowing collaborators to enter their names and select their preferred time slots with a convenient drag-and-drop feature.",
+        "image": "/steps/03.jpg"
+      },
+      {
+        "title": "That's Done",
+        "content": "And that's done, when you've set your availability in Meetor, simply head to the 'Group' page to see a unified schedule. Here, color-coded time slots visually represent the most popular choices, with darker shades indicating higher availability. Gain insights into participant availability with a quick hover or long-press on any time slot.",
+        "image": "/steps/04.jpg"
+      }
+    ],
+    "aboutAuthor": "About Author"
+  },
+  "home": {
+    "header": "Create an Event, \nand Share It.",
+    "description": "Meetor provides a seamless, mobile-friendly, and login-free experience. Just create an event, share the link, and goes for scheduling.",
+    "subheader": "events scheduled.",
+    "recent": "Recent events",
+    "clear": "Clear History",
+    "input": {
+      "name": "Give your event a name",
+      "chooseDates": "Choose your dates",
+      "chooseRange": "Set a time range",
+      "placeholder": "When to Hold The Eras Tour",
+      "switch": "All Day"
     }
+  },
+  "event": {
+    "hello": "Hi👋, ",
+    "createdAt": "created at ",
+    "ago": " ago",
+    "go": "Start to check your time.",
+    "input": {
+      "name": "Enter your name",
+      "checkTime": "Check your time",
+      "placeholder": "Taylor"
+    },
+    "export": "Export"
+  },
+  "notFound": {
+    "title": "Where am I? who am I? ",
+    "tryGoHome": "Try GO HOME"
+  },
+  "eventNotFound": {
+    "title": "Event Not Found"
+  },
+  "global": {
+    "button": {
+      "submit": "Submit",
+      "back": "BACK",
+      "auto": "AUTO",
+      "close": "Later",
+      "donate": "Buy me a coffee",
+      "logout": "Log out"
+    },
+    "weekdays": ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
+    "settings": {
+      "title": "Settings",
+      "theme": "Theme",
+      "language": "Language",
+      "weekStart": {
+        "title": "Week Start",
+        "sun": "SUN",
+        "mon": "MON"
+      },
+      "timeFormat": "Time Format",
+      "about": "About Meetor"
+    },
+    "toast": {
+      "loading": "Loading...",
+      "success": "Here we go.",
+      "saved": "Saved!",
+      "error": "Something went wrong:(",
+      "linkCopied": "Link Copied!",
+      "nameFirst": "Fill your name first.",
+      "emptyForm": "You missed some fields.",
+      "selectPast": "The past has passed by."
+    },
+    "donateAlert": {
+      "title": "This Could Be an Ad",
+      "content": "But since we care about your experience, its not. Consider donate to support us."
+    },
+    "panel": {
+      "dates": "Dates",
+      "days": "Days",
+      "yourTime": "Your Time",
+      "groupTime": "Group Time"
+    },
+    "timeTable": {
+      "available": "available on",
+      "at": " at ",
+      "all": "All are"
+    },
+    "footer": {
+      "title": "If you love this, consider"
+    },
+    "tips": {
+      "dragSelect": "You can drag to multi-select",
+      "hoverToShow": "Hover to show details",
+      "tapToShow": "Tap to show details",
+      "allDay": "In \"All Day\" mode, the time range will be ignored."
+    }
+  }
 }
