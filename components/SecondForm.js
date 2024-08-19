@@ -89,6 +89,7 @@ const Second = ({ inputRef }) => {
     const [ name ] = useLocalStorage('name')
     const [ tabIndex, setTabIndex ] = useState(1)
     const { context } = useLang()
+
     const { isTouch } = useTouchDevices()
     useEffect(() => {
         if (name) setTabIndex(0)
@@ -108,7 +109,7 @@ const Second = ({ inputRef }) => {
                     <TimeTable />,
                     <TimeTable readOnly />
                 ] }
-                tips={ [ context.global.tips.dragSelect, isTouch ? context.global.tips.tapToShow : context.global.tips.hoverToShow ] }
+                tips={ [ context.global.tips.dragSelect, isTouch ? context.global.tips.tapToShow : context.global.tips.hoverToShow, context.global.tips.forMore ] }
                 inputRef={ inputRef }
                 isDisabled={ name ? false : true }
                 index={ tabIndex }
