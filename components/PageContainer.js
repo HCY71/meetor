@@ -1,4 +1,3 @@
-import { Center } from "@chakra-ui/react"
 import { Toaster } from "react-hot-toast"
 import Navbar from "./Navbar"
 import Content from "./Content"

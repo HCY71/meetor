@@ -38,8 +38,10 @@
       "name": "Give your event a name",
       "chooseDates": "Choose your dates",
       "chooseRange": "Set a time range",
-      "placeholder": "When to Hold The Eras Tour",
-      "switch": "All Day"
+      "placeholder": "When to meet me at the APT?",
+      "switch": "All Day",
+      "timezone": "Timezone",
+      "timezoneReset": "Reset"
     }
   },
   "event": {
@@ -50,7 +52,7 @@
     "input": {
       "name": "Enter your name",
       "checkTime": "Check your time",
-      "placeholder": "Taylor"
+      "placeholder": "Mars"
     },
     "export": "Export"
   },

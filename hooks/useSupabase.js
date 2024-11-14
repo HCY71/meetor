@@ -80,7 +80,6 @@ const useSupabase = () => {
         }
     }, [])
 
-    // DEBUG
     const SUBSCRIBE = useCallback(async (from, callback, id) => {
         supabase
             .channel('schema-db-changes')
@@ -98,7 +97,7 @@ const useSupabase = () => {
     }, [])
 
 
-    return { GET, GET_COUNT, GET_BY_ID, POST, POST_USER_TIME, SUBSCRIBE, isLoading, data, error }
+    return { GET, GET_COUNT, GET_BY_ID, POST, POST_USER_TIME, SUBSCRIBE, isLoading, setIsLoading, data, error }
 }
 
 export default useSupabase

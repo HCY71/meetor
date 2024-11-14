@@ -18,6 +18,8 @@ import { useLang } from "@/context/LangContext"
 import { useConfigs } from "@/context/ConfigsContext"
 import Link from "next/link"
 import CustomButton from "@/components/atoms/CustomButton"
+import { EventProvider } from "@/context/EventContext"
+import PageSkeleton from "@/components/cells/PageSkeleton"
 
 const Page = () => {
     const [ event, setEvent ] = useState(null)
@@ -28,7 +30,7 @@ const Page = () => {
 
     const { context } = useLang()
     const { configs } = useConfigs()
-    const [ recent, setRecent ] = useLocalStorage('recent', [])
+    const [ recent, setRecent ] = useLocalStorage('meetor_recent', [])
 
     const { GET_BY_ID, isLoading, data } = useSupabase()
     useEffect(() => {
@@ -48,6 +50,7 @@ const Page = () => {
         }
     }, [ isLoading, data ])
 
+    // handle event not found
     if (notFound) return (
         <VStack spacing={ 15 } >
             <VStack spacing={ 5 }>
@@ -64,25 +67,28 @@ const Page = () => {
             </VStack>
         </VStack>
     )
+    else if (!event) return <PageSkeleton />
     return (
-        <VStack spacing={ 5 } w='520px' maxW='100%'>
-            { event
-                &&
-                <VStack spacing={ { base: 2, md: 3 } }>
-                    <Header>
-                        { event.name }
-                    </Header>
-                    <Subtitle>
-                        { context.event.createdAt + getTimeDistance(event, currentDate, configs.lang) + context.event.ago }
-                    </Subtitle>
-                    <HStack mt={ 4 } mb={ 4 } spacing={ 3 }>
-                        <CopyLink />
-                        <Share />
-                    </HStack>
-                </VStack>
-            }
-            <SecondForm />
-        </VStack >
+        <EventProvider event={ event }>
+            <VStack spacing={ 5 } w='520px' maxW='100%'>
+                { event
+                    &&
+                    <VStack spacing={ { base: 2, md: 3 } }>
+                        <Header>
+                            { event.name }
+                        </Header>
+                        <Subtitle>
+                            { context.event.createdAt + getTimeDistance(event, currentDate, configs.lang) + context.event.ago }
+                        </Subtitle>
+                        <HStack mt={ 4 } mb={ 4 } spacing={ 3 }>
+                            <CopyLink />
+                            <Share />
+                        </HStack>
+                    </VStack>
+                }
+                <SecondForm />
+            </VStack>
+        </EventProvider>
     )
 }
 

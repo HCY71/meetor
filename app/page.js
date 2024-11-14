@@ -16,7 +16,7 @@ import { colors } from '@/public/theme'
 
 export default function Home() {
   const { context } = useLang()
-  const [ name, setName ] = useLocalStorage('name', '')
+  const [ name, setName ] = useLocalStorage('meetor_name', '')
   const [ showCounter, setShowCounter ] = useState(false)
   const { data, isLoading, GET_COUNT } = useSupabase()
 

@@ -38,8 +38,10 @@
       "name": "幫行程取個名字",
       "chooseDates": "選擇日期/星期",
       "chooseRange": "設定一個時間範圍",
-      "placeholder": "(G)I-DLE小組討論",
-      "switch": "整天"
+      "placeholder": "When to meet me at the APT?",
+      "switch": "整天",
+      "timezone": "時區",
+      "timezoneReset": "重置"
     }
   },
   "event": {
@@ -50,7 +52,7 @@
     "input": {
       "name": "填上你的姓名",
       "checkTime": "確認你的時間",
-      "placeholder": "舒華"
+      "placeholder": "Rosé"
     },
     "export": "匯出"
   },

@@ -9,7 +9,7 @@ import { getTimeDistance } from "@/public/utils/timeFormat"
 import { colors } from "@/public/theme"
 
 const RecentVisited = () => {
-    const [ recent, setRecent ] = useLocalStorage('recent', [])
+    const [ recent, setRecent ] = useLocalStorage('meetor_recent', [])
     const { currentDate } = useDate()
     const { context } = useLang()
     const { configs } = useConfigs()

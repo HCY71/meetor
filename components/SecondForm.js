@@ -37,7 +37,7 @@ const SecondForm = () => {
 
 const Steps = ({ openModal }) => {
     const inputRef = useRef(null)
-    const [ name ] = useLocalStorage('name')
+    const [ name ] = useLocalStorage('meetor_name')
     return (
         <>
             { name ? <LoggedIn /> : <First inputRef={ inputRef } openModal={ openModal } /> }
@@ -47,7 +47,7 @@ const Steps = ({ openModal }) => {
 }
 
 const First = ({ inputRef, openModal }) => {
-    const [ name, setName ] = useLocalStorage('name')
+    const [ name, setName ] = useLocalStorage('meetor_name')
     const { context } = useLang()
     const handleSubmit = (value) => {
         openModal()
@@ -86,7 +86,7 @@ const First = ({ inputRef, openModal }) => {
 }
 
 const Second = ({ inputRef }) => {
-    const [ name ] = useLocalStorage('name')
+    const [ name ] = useLocalStorage('meetor_name')
     const [ tabIndex, setTabIndex ] = useState(1)
     const { context } = useLang()
 
@@ -121,14 +121,14 @@ const Second = ({ inputRef }) => {
 }
 
 const LoggedIn = () => {
-    const [ name, setName ] = useLocalStorage('name')
+    const [ name, setName ] = useLocalStorage('meetor_name')
     const { context } = useLang()
     const handleLogout = () => setName()
     const { colorMode } = useColorMode()
     return (
         <VStack>
             <SubHeader>
-                { context.event.hello + name }
+                { context.event.hello + (name || " ") }
             </SubHeader>
             <HStack
                 fontSize={ { base: '1rem', md: '1.5rem' } }
