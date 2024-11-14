@@ -35,7 +35,7 @@ import { motion } from "framer-motion"
 const TimeTable = ({ readOnly }) => {
     const { GET_BY_ID, POST_USER_TIME, SUBSCRIBE, data, isLoading } = useSupabase()
     const { eventId } = useParams()
-    const [ user ] = useLocalStorage('name')
+    const [ user ] = useLocalStorage('meetor_name')
     const [ range, setRange ] = useState([])
     const [ dates, setDates ] = useState([])
     const [ type, setType ] = useState('dates')
@@ -48,6 +48,11 @@ const TimeTable = ({ readOnly }) => {
 
     const selectingMode = useRef('init')
     const selection = useRef({ start: null, end: null })
+
+    // TEMP:
+    const tidyUp = (input) => {
+        return input.replace("+00:00", "")
+    }
 
     useEffect(() => {
         GET_BY_ID('events', eventId)
@@ -126,10 +131,13 @@ const TimeTable = ({ readOnly }) => {
         const group = {}
         if (users) users.forEach(u => {
             u.time.forEach(t => {
+                // TEMP:
+                t = tidyUp(t)
                 if (group[ t ]) group[ t ].push(u.user)
                 else group[ t ] = [ u.user ]
             })
         })
+
         setGroupTime(group)
     }
 
@@ -218,9 +226,10 @@ const TimeTable = ({ readOnly }) => {
                             key={ d + indexCol }
                             index={ 0 }
                             borderBottom={ colors[ colorMode ].border.table }
-                            bg={ generateColors(groupTime[ d ]?.length / users?.length, colorMode === 'dark') }
+                            // TEMP:
+                            bg={ generateColors(groupTime[ tidyUp(d) ]?.length / users?.length, colorMode === 'dark') }
 
-                            whoIs={ groupTime[ d ] }
+                            whoIs={ groupTime[ tidyUp(d) ] }
 
                             users={ users }
                             type={ type }
@@ -323,9 +332,10 @@ const TimeTable = ({ readOnly }) => {
                                 id={ d }
                                 key={ d + indexCol }
                                 index={ indexRow }
-                                bg={ generateColors(groupTime[ d ]?.length / users?.length, colorMode === 'dark') }
+                                // TEMP:
+                                bg={ generateColors(groupTime[ tidyUp(d) ]?.length / users?.length, colorMode === 'dark') }
 
-                                whoIs={ groupTime[ d ] }
+                                whoIs={ groupTime[ tidyUp(d) ] }
 
                                 users={ users }
                                 type={ type }
