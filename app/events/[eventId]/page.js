@@ -4,6 +4,7 @@ import {
     HStack,
     VStack,
     Text,
+    useDisclosure
 } from "@chakra-ui/react"
 import Header from "@/components/atoms/Header"
 import Subtitle from "@/components/atoms/Subtitle"
@@ -18,8 +19,9 @@ import { useLang } from "@/context/LangContext"
 import { useConfigs } from "@/context/ConfigsContext"
 import Link from "next/link"
 import CustomButton from "@/components/atoms/CustomButton"
-import { EventProvider } from "@/context/EventContext"
+import UpdateModal from "@/components/cells/UpdateModal"
 import PageSkeleton from "@/components/cells/PageSkeleton"
+import { EventProvider } from "@/context/EventContext"
 
 const Page = () => {
     const [ event, setEvent ] = useState(null)
@@ -27,10 +29,12 @@ const Page = () => {
     const { currentDate } = useDate()
 
     const [ notFound, setNotFound ] = useState(false)
+    const { isOpen, onOpen, onClose } = useDisclosure()
 
     const { context } = useLang()
     const { configs } = useConfigs()
     const [ recent, setRecent ] = useLocalStorage('meetor_recent', [])
+    const [ isUpdateRead ] = useLocalStorage('meetor_update_timezone_read')
 
     const { GET_BY_ID, isLoading, data } = useSupabase()
     useEffect(() => {
@@ -38,7 +42,7 @@ const Page = () => {
     }, [ GET_BY_ID, eventId ])
 
     useEffect(() => {
-        if (!isLoading && data[ 0 ]) {
+        if (!isLoading && data && data[ 0 ]) {
             setEvent(data[ 0 ])
 
             // Add to recently visited
@@ -49,6 +53,10 @@ const Page = () => {
             if (!isLoading) setNotFound(true)
         }
     }, [ isLoading, data ])
+
+    useEffect(() => {
+        if (!isUpdateRead) onOpen()
+    }, [])
 
     // handle event not found
     if (notFound) return (
@@ -70,6 +78,7 @@ const Page = () => {
     else if (!event) return <PageSkeleton />
     return (
         <EventProvider event={ event }>
+            <UpdateModal controls={ { isOpen, onClose } } />
             <VStack spacing={ 5 } w='520px' maxW='100%'>
                 { event
                     &&

@@ -1,5 +1,4 @@
 import {
-    Center,
     Modal,
     ModalOverlay,
     ModalHeader,
@@ -7,22 +6,15 @@ import {
     ModalFooter,
     ModalBody,
 } from '@chakra-ui/react'
-import CustomButton from './CustomButton'
-import DonateButton from './DonateButton'
-import { useLang } from '@/context/LangContext'
 import { useColorMode } from '@chakra-ui/react'
 import { colors } from '@/public/theme'
 
-const CustomModal = ({ controls }) => {
-    const { context } = useLang()
+const CustomModal = ({ controls, context, button, ...props }) => {
     const { colorMode } = useColorMode()
-    const handleClose = () => {
-        controls.onClose()
-        window.location.reload()
-    }
+
     return (
         <>
-            <Modal blockScrollOnMount={ false } isOpen={ controls.isOpen } onClose={ handleClose } size={ { base: 'xs', md: 'lg' } }>
+            <Modal blockScrollOnMount={ false } isOpen={ controls.isOpen } onClose={ controls.onClose } size={ { base: 'xs', md: 'lg' } } { ...props }>
                 <ModalOverlay />
                 <ModalContent
                     p={ { base: '.5rem', md: '1rem' } }
@@ -35,16 +27,13 @@ const CustomModal = ({ controls }) => {
                         fontWeight='bold'
                         textAlign='center'
                     >
-                        { context.global.donateAlert.title }
+                        { context.header }
                     </ModalHeader>
                     <ModalBody fontSize={ { base: '1rem', md: '1.125rem' } }>
-                        { context.global.donateAlert.content }
+                        { context.body }
                     </ModalBody>
                     <ModalFooter>
-                        <CustomButton colorScheme='blue' mr={ 3 } onClick={ handleClose } ghost>
-                            { context.global.button.close }
-                        </CustomButton>
-                        <DonateButton isModal />
+                        { button }
                     </ModalFooter>
                 </ModalContent>
             </Modal>

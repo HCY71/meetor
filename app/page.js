@@ -5,20 +5,24 @@ import Form from '../components/Form'
 import Header from '../components/atoms/Header'
 import Subtitle from '../components/atoms/Subtitle'
 import RecentVisited from '@/components/cells/RecentVisited'
+import UpdateModal from '@/components/cells/UpdateModal'
 import { useLang } from '@/context/LangContext'
 
 import useLocalStorage from '@/hooks/useLocalStorage'
 import useSupabase from '@/hooks/useSupabase'
 
 import { numberWithCommas } from '@/public/utils/numberFormatter'
-import { useColorMode } from '@chakra-ui/react'
+import { useColorMode, useDisclosure } from '@chakra-ui/react'
 import { colors } from '@/public/theme'
 
 export default function Home() {
   const { context } = useLang()
   const [ name, setName ] = useLocalStorage('meetor_name', '')
+  const [ isUpdateRead ] = useLocalStorage('meetor_update_timezone_read')
+
   const [ showCounter, setShowCounter ] = useState(false)
   const { data, isLoading, GET_COUNT } = useSupabase()
+  const { isOpen, onOpen, onClose } = useDisclosure()
 
   const { colorMode } = useColorMode()
 
@@ -34,9 +38,13 @@ export default function Home() {
     if (!isLoading && data) setShowCounter(true)
   }, [ isLoading, data ])
 
+  useEffect(() => {
+    if (!isUpdateRead) onOpen()
+  }, [])
 
   return (
     <>
+      <UpdateModal controls={ { isOpen, onClose } } />
       <VStack spacing={ { base: 3, md: 5 } }>
         <VStack
           spacing='0'

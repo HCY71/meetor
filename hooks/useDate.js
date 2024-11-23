@@ -7,7 +7,16 @@ import { useConfigs } from '@/context/ConfigsContext'
 const useDate = () => {
     const [ locale, setLocale ] = useState(null)
     const [ today, setToday ] = useState({})
-    const [ currentDate, setCurrentDate ] = useState({})
+    const [ currentDate, setCurrentDate ] = useState(() => {
+        const date = new Date()
+        return {
+            date: date,
+            month: getMonth(date),
+            startOfMonth: startOfMonth(date),
+            monthAndYear: format(date, 'MMMM yyyy', { locale: locale }),
+        }
+    })
+    const [ userTimezone, setUserTimezone ] = useState('America/New_York')
     const { configs } = useConfigs()
 
     const generateCalendar = useCallback((today, addOn, startOn) => {
@@ -49,8 +58,10 @@ const useDate = () => {
             monthAndYear: format(date, 'MMMM yyyy', { locale: locale }),
         })
     }
+
     useEffect(() => {
         const date = new Date()
+
         setToday({
             day: getDay(date),
         })
@@ -60,6 +71,7 @@ const useDate = () => {
             startOfMonth: startOfMonth(date),
             monthAndYear: format(date, 'MMMM yyyy', { locale: locale }),
         })
+
     }, [ locale ])
 
     useEffect(() => {
@@ -67,8 +79,14 @@ const useDate = () => {
         else setLocale(null)
     }, [ configs.lang ])
 
+    // get user timezone
+    useEffect(() => {
+        const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+        setUserTimezone(userTimezone)
+    }, [])
+
     return {
-        today, currentDate, generateCalendar, monthControls: { nextMonth, prevMonth, goBack, isCurrentMonth }
+        today, currentDate, userTimezone, generateCalendar, monthControls: { nextMonth, prevMonth, goBack, isCurrentMonth }
     }
 }
 
