@@ -57,6 +57,7 @@ const TimeTable = ({ readOnly }) => {
     const event = useEvent()
     const { eventId } = useParams()
 
+
     const { POST_USER_TIME, SUBSCRIBE, isLoading, setIsLoading } = useSupabase()
 
     const [ user ] = useLocalStorage('meetor_name')
@@ -73,6 +74,9 @@ const TimeTable = ({ readOnly }) => {
         dataWithTime: [],
     })
 
+
+
+
     const [ selectedTime, setSelectedTime ] = useState([])
     const [ groupTime, setGroupTime ] = useState({})
     const { configs } = useConfigs()
@@ -82,7 +86,10 @@ const TimeTable = ({ readOnly }) => {
     const selectingMode = useRef('init')
     const selection = useRef({ start: null, end: null })
 
+
     // initialize
+   
+
     useEffect(() => {
         setIsLoading(false)
     }, [])
@@ -281,13 +288,18 @@ const TimeTable = ({ readOnly }) => {
 
         if (users) users.forEach(u => {
             u.time.forEach(t => {
+
                 // t = event.type === 'dates' ? parseOldDateData(t) : t
                 t = event.type === 'dates' ? parseOldDateData(t) : parseOldDayData(t)
+
+
+               
 
                 if (group[ t ]) group[ t ].push(u.user)
                 else group[ t ] = [ u.user ]
             })
         })
+
         setGroupTime(group)
     }
 
@@ -379,6 +391,7 @@ const TimeTable = ({ readOnly }) => {
                             </GridItem>
                         ))
                     }
+
                     { localTimes.dataWithTime.map((d) => {
                         return (readOnly ?
                             <GridGroupPopover
@@ -388,6 +401,8 @@ const TimeTable = ({ readOnly }) => {
                                 borderBottom={ colors[ colorMode ].border.table }
 
                                 bg={ generateColors(groupTime[ event.type === 'dates' ? new Date(d.data).toISOString() : d.data ]?.length / users?.length, colorMode === 'dark') }
+
+                   
 
                                 whoIs={ groupTime[ event.type === 'dates' ? new Date(d.data).toISOString() : d.data ] }
 
@@ -493,12 +508,14 @@ const TimeTable = ({ readOnly }) => {
                             </GridItem>
                         ))
                     }
+
                     { localTimes.dataWithTime.map((d) =>
                     (readOnly ?
                         <GridGroupPopover
                             id={ d.data }
                             key={ d.data }
                             index={ d.indexRow }
+
 
                             bg={ generateColors(groupTime[ event.type === 'dates' ? new Date(d.data).toISOString() : d.data ]?.length / users?.length, colorMode === 'dark') }
                             opacity={ isDateSelectable(truthTable, d.data) ? 1 : .1 }
