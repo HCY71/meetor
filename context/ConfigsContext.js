@@ -8,7 +8,7 @@ export const ConfigsProvider = ({ children }) => {
     const [ configs, setConfigs ] = useLocalStorage('meetor_configs', configsInitial)
 
     return (
-        <ConfigsContext.Provider value={ { configs: typeof (configs) === 'object' ? configs : JSON.parse(configs), setConfigs } }>
+        <ConfigsContext.Provider value={ { configs, setConfigs } }>
             { children }
         </ConfigsContext.Provider>
     )

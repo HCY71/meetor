@@ -50,6 +50,7 @@ const Dates = () => {
     // auto select dates
     useEffect(() => {
         if (dates.length && selectingMode.current === 'add') {
+
             const formattedDates = dates.filter(d => isDateInRange(selection.current.start, selection.current.end, formatISO(d)) && !isSelected(selectedDates, formatISO(d))).map(d => formatISO(d))
             setSelectedDates(prev => [ ...prev, ...formattedDates ])
         }
@@ -104,7 +105,7 @@ const Dates = () => {
                         color={ colors[ colorMode ].font.dim }
                         borderColor={ colors[ colorMode ].bg.dim }
                         cursor='pointer'
-                        p={ 1 }
+                        p={ '4px 8px' }
                         border='solid 1px'
                         borderRadius='md'
                         onClick={ monthControls.goBack }
@@ -179,11 +180,11 @@ const Dates = () => {
                                             !isPast(addDays(d, 1)) ?
                                                 (e) => {
                                                     e.preventDefault()
+
                                                     selectingMode.current = isSelected(values.dates, formatISO(d)) ? 'remove' : 'add'
                                                     if (selectingMode.current === 'add') setSelectedDates(prev => [ ...prev, formatISO(d) ])
                                                     else if (selectingMode.current === 'remove') setSelectedDates(prev => prev.filter(t => t !== formatISO(d)))
 
-                                                    // TODO: fix this
                                                     selection.current = { start: formatISO(d), end: formatISO(d) }
                                                     e.currentTarget.releasePointerCapture(e.pointerId)
 

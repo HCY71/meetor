@@ -43,11 +43,11 @@ const RecentVisited = () => {
                     { context.home.clear }
                 </Center>
             </HStack>
-            { recent && (typeof (recent) === 'object') ? recent : JSON.parse(recent).reverse().map(r => (
+            { recent && [ ...recent ].reverse().map(r => (
                 <Link href={ `/events/${r.id}` } className="next-link-custom" key={ r.id }>
                     <HStack justify='space-between' p={ { base: '0 8px', md: '0 16px' } } >
                         <Center fontWeight='bold'>{ r.name }</Center>
-                        <Center fontSize={ { base: '.75rem', md: '.875rem' } }> { context.event.createdAt + getTimeDistance(r, currentDate, configs.lang) + context.event.ago } </Center>
+                        <Center fontSize={ { base: '.75rem', md: '.875rem' } } textAlign={ 'right' }> { context.event.createdAt + getTimeDistance(r, currentDate, configs.lang) + context.event.ago } </Center>
                     </HStack>
                 </Link>
             )) }

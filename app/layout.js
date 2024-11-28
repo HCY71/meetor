@@ -25,6 +25,7 @@ export default function RootLayout({ children }) {
     window.addEventListener('touchstart', (e) => e.preventDefault())
   }, [])
 
+  // FIXME: don't show intro console on dev
   // show console message
   useEffect(() => {
     setTimeout(() => {

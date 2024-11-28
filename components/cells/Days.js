@@ -17,6 +17,7 @@ const Days = () => {
 
     const [ selectedDays, setSelectedDays ] = useState([])
     const selectingMode = useRef(null)
+    const dayOptions = Array.from({ length: 7 }, (_, i) => i)
 
     useEffect(() => {
         setFieldValue('days', selectedDays)
@@ -33,7 +34,7 @@ const Days = () => {
                     name="days"
                     render={ () => (
                         <>
-                            { checkWeekStart(context.global.weekdays, configs.weekStartsOn).map(day => (
+                            { checkWeekStart(dayOptions, configs.weekStartsOn).map(day => (
                                 <Center
                                     className='no-touch-action'
                                     id={ day }
@@ -42,7 +43,7 @@ const Days = () => {
                                     borderRadius='md'
                                     p={ 2 }
                                     w='100%'
-                                    fontWeight={ isSelected(values.days, day) ? 'bold' : (context.global.weekdays[ today.day ] === day ? 'bold' : 'normal') }
+                                    fontWeight={ isSelected(values.days, day) ? 'bold' : (today.day === day ? 'bold' : 'normal') }
                                     cursor='pointer'
                                     userSelect='none'
                                     _active={ {
@@ -76,7 +77,7 @@ const Days = () => {
                                         }
                                     } }
                                 >
-                                    { day }
+                                    { context.global.weekdays[ day ] }
                                 </Center>
                             )) }
                         </>

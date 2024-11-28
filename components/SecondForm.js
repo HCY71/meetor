@@ -15,23 +15,26 @@ import CustomInput from "./atoms/CustomInput"
 import Submit from "./atoms/Submit"
 import CustomButton from "./atoms/CustomButton"
 import SubHeader from "./atoms/SubHeader"
-import CustomModal from "./atoms/CustomModal"
+import DonateModal from "./cells/DonateModal"
 
 import { Formik } from "formik"
 import { secondFormData } from "@/lib/initialValues"
 import useLocalStorage from "@/hooks/useLocalStorage"
 import { colors } from "@/public/theme"
 import { useLang } from "@/context/LangContext"
+import { useTimezone } from "@/context/TimezoneContext"
+import { TimezoneProvider } from "@/context/TimezoneContext"
 import { useTouchDevices } from "@/hooks/useTouchDevices"
+import { useEvent } from "@/context/EventContext"
 
 const SecondForm = () => {
     const { isOpen, onOpen, onClose } = useDisclosure()
 
     return (
-        <>
-            <CustomModal controls={ { isOpen, onClose } } />
+        <TimezoneProvider>
+            <DonateModal controls={ { isOpen, onClose } } />
             <Steps openModal={ onOpen } />
-        </>
+        </TimezoneProvider>
     )
 }
 
@@ -47,7 +50,7 @@ const Steps = ({ openModal }) => {
 }
 
 const First = ({ inputRef, openModal }) => {
-    const [ name, setName ] = useLocalStorage('meetor_name')
+    const [ _, setName ] = useLocalStorage('meetor_name')
     const { context } = useLang()
     const handleSubmit = (value) => {
         openModal()
@@ -89,6 +92,8 @@ const Second = ({ inputRef }) => {
     const [ name ] = useLocalStorage('meetor_name')
     const [ tabIndex, setTabIndex ] = useState(1)
     const { context } = useLang()
+    const timezoneConfigs = useTimezone()
+    const event = useEvent()
 
     const { isTouch } = useTouchDevices()
     useEffect(() => {
@@ -114,6 +119,8 @@ const Second = ({ inputRef }) => {
                 isDisabled={ name ? false : true }
                 index={ tabIndex }
                 onChange={ handleTabsChange }
+                timezoneConfigs={ timezoneConfigs }
+                event={ event }
             />
             { name }
         </Step>

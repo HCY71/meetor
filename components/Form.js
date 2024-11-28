@@ -18,15 +18,17 @@ import Days from "./cells/Days"
 import Dates from "./cells/Dates"
 import CustomTabs from "./cells/Tabs"
 import CustomInput from "./atoms/CustomInput"
+import CustomSelect from "./atoms/CustomSelect"
 import ChakraSwitch from "./atoms/ChakraSwitch"
 import { TagTemplate } from "./cells/Tabs"
 import { useFormikContext, Formik } from "formik"
 
-import { compareAsc, parseISO, formatISO } from "date-fns"
+import { compareAsc, formatISO } from "date-fns"
 
 import { displayTime } from "@/public/utils/timeFormat"
 import { formData } from "@/lib/initialValues"
 import useSupabase from "@/hooks/useSupabase"
+import useDate from "@/hooks/useDate"
 import { toast } from "react-hot-toast"
 import { uid } from "uid"
 import { colors } from "@/public/theme"
@@ -39,38 +41,20 @@ const Form = () => {
 
     const cleanupValues = (value) => {
         if (value.type === 'dates') {
-            // sort
-            const datesAfterSort = value.dates.map(d => parseISO(d)).sort(compareAsc).map(d => formatISO(d))
+            // sort dates and remove duplicates
+            const datesAfterSort = [ ...new Set(value.dates.sort(compareAsc).map(d => formatISO(d))) ]
 
-            // remove timezone
+            // manually remove the default timezone -> it's stupid but it works
             const datesWithoutTimezone = datesAfterSort.map(date => (date.indexOf('+') !== -1) ? date.slice(0, date.indexOf('+')) : date)
+            value.dates = datesWithoutTimezone
             value.id = uid()
-            return { ...value, dates: datesWithoutTimezone }
+
         } else {
-            const sorter = {
-                "MON": 1,
-                "TUE": 2,
-                "WED": 3,
-                "THU": 4,
-                "FRI": 5,
-                "SAT": 6,
-                "SUN": 0,
-                "一": 1,
-                "二": 2,
-                "三": 3,
-                "四": 4,
-                "五": 5,
-                "六": 6,
-                "日": 0
-            }
-            value.days.sort(function sortByDay(a, b) {
-                let day1 = a.toLowerCase()
-                let day2 = b.toLowerCase()
-                return sorter[ day1 ] - sorter[ day2 ]
-            })
+            value.days.sort((a, b) => a - b)
             value.id = uid()
-            return value
         }
+        if (value.allDay) value.timezone = 'UTC'
+        return value
     }
     const handleSubmit = (value) => {
         toast.promise(
@@ -123,6 +107,7 @@ const Steps = () => {
             <First />
             <Second />
             <Third />
+            <Forth />
             <Submit mt={ 10 } />
         </VStack>
     )
@@ -214,6 +199,50 @@ const Third = () => {
                 </FormControl>
             ) }
         </Step >
+    )
+}
+
+const Forth = () => {
+    const { values, setFieldValue } = useFormikContext()
+    const { userTimezone } = useDate()
+    const { context } = useLang()
+    const { colorMode } = useColorMode()
+
+    useEffect(() => {
+        setFieldValue('timezone', userTimezone)
+    }, [ userTimezone ])
+
+    const handleReset = () => {
+        setFieldValue('timezone', userTimezone)
+    }
+
+    // if all day mode, skip this step
+    if (values.allDay) return null
+    return (
+        <Step step={ 4 } title={ context.home.input.timezone } mt={ { base: 5, md: 10 } }>
+            <CustomSelect
+                id={ 'timezone' }
+                onChange={ (e) => setFieldValue('timezone', e.target.value) }
+                value={ values.timezone }
+            />
+            <Center
+                fontSize='0.75rem'
+                fontWeight='medium'
+                color={ colors[ colorMode ].font.dim }
+                borderColor={ colors[ colorMode ].bg.dim }
+                cursor='pointer'
+                p={ '4px 8px' }
+                border='solid 1px'
+                borderRadius='md'
+                onClick={ handleReset }
+                visibility={ values.timezone === userTimezone ? 'hidden' : 'visible' }
+                pos='absolute'
+                right='0'
+                top='0'
+            >
+                { context.home.input.timezoneReset }
+            </Center>
+        </Step>
     )
 }
 
