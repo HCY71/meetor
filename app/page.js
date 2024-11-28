@@ -31,7 +31,10 @@ export default function Home() {
   }, [ name ])
 
   useEffect(() => {
-    GET_COUNT('events', '*')
+    const fetchData = async () => {
+      await GET_COUNT('events', '*')
+    }
+    fetchData()
   }, [])
 
   useEffect(() => {
@@ -59,7 +62,7 @@ export default function Home() {
         </VStack>
         { (showCounter) ?
           <Subtitle>
-            { numberWithCommas(data + 1310) } { context.home.subheader }
+            { numberWithCommas(data + 1120) } { context.home.subheader }
           </Subtitle> :
           <Skeleton w={ { base: '60%', md: '30%' } } h={ { base: '24px', md: '32px' } } />
         }

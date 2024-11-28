@@ -59,7 +59,6 @@ const getTimeDistance = (event, currentDate, lang) => {
 }
 
 const getFullDateAndTime = (date, type, lang) => {
-    // TODO: tidy this
     if (type === 'dates') return format(date, 'yyyy-MM-dd')
     else if (lang === 'zh-tw') return '週' + translateDay(date.toString().split('-')[ 0 ], lang)
     else return translateDay(date.toString().split('-')[ 0 ], lang)
@@ -180,7 +179,6 @@ const combineDaysAndTime = (day, time, timezone, isAllDay) => {
     // if it's all day, ignore time
     if (isAllDay) return day
 
-    // FIXME:
     // fallback to old data
     if (isNaN(parseInt(day))) {
         day = convertDaysToIndex(day)

@@ -185,7 +185,6 @@ const Dates = () => {
                                                     if (selectingMode.current === 'add') setSelectedDates(prev => [ ...prev, formatISO(d) ])
                                                     else if (selectingMode.current === 'remove') setSelectedDates(prev => prev.filter(t => t !== formatISO(d)))
 
-                                                    // TODO: fix this
                                                     selection.current = { start: formatISO(d), end: formatISO(d) }
                                                     e.currentTarget.releasePointerCapture(e.pointerId)
 

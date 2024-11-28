@@ -87,123 +87,105 @@ const TimeTable = ({ readOnly }) => {
         setIsLoading(false)
     }, [])
 
-    // FIXME: temporary log
-    useEffect(() => {
-        // console.log('event', event)
-
-        console.log('selectedTime', selectedTime)
-        // console.log('localTimes', localTimes)
-        // console.log('groupTime', groupTime)
-        // TODO: check is date selectable
-        if (truthTable) {
-            // console.log('truthTable', truthTable)
-
-            // console.log(isDateSelectable(truthTable, selectedTime[ 0 ]), 'isSelectable?')
-        }
-
-    }, [ localTimes, groupTime, selectedTime ])
-
     // update localTimes when user timezone changes
     useEffect(() => {
-        const delta = getUTCOffsetDifference(event.timezone, timezone)
-        const { localRange, dayChangeIndex, isRangeRearranged } = getLocalRange(event.range, delta)
+        const updateLocalTimes = () => {
+            const delta = getUTCOffsetDifference(event.timezone, timezone)
+            const { localRange, dayChangeIndex, isRangeRearranged } = getLocalRange(event.range, delta)
 
-        if (event.timezone !== timezone && dayChangeIndex !== 0 && !event.allDay) {
-            let times
-            // FIXME:
-            const localTimes = getTimesFromRange(localRange)
-            if (isRangeRearranged) {
-                times = getTimesFromRange([ 0, 24 ])
-                localTimes.shift()
-                localTimes.pop()
-                localTimes.pop()
-                times = times.filter(t => !localTimes.includes(t))
-            } else {
-                times = localTimes
-            }
-
-            let dataWithTime = []
-            let updatedDates = []
-            let updatedDays = []
-            // if these is change in day, adjust the dates or days
-            if (event.type === 'dates') {
-                updatedDates = adjustDatesToLocal(event.dates, dayChangeIndex, isRangeRearranged)
-                dataWithTime = times.map((t, indexRow) => updatedDates.map((d, indexCol) => {
-                    return {
-                        indexRow,
-                        indexCol,
-                        data: combineDateAndTime(d, t, timezone, event.allDay)
-                    }
-                }))
-            } else {
-                // FIXME:
-                // fallback to old data - days
-                const isOldData = isNaN(parseInt(event.days[ 0 ]))
-                const targetDays = isOldData ? event.days.map(d => convertDaysToIndex(d)) : event.days
-                console.log('targetDays', targetDays)
-
-                updatedDays = reorderSunDay(adjustDaysToLocal(targetDays, dayChangeIndex, isRangeRearranged), configs.weekStartsOn)
-                dataWithTime = times.map((t, indexRow) => updatedDays.map((d, indexCol) => {
-                    return {
-                        indexRow,
-                        indexCol,
-                        data: combineDaysAndTime(d, t, timezone, event.allDay)
-                    }
-                }))
-
-            }
-            setLocalTimes((prev) => {
-                return { ...prev, dates: updatedDates, days: updatedDays, range: localRange, times, dataWithTime: event.allDay ? dataWithTime.flat() : dataWithTime.slice(0, -1).flat() }
-            })
-        } else {
-            // reset  if timezone is the same or dayChangeIndex===0
-            const times = getTimesFromRange(localRange, event.allDay)
-
-            let dataWithTime = []
-            let targetDays = []
-
-            if (event.type === 'dates') {
-                dataWithTime = times.map((t, indexRow) => event.dates.map((d, indexCol) => {
-                    return {
-                        indexRow,
-                        indexCol,
-                        data: combineDateAndTime(d, t, timezone, event.allDay)
-                    }
-                }))
-
-            } else {
-                // FIXME:
-                // fallback to old data - days
-                const isOldData = isNaN(parseInt(event.days[ 0 ]))
-                targetDays = isOldData ? event.days.map(d => convertDaysToIndex(d)).sort((a, b) => a - b) : event.days
-
-
-                dataWithTime = times.map((t, indexRow) => reorderSunDay(targetDays, configs.weekStartsOn).map((d, indexCol) => {
-                    return {
-                        indexRow,
-                        indexCol,
-                        data: combineDaysAndTime(d, t, timezone, event.allDay)
-                    }
-                }))
-            }
-
-            setLocalTimes((prev) => {
-                return {
-                    ...prev,
-                    range: localRange,
-                    dates: event.dates,
-                    days: targetDays,
-                    times,
-                    dataWithTime: event.allDay ? dataWithTime.flat() : dataWithTime.slice(0, -1).flat(),
+            if (event.timezone !== timezone && dayChangeIndex !== 0 && !event.allDay) {
+                let times
+                const localTimes = getTimesFromRange(localRange)
+                if (isRangeRearranged) {
+                    times = getTimesFromRange([ 0, 24 ])
+                    localTimes.shift()
+                    localTimes.pop()
+                    localTimes.pop()
+                    times = times.filter(t => !localTimes.includes(t))
+                } else {
+                    times = localTimes
                 }
-            })
+
+                let dataWithTime = []
+                let updatedDates = []
+                let updatedDays = []
+                // if these is change in day, adjust the dates or days
+                if (event.type === 'dates') {
+                    updatedDates = adjustDatesToLocal(event.dates, dayChangeIndex, isRangeRearranged)
+                    dataWithTime = times.map((t, indexRow) => updatedDates.map((d, indexCol) => {
+                        return {
+                            indexRow,
+                            indexCol,
+                            data: combineDateAndTime(d, t, timezone, event.allDay)
+                        }
+                    }))
+                } else {
+                    // fallback to old data - days
+                    const isOldData = isNaN(parseInt(event.days[ 0 ]))
+                    const targetDays = isOldData ? event.days.map(d => convertDaysToIndex(d)) : event.days
+
+                    updatedDays = reorderSunDay(adjustDaysToLocal(targetDays, dayChangeIndex, isRangeRearranged), configs.weekStartsOn)
+                    dataWithTime = times.map((t, indexRow) => updatedDays.map((d, indexCol) => {
+                        return {
+                            indexRow,
+                            indexCol,
+                            data: combineDaysAndTime(d, t, timezone, event.allDay)
+                        }
+                    }))
+
+                }
+                setLocalTimes((prev) => {
+                    return { ...prev, dates: updatedDates, days: updatedDays, range: localRange, times, dataWithTime: event.allDay ? dataWithTime.flat() : dataWithTime.slice(0, -1).flat() }
+                })
+            } else {
+                // reset  if timezone is the same or dayChangeIndex===0
+                const times = getTimesFromRange(localRange, event.allDay)
+
+                let dataWithTime = []
+                let targetDays = []
+
+                if (event.type === 'dates') {
+                    dataWithTime = times.map((t, indexRow) => event.dates.map((d, indexCol) => {
+                        return {
+                            indexRow,
+                            indexCol,
+                            data: combineDateAndTime(d, t, timezone, event.allDay)
+                        }
+                    }))
+
+                } else {
+                    // fallback to old data - days
+                    const isOldData = isNaN(parseInt(event.days[ 0 ]))
+                    targetDays = isOldData ? event.days.map(d => convertDaysToIndex(d)).sort((a, b) => a - b) : event.days
+
+
+                    dataWithTime = times.map((t, indexRow) => reorderSunDay(targetDays, configs.weekStartsOn).map((d, indexCol) => {
+                        return {
+                            indexRow,
+                            indexCol,
+                            data: combineDaysAndTime(d, t, timezone, event.allDay)
+                        }
+                    }))
+                }
+
+                setLocalTimes((prev) => {
+                    return {
+                        ...prev,
+                        range: localRange,
+                        dates: event.dates,
+                        days: targetDays,
+                        times,
+                        dataWithTime: event.allDay ? dataWithTime.flat() : dataWithTime.slice(0, -1).flat(),
+                    }
+                })
+            }
         }
+        updateLocalTimes()
     }, [ timezone, configs.weekStartsOn ])
 
     // get user selectedTime from event
     useEffect(() => {
         const userSelectedTime = event.users?.find(u => u.user === user)?.time
-        console.log('userSelectedTime', userSelectedTime)
 
         if (userSelectedTime) {
             const convertedDates = event.type === 'dates' ? userSelectedTime.map(d => parseOldDateData(d)) : userSelectedTime.map(d => parseOldDayData(d))
@@ -232,55 +214,53 @@ const TimeTable = ({ readOnly }) => {
     // update
     useEffect(() => {
         if (selectedTime !== null && !selectingMode.current && !isLoading) {
-            // FIXME:
             const uniqueTime = [ ...new Set(selectedTime) ]
             POST_USER_TIME(eventId, { user, time: uniqueTime, timezone })
         }
     }, [ selectedTime, POST_USER_TIME, user, eventId, selectingMode.current ])
 
     useEffect(() => {
-        // FIXME:
         if (readOnly) checkGroupTime()
     }, [ users ])
 
     // auto select
     useEffect(() => {
+        const handleAutoSelect = () => {
+            if (selectingMode.current === 'add') {
+                if (event.allDay) {
+                    const selected = localTimes.dataWithTime.filter((d) => checkIsInRange(selection.current.start, selection.current.end, { row: 0, col: d.indexCol }) && !checkIsSelect(selectedTime, d.data))
+                        .map(d => d.data)
 
-        if (selectingMode.current === 'add') {
-            if (event.allDay) {
-                // FIXME:
-                const selected = localTimes.dataWithTime.filter((d) => checkIsInRange(selection.current.start, selection.current.end, { row: 0, col: d.indexCol }) && !checkIsSelect(selectedTime, d.data))
-                    .map(d => d.data)
-                setSelectedTime(prev => [ ...prev, ...selected ])
+                    setSelectedTime(prev => [ ...prev, ...selected ])
+                }
+                else {
+                    const selected = localTimes.dataWithTime
+                        .filter((d) =>
+                            checkIsInRange(selection.current.start, selection.current.end, { row: d.indexRow, col: d.indexCol }) && !checkIsSelect(selectedTime, d.data) && isDateSelectable(truthTable, d.data))
+                        .map(d => d.data)
+                    setSelectedTime(prev => [ ...prev, ...selected ])
+                }
             }
-            else {
-                const selected = localTimes.dataWithTime
+            else if (selectingMode.current === 'remove') {
+                const toBeRemoved = localTimes.dataWithTime
                     .filter((d) =>
-                        checkIsInRange(selection.current.start, selection.current.end, { row: d.indexRow, col: d.indexCol }) && !checkIsSelect(selectedTime, d.data) && isDateSelectable(truthTable, d.data))
+                        checkIsInRange(selection.current.start, selection.current.end, { row: d.indexRow, col: d.indexCol }) && checkIsSelect(selectedTime, d.data))
                     .map(d => d.data)
-                setSelectedTime(prev => [ ...prev, ...selected ])
+
+                // in filter method, if the return value is true, it will be kept
+                // !checkIsSelect means it is not in the toBeRemoved list -> it should be kept(true)
+                setSelectedTime(prev => prev.filter(t => !checkIsSelect(toBeRemoved, t)))
             }
         }
-        else if (selectingMode.current === 'remove') {
-            const toBeRemoved = localTimes.dataWithTime
-                .filter((d) =>
-                    checkIsInRange(selection.current.start, selection.current.end, { row: d.indexRow, col: d.indexCol }) && checkIsSelect(selectedTime, d.data))
-                .map(d => d.data)
-
-            // in filter method, if the return value is true, it will be kept
-            // !checkIsSelect means it is not in the toBeRemoved list -> it should be kept(true)
-            setSelectedTime(prev => prev.filter(t => !checkIsSelect(toBeRemoved, t)))
-        }
+        handleAutoSelect()
     }, [ selection.current.start, selection.current.end, selectingMode.current ])
 
 
     const times = getTimesFromRange(event.range, event.allDay)
 
-    // TODO:timezone version
     const truthTable = times.map(t => {
         if (event.allDay) return event.type === 'dates' ? event.dates : event.days
         if (event.type === 'dates') return event.dates.map(d => combineDateAndTime(d, t, event.timezone))
-        // TODO: the data should change or has changed
         else return reorderSunDay(event.days, configs.weekStartsOn).map(d => combineDaysAndTime(d, t, event.timezone))
     }).flat()
 
@@ -302,7 +282,6 @@ const TimeTable = ({ readOnly }) => {
         if (users) users.forEach(u => {
             u.time.forEach(t => {
                 // t = event.type === 'dates' ? parseOldDateData(t) : t
-                // TODO: fallback to old data - days
                 t = event.type === 'dates' ? parseOldDateData(t) : parseOldDayData(t)
 
                 if (group[ t ]) group[ t ].push(u.user)
@@ -338,7 +317,7 @@ const TimeTable = ({ readOnly }) => {
 
     // fallback to old data - days
     const parseOldDayData = (d) => {
-        const isOldData = !(/^\d+(-\d+(\.\d+)?)$/.test(d))
+        const isOldData = isNaN(parseInt(d))
         if (isOldData && event.allDay) {
             return convertDaysToIndex(d)
         }
@@ -423,7 +402,6 @@ const TimeTable = ({ readOnly }) => {
                                 key={ d.data }
                                 index={ 0 }
                                 borderBottom={ colors[ colorMode ].border.table }
-
                                 bg={ checkIsSelect(selectedTime, d.data) ? colors[ colorMode ].bg.timetableSelected : 'transparent' }
 
                                 onPointerDown={ (e) => {
@@ -469,7 +447,6 @@ const TimeTable = ({ readOnly }) => {
                 pt={ '0rem' }
                 pos={ 'absolute' }
                 left={ { base: '-0px', md: '-48px' } }
-                // FIXME:
                 top={ localTimes.times[ 0 ] % 1 === 0 ? { base: '14px', md: '5px' } : '36px' }
                 zIndex={ 1 }
                 alignItems={ { base: 'flex-start', md: 'center' } }
@@ -479,7 +456,6 @@ const TimeTable = ({ readOnly }) => {
                     const hasBreakpoint = i < arr.length - 1 && arr[ i + 1 ] - t !== 0.5
                     return (t % 1 === 0 &&
                         <Center key={ t + '-time-col' } h={ { base: '60px', md: '70px' } } alignItems='flex-start'>
-                            {/* FIXME:  */ }
                             <Center
                                 borderRadius='sm'
                                 border={ { base: colors[ colorMode ].border.table, md: "none" } }
@@ -520,7 +496,6 @@ const TimeTable = ({ readOnly }) => {
                     { localTimes.dataWithTime.map((d) =>
                     (readOnly ?
                         <GridGroupPopover
-                            // FIXME:
                             id={ d.data }
                             key={ d.data }
                             index={ d.indexRow }
@@ -534,7 +509,6 @@ const TimeTable = ({ readOnly }) => {
                         />
                         :
                         <GridItemTemplate
-                            // FIXME:
                             id={ d.data }
                             key={ d.data }
                             index={ d.indexRow }
