@@ -22,6 +22,7 @@ import CustomButton from "@/components/atoms/CustomButton"
 import UpdateModal from "@/components/cells/UpdateModal"
 import PageSkeleton from "@/components/cells/PageSkeleton"
 import { EventProvider } from "@/context/EventContext"
+import { isBefore } from "date-fns"
 
 const Page = () => {
     const [ event, setEvent ] = useState(null)
@@ -34,7 +35,8 @@ const Page = () => {
     const { context } = useLang()
     const { configs } = useConfigs()
     const [ recent, setRecent ] = useLocalStorage('meetor_recent', [])
-    const [ isUpdateRead ] = useLocalStorage('meetor_update_timezone_read')
+    const [ isUpdateReadEn ] = useLocalStorage('meetor_update_timezone_read_en')
+    const [ isUpdateReadZh ] = useLocalStorage('meetor_update_timezone_read_zh')
 
     const { GET_BY_ID, isLoading, data } = useSupabase()
     useEffect(() => {
@@ -55,7 +57,12 @@ const Page = () => {
     }, [ isLoading, data ])
 
     useEffect(() => {
-        if (!isUpdateRead) onOpen()
+        const isOutdated = isBefore(new Date(), new Date('2025/01/30'))
+        if (configs.lang === 'en') {
+            if (!(isUpdateReadEn) && isOutdated) onOpen()
+        } else {
+            if (!(isUpdateReadZh) && isOutdated) onOpen()
+        }
     }, [])
 
     // handle event not found

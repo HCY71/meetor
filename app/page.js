@@ -7,6 +7,7 @@ import Subtitle from '../components/atoms/Subtitle'
 import RecentVisited from '@/components/cells/RecentVisited'
 import UpdateModal from '@/components/cells/UpdateModal'
 import { useLang } from '@/context/LangContext'
+import { useConfigs } from '@/context/ConfigsContext'
 
 import useLocalStorage from '@/hooks/useLocalStorage'
 import useSupabase from '@/hooks/useSupabase'
@@ -14,11 +15,14 @@ import useSupabase from '@/hooks/useSupabase'
 import { numberWithCommas } from '@/public/utils/numberFormatter'
 import { useColorMode, useDisclosure } from '@chakra-ui/react'
 import { colors } from '@/public/theme'
+import { isBefore } from "date-fns"
 
 export default function Home() {
   const { context } = useLang()
+  const { configs } = useConfigs()
   const [ name, setName ] = useLocalStorage('meetor_name', '')
-  const [ isUpdateRead ] = useLocalStorage('meetor_update_timezone_read')
+  const [ isUpdateReadEn ] = useLocalStorage('meetor_update_timezone_read_en')
+  const [ isUpdateReadZh ] = useLocalStorage('meetor_update_timezone_read_zh')
 
   const [ showCounter, setShowCounter ] = useState(false)
   const { data, isLoading, GET_COUNT } = useSupabase()
@@ -42,7 +46,12 @@ export default function Home() {
   }, [ isLoading, data ])
 
   useEffect(() => {
-    if (!isUpdateRead) onOpen()
+    const isOutdated = isBefore(new Date(), new Date('2025/01/30'))
+    if (configs.lang === 'en') {
+      if (!(isUpdateReadEn) && isOutdated) onOpen()
+    } else {
+      if (!(isUpdateReadZh) && isOutdated) onOpen()
+    }
   }, [])
 
   return (
