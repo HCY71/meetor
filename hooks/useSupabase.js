@@ -15,19 +15,24 @@ const useSupabase = () => {
         setIsLoading(false)
         if (error) throw error
     }, [])
-    const GET_COUNT = useCallback(async (from, select) => {
+    const GET_EVENT_TOTAL = useCallback(async (abortSignal) => {
         setIsLoading(true)
-        // An Exact Count Scans The Whole Table And Times Out With A 503 Now
-        // That The Table Is Large, So Use The Planner's Estimated Count. The
-        // Try/Catch Keeps A Failed Count From Leaving isLoading Stuck On True.
         try {
-            const { count, error } = await supabase.from(from).select(select, { count: 'estimated', head: true })
+            const { data, error } = await supabase
+                .from('site_statistics')
+                .select('events_created')
+                .eq('id', 'global')
+                .abortSignal(abortSignal)
+                .single()
+
             if (error) throw error
-            setData(count)
-        } catch (countError) {
-            setError(countError)
+            setData(data.events_created)
+            setError(null)
+        } catch (eventTotalError) {
+            if (abortSignal.aborted) return
+            setError(eventTotalError)
         } finally {
-            setIsLoading(false)
+            if (!abortSignal.aborted) setIsLoading(false)
         }
     }, [])
     const GET_BY_ID = useCallback(async (from, id) => {
@@ -104,7 +109,7 @@ const useSupabase = () => {
     }, [])
 
 
-    return { GET, GET_COUNT, GET_BY_ID, POST, POST_USER_TIME, SUBSCRIBE, isLoading, setIsLoading, data, error }
+    return { GET, GET_EVENT_TOTAL, GET_BY_ID, POST, POST_USER_TIME, SUBSCRIBE, isLoading, setIsLoading, data, error }
 }
 
 export default useSupabase
