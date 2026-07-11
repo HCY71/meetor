@@ -17,11 +17,18 @@ const useSupabase = () => {
     }, [])
     const GET_COUNT = useCallback(async (from, select) => {
         setIsLoading(true)
-        const { count, error } = await supabase.from(from).select(select, { count: 'exact', head: true })
-        setData(count)
-        setError(error)
-        setIsLoading(false)
-        if (error) throw error
+        // An Exact Count Scans The Whole Table And Times Out With A 503 Now
+        // That The Table Is Large, So Use The Planner's Estimated Count. The
+        // Try/Catch Keeps A Failed Count From Leaving isLoading Stuck On True.
+        try {
+            const { count, error } = await supabase.from(from).select(select, { count: 'estimated', head: true })
+            if (error) throw error
+            setData(count)
+        } catch (countError) {
+            setError(countError)
+        } finally {
+            setIsLoading(false)
+        }
     }, [])
     const GET_BY_ID = useCallback(async (from, id) => {
         setIsLoading(true)

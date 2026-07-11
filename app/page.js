@@ -25,7 +25,7 @@ export default function Home() {
   const [ isUpdateReadZh ] = useLocalStorage('meetor_update_timezone_read_zh')
 
   const [ showCounter, setShowCounter ] = useState(false)
-  const { data, isLoading, GET_COUNT } = useSupabase()
+  const { data, isLoading, error, GET_COUNT } = useSupabase()
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   const { colorMode } = useColorMode()
@@ -42,7 +42,7 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    if (!isLoading && data) setShowCounter(true)
+    if (!isLoading && typeof data === 'number') setShowCounter(true)
   }, [ isLoading, data ])
 
   useEffect(() => {
@@ -73,7 +73,9 @@ export default function Home() {
           <Subtitle>
             { numberWithCommas(data + 1120) } { context.home.subheader }
           </Subtitle> :
-          <Skeleton w={ { base: '60%', md: '30%' } } h={ { base: '24px', md: '32px' } } />
+          // Hide The Counter Row Entirely If The Count Failed, A Skeleton
+          // Should Only Show While The Request Is Still In Flight.
+          !error && <Skeleton w={ { base: '60%', md: '30%' } } h={ { base: '24px', md: '32px' } } />
         }
       </VStack >
 
