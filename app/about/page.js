@@ -1,12 +1,13 @@
 'use client'
 import { Box, Image, Divider, Link } from "@chakra-ui/react"
 import { useLang } from "@/context/LangContext"
+import { author } from "@/content"
 import { useColorMode } from "@chakra-ui/react"
 import { colors } from "@/public/theme"
 
 import { GAclickEvent } from '@/public/utils/GA'
 
-const page = () => {
+const AboutPage = () => {
     const { context } = useLang()
     const { colorMode } = useColorMode()
     return (
@@ -34,17 +35,16 @@ const page = () => {
                 </Box>
                 <Box>
                     <Box display='flex' flexDir={ { base: 'column', md: 'row' } } gap='2' alignItems={ { base: 'start', md: 'end' } }>
-                        <H2 lineHeight={ { base: .5, md: '1.15' } }>Erkin Hsu</H2>
-                        <BodyText textAlign='left'>Developer</BodyText>
+                        <H2 lineHeight={ { base: .5, md: '1.15' } }>{ author.name }</H2>
+                        <BodyText textAlign='left'>{ author.role }</BodyText>
                     </Box>
-                    <Link href="mailto:contact@erkin-portfolio.com" fontWeight='bold' rel="noopener noreferrer" target="_blank" mt='2' display='block'>contact@erkin-portfolio.com</Link>
+                    <Link href={ `mailto:${author.email}` } fontWeight='bold' rel="noopener noreferrer" target="_blank" mt='2' display='block'>{ author.email }</Link>
                     <Box display='flex' gap='3' mt='5' alignSelf='end'>
-                        <Link href="https://github.com/HCY71" rel="noopener noreferrer" target="_blank" _hover={ { textDecor: 'none', transform: 'scale(1.03)' } } transition='.2s' onClick={ () => GAclickEvent('about_page', 'github') }>
-                            <Box fontWeight='bold' border='solid 1px' borderColor={ colors[ colorMode ].bg.invert } fontSize='14px' p='6px 12px' borderRadius='5px' className="link-button">Github <Box as={ 'span' } transition='.2s' display='inline-block'>➚</Box></Box>
-                        </Link>
-                        <Link href="https://erkin-portfolio.com" rel="noopener noreferrer" target="_blank" _hover={ { textDecor: 'none', transform: 'scale(1.03)' } } transition='.2s' onClick={ () => GAclickEvent('about_page', 'website') }>
-                            <Box fontWeight='bold' border='solid 1px' borderColor={ colors[ colorMode ].bg.invert } fontSize='14px' p='6px 12px' borderRadius='5px' className="link-button">Website <Box as={ 'span' } transition='.2s' display='inline-block'>➚</Box></Box>
-                        </Link>
+                        { author.links.map((link) => (
+                            <Link key={ link.label } href={ link.url } rel="noopener noreferrer" target="_blank" _hover={ { textDecor: 'none', transform: 'scale(1.03)' } } transition='.2s' onClick={ () => GAclickEvent('about_page', link.label.toLowerCase()) }>
+                                <Box fontWeight='bold' border='solid 1px' borderColor={ colors[ colorMode ].bg.invert } fontSize='14px' p='6px 12px' borderRadius='5px' className="link-button">{ link.label } <Box as={ 'span' } transition='.2s' display='inline-block'>➚</Box></Box>
+                            </Link>
+                        )) }
                     </Box>
                 </Box>
             </Box>
@@ -78,4 +78,4 @@ const ListItem = ({ num, children }) => {
     )
 }
 
-export default page
+export default AboutPage
