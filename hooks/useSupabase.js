@@ -45,13 +45,16 @@ const useSupabase = () => {
   }, []);
   const POST = useCallback(async (from, upsert) => {
     setIsLoading(true);
-    const { data, error } = await supabase.from(from).upsert(upsert).select();
-    setData(data);
-    setError(error);
+    const { data: createdEvent, error: createEventError } = await supabase
+      .from(from)
+      .upsert(upsert)
+      .select("id")
+      .single();
+    setError(createEventError);
     setIsLoading(false);
-    if (error) throw error;
-    if (!error && data) router.push(`/events/${data[0].id}`);
-  }, []);
+    if (createEventError) throw createEventError;
+    if (createdEvent) router.push(`/events/${createdEvent.id}`);
+  }, [router]);
   const POST_USER_TIME = useCallback(async (eventId, update) => {
     setIsLoading(true);
     const { data: dataFound, error: errorFound } = await supabase
@@ -65,7 +68,7 @@ const useSupabase = () => {
         dataFound.users &&
         dataFound.users.some((u) => u?.user === update.user)
       ) {
-        const { data, error } = await supabase
+        const { error: updateEventError } = await supabase
           .from("events")
           .update({
             users: dataFound.users.map((u) => {
@@ -73,24 +76,20 @@ const useSupabase = () => {
               else return u;
             }),
           })
-          .eq("id", eventId)
-          .select();
-        // setData(data)
-        setError(error);
+          .eq("id", eventId);
+        setError(updateEventError);
         setIsLoading(false);
-        if (error) throw error;
+        if (updateEventError) throw updateEventError;
       } else {
-        const { data, error } = await supabase
+        const { error: updateEventError } = await supabase
           .from("events")
           .update({
             users: dataFound.users ? [...dataFound.users, update] : [update],
           })
-          .eq("id", eventId)
-          .select();
-        // setData(data)
-        setError(error);
+          .eq("id", eventId);
+        setError(updateEventError);
         setIsLoading(false);
-        if (error) throw error;
+        if (updateEventError) throw updateEventError;
       }
     }
   }, []);
