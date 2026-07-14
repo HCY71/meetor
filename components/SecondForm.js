@@ -111,8 +111,8 @@ const Second = ({ inputRef }) => {
             <CustomTabs
                 tab={ [ context.global.panel.yourTime, context.global.panel.groupTime ] }
                 panel={ [
-                    <TimeTable />,
-                    <TimeTable readOnly />
+                    <TimeTable key='personal-time' />,
+                    <TimeTable key='group-time' readOnly isRealtimeEnabled={ tabIndex === 1 } />
                 ] }
                 tips={ [ context.global.tips.dragSelect, isTouch ? context.global.tips.tapToShow : context.global.tips.hoverToShow, context.global.tips.forMore ] }
                 inputRef={ inputRef }
