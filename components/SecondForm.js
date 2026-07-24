@@ -90,7 +90,7 @@ const First = ({ inputRef, openModal }) => {
 
 const Second = ({ inputRef }) => {
     const [ name ] = useLocalStorage('meetor_name')
-    const [ tabIndex, setTabIndex ] = useState(1)
+    const [ tabIndex, setTabIndex ] = useState(() => name ? 0 : 1)
     const { context } = useLang()
     const timezoneConfigs = useTimezone()
     const event = useEvent()

@@ -31,6 +31,8 @@ const CustomTabs = ({ onMouseDown = [ null, null ], tab, panel, isDisabled = fal
             variant={ colorMode === 'light' ? 'black' : 'white' }
             w='100%'
             isFitted
+            isLazy
+            lazyBehavior='keepMounted'
             { ...props }
         >
             <TabList as={ HStack } spacing={ { base: 1, md: 2 } }>

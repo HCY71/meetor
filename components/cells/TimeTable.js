@@ -1,5 +1,14 @@
-import { useEffect, useState, forwardRef, useRef } from "react";
 import {
+  forwardRef,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  Box,
   Center,
   Text,
   Grid,
@@ -7,12 +16,11 @@ import {
   VStack,
   HStack,
   Popover,
-  PopoverTrigger,
+  PopoverAnchor,
   PopoverContent,
   PopoverHeader,
   PopoverBody,
   PopoverArrow,
-  useDisclosure,
   useColorMode,
 } from "@chakra-ui/react";
 import {
@@ -30,7 +38,6 @@ import {
   getUTCOffsetDifference,
   getLocalRange,
   getTimesFromRange,
-  isDateSelectable,
   convertDaysToIndex,
 } from "@/public/utils/timeFormat";
 import CustomTag from "../atoms/CustomTag";
@@ -45,393 +52,959 @@ import { useConfigs } from "@/context/ConfigsContext";
 import { useLang } from "@/context/LangContext";
 import { useEvent } from "@/context/EventContext";
 import { useTimezone } from "@/context/TimezoneContext";
-import { useTouchDevices } from "@/hooks/useTouchDevices";
 import { downloadObjectAsJson } from "@/lib/download";
 
 import { format, addMinutes } from "date-fns";
 import { tz } from "@date-fns/tz";
 
-import { motion } from "framer-motion";
+const buildLocalTimes = (event, timezone, weekStartsOn) => {
+  const timezoneDifference = getUTCOffsetDifference(event.timezone, timezone);
+  const localTimezoneOffset = getUTCOffsetDifference("UTC", timezone);
+  const { localRange, dayChangeIndex, isRangeRearranged } = getLocalRange(
+    event.range,
+    timezoneDifference,
+  );
 
-const TimeTable = ({ readOnly, isRealtimeEnabled }) => {
-  const event = useEvent();
-  const { eventId } = useParams();
+  let dates = event.dates;
+  let days = event.days;
+  let times = [];
+  let dataWithTime = [];
 
-  const { POST_USER_TIME, subscribeToEventUsers, isLoading, setIsLoading } =
-    useSupabase();
+  if (
+    event.timezone !== timezone &&
+    dayChangeIndex !== 0 &&
+    !event.allDay
+  ) {
+    const adjustedRangeTimes = getTimesFromRange(localRange);
 
-  const [user] = useLocalStorage("meetor_name");
+    if (isRangeRearranged) {
+      times = getTimesFromRange([0, 24]);
+      adjustedRangeTimes.shift();
+      adjustedRangeTimes.pop();
+      adjustedRangeTimes.pop();
+      times = times.filter((time) => !adjustedRangeTimes.includes(time));
+    } else {
+      times = adjustedRangeTimes;
+    }
 
-  const [users, setUsers] = useState(event.users);
+    if (event.type === "dates") {
+      dates = adjustDatesToLocal(
+        event.dates,
+        dayChangeIndex,
+        isRangeRearranged,
+      );
+      dataWithTime = times.flatMap((time, rowIndex) =>
+        dates.map((date, columnIndex) => ({
+          rowIndex,
+          columnIndex,
+          data: combineDateAndTime(
+            date,
+            time,
+            timezone,
+            event.allDay,
+            localTimezoneOffset,
+          ),
+        })),
+      );
+    } else {
+      const hasLegacyDays = isNaN(parseInt(event.days[0]));
+      const normalizedDays = hasLegacyDays
+        ? event.days.map((day) => convertDaysToIndex(day))
+        : event.days;
 
-  const { timezone, updateTimezone } = useTimezone();
+      days = reorderSunDay(
+        adjustDaysToLocal(
+          normalizedDays,
+          dayChangeIndex,
+          isRangeRearranged,
+        ),
+        weekStartsOn,
+      );
+      dataWithTime = times.flatMap((time, rowIndex) =>
+        days.map((day, columnIndex) => ({
+          rowIndex,
+          columnIndex,
+          data: combineDaysAndTime(
+            day,
+            time,
+            timezone,
+            event.allDay,
+            localTimezoneOffset,
+          ),
+        })),
+      );
+    }
+  } else {
+    times = getTimesFromRange(localRange, event.allDay);
 
-  const [localTimes, setLocalTimes] = useState({
-    dates: event.dates,
-    days: event.days,
-    range: event.range,
-    times: [],
-    dataWithTime: [],
+    if (event.type === "dates") {
+      dataWithTime = times.flatMap((time, rowIndex) =>
+        event.dates.map((date, columnIndex) => ({
+          rowIndex,
+          columnIndex,
+          data: combineDateAndTime(
+            date,
+            time,
+            timezone,
+            event.allDay,
+            localTimezoneOffset,
+          ),
+        })),
+      );
+    } else {
+      const hasLegacyDays = isNaN(parseInt(event.days[0]));
+      days = hasLegacyDays
+        ? event.days
+            .map((day) => convertDaysToIndex(day))
+            .sort((firstDay, secondDay) => firstDay - secondDay)
+        : event.days;
+      days = reorderSunDay(days, weekStartsOn);
+      dataWithTime = times.flatMap((time, rowIndex) =>
+        days.map((day, columnIndex) => ({
+          rowIndex,
+          columnIndex,
+          data: combineDaysAndTime(
+            day,
+            time,
+            timezone,
+            event.allDay,
+            localTimezoneOffset,
+          ),
+        })),
+      );
+    }
+  }
+
+  return {
+    dates,
+    days,
+    range: localRange,
+    times,
+    dataWithTime: event.allDay
+      ? dataWithTime
+      : dataWithTime.filter((cell) => cell.rowIndex < times.length - 1),
+  };
+};
+
+const buildSelectableTimeSet = (event, weekStartsOn) => {
+  if (event.allDay && event.type === "dates") {
+    return new Set(event.dates.map((date) => new Date(date).toISOString()));
+  }
+
+  if (event.allDay) {
+    return new Set(
+      event.days.map((day) => {
+        return isNaN(parseInt(day)) ? convertDaysToIndex(day) : day;
+      }),
+    );
+  }
+
+  const eventTimezoneOffset = getUTCOffsetDifference("UTC", event.timezone);
+  const eventTimes = getTimesFromRange(event.range);
+  const eventDays = reorderSunDay(event.days, weekStartsOn);
+  const selectableTimes = eventTimes.flatMap((time) => {
+    if (event.type === "dates") {
+      return event.dates.map((date) =>
+        combineDateAndTime(
+          date,
+          time,
+          event.timezone,
+          false,
+          eventTimezoneOffset,
+        ),
+      );
+    }
+
+    return eventDays.map((day) =>
+      combineDaysAndTime(
+        day,
+        time,
+        event.timezone,
+        false,
+        eventTimezoneOffset,
+      ),
+    );
   });
 
-  const [selectedTime, setSelectedTime] = useState([]);
-  const [groupTime, setGroupTime] = useState({});
+  return new Set(selectableTimes);
+};
+
+const parseLegacyDateData = (date, event, timezone) => {
+  try {
+    if (event.allDay && !date.includes("Z")) {
+      const offsetMatch = date.match(/(.*?)([+-]\d{1,2}(\.\d+)?$)/);
+      if (offsetMatch) return undefined;
+
+      const timezoneDifference = getUTCOffsetDifference("UTC", timezone);
+      return new Date(
+        addMinutes(new Date(date), timezoneDifference * 60),
+      ).toISOString();
+    }
+
+    return new Date(date).toISOString();
+  } catch {
+    const [dateTime, offset] = date.split(/([+-]\d{1,2}(\.\d+)?$)/);
+    return new Date(
+      addMinutes(new Date(dateTime), Math.abs(parseFloat(offset)) * 60, {
+        in: tz(timezone),
+      }),
+    ).toISOString();
+  }
+};
+
+const parseLegacyDayData = (dayAndTime, event) => {
+  const hasLegacyDay = isNaN(parseInt(dayAndTime));
+
+  if (hasLegacyDay && event.allDay) {
+    return convertDaysToIndex(dayAndTime);
+  }
+
+  if (!hasLegacyDay) return dayAndTime;
+
+  const [day, time] = dayAndTime.split("-");
+  const timezoneDifference = getUTCOffsetDifference("UTC", event.timezone);
+
+  if (time - timezoneDifference < 0) {
+    if (convertDaysToIndex(day) === 0) {
+      return `6-${time - timezoneDifference + 24}`;
+    }
+    return `${convertDaysToIndex(day) - 1}-${time - timezoneDifference + 24}`;
+  }
+
+  if (time - timezoneDifference >= 24) {
+    if (convertDaysToIndex(day) === 6) {
+      return `0-${time - timezoneDifference - 24}`;
+    }
+    return `${convertDaysToIndex(day) + 1}-${time - timezoneDifference - 24}`;
+  }
+
+  return `${convertDaysToIndex(day)}-${time - timezoneDifference}`;
+};
+
+const buildSelectionPreview = (dragSelection, cellMatrix) => {
+  if (!dragSelection) return null;
+
+  const nextSelection = new Set(dragSelection.baseSelection);
+  const minimumRow = Math.min(
+    dragSelection.start.rowIndex,
+    dragSelection.end.rowIndex,
+  );
+  const maximumRow = Math.max(
+    dragSelection.start.rowIndex,
+    dragSelection.end.rowIndex,
+  );
+  const minimumColumn = Math.min(
+    dragSelection.start.columnIndex,
+    dragSelection.end.columnIndex,
+  );
+  const maximumColumn = Math.max(
+    dragSelection.start.columnIndex,
+    dragSelection.end.columnIndex,
+  );
+
+  for (let rowIndex = minimumRow; rowIndex <= maximumRow; rowIndex += 1) {
+    for (
+      let columnIndex = minimumColumn;
+      columnIndex <= maximumColumn;
+      columnIndex += 1
+    ) {
+      const cell = cellMatrix[rowIndex]?.[columnIndex];
+      if (!cell) continue;
+
+      if (dragSelection.mode === "add" && cell.isSelectable) {
+        nextSelection.add(cell.id);
+      } else if (dragSelection.mode === "remove") {
+        nextSelection.delete(cell.id);
+      }
+    }
+  }
+
+  return nextSelection;
+};
+
+const areSetsEqual = (firstSet, secondSet) => {
+  if (firstSet.size !== secondSet.size) return false;
+
+  for (const entry of firstSet) {
+    if (!secondSet.has(entry)) return false;
+  }
+
+  return true;
+};
+
+const getCellElement = (target, gridElement) => {
+  if (!(target instanceof Element)) return null;
+
+  const cellElement = target.closest("[data-time-cell]");
+  if (!cellElement || !gridElement.contains(cellElement)) return null;
+  return cellElement;
+};
+
+const getCellElementFromPoint = (pointerEvent, gridElement) => {
+  const target = document.elementFromPoint(
+    pointerEvent.clientX,
+    pointerEvent.clientY,
+  );
+  return getCellElement(target, gridElement);
+};
+
+const getCellCoordinates = (cellElement) => ({
+  id: cellElement.dataset.timeCell,
+  rowIndex: Number(cellElement.dataset.timeRow),
+  columnIndex: Number(cellElement.dataset.timeColumn),
+  isSelectable: cellElement.dataset.isSelectable === "true",
+});
+
+// position of a cell relative to the grid, used to anchor the group popover
+// without turning the cell itself into a popover trigger (which remounts it)
+const getCellOffsetWithinGrid = (cellElement, gridElement) => {
+  const gridRect = gridElement.getBoundingClientRect();
+  const cellRect = cellElement.getBoundingClientRect();
+  return {
+    left: cellRect.left - gridRect.left,
+    top: cellRect.top - gridRect.top,
+    width: cellRect.width,
+    height: cellRect.height,
+  };
+};
+
+const generateAvailabilityColor = (percent, isDarkMode) => {
+  if (isNaN(percent)) return "transparent";
+  if (isDarkMode) {
+    return `hsla(47, 81%, ${61 * percent}%, ${percent * 0.8 + 20})`;
+  }
+  return `hsla(51, 89%, ${100 - 33 * percent}%, ${percent * 0.8 + 20})`;
+};
+
+const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
+  const event = useEvent();
+  const { eventId } = useParams();
+  const { POST_USER_TIME, subscribeToEventUsers } = useSupabase();
+  const [user] = useLocalStorage("meetor_name");
+  const [users, setUsers] = useState(event.users);
+  const { timezone, updateTimezone } = useTimezone();
   const { configs } = useConfigs();
   const { context } = useLang();
   const { colorMode } = useColorMode();
 
-  const selectingMode = useRef("init");
-  const selection = useRef({ start: null, end: null });
+  const [selectedTime, setSelectedTime] = useState(() => new Set());
+  const selectedTimeRef = useRef(selectedTime);
+  const timezoneRef = useRef(timezone);
+  const updateTimezoneRef = useRef(updateTimezone);
+  const [dragSelection, setDragSelection] = useState(null);
+  const dragSelectionRef = useRef(null);
+  const activePointerIdRef = useRef(null);
+  const capturedGridRef = useRef(null);
+  const dragAnimationFrameRef = useRef(null);
+  const [activeGroupCellId, setActiveGroupCellId] = useState(null);
+  const [groupAnchorRect, setGroupAnchorRect] = useState(null);
+  const [focusedCellId, setFocusedCellId] = useState(null);
 
-  // initialize
+  timezoneRef.current = timezone;
+  updateTimezoneRef.current = updateTimezone;
 
-  useEffect(() => {
-    setIsLoading(false);
-  }, []);
+  const localTimes = useMemo(
+    () => buildLocalTimes(event, timezone, configs.weekStartsOn),
+    [event, timezone, configs.weekStartsOn],
+  );
 
-  // update localTimes when user timezone changes
-  useEffect(() => {
-    const updateLocalTimes = () => {
-      const delta = getUTCOffsetDifference(event.timezone, timezone);
-      const { localRange, dayChangeIndex, isRangeRearranged } = getLocalRange(
-        event.range,
-        delta,
-      );
+  const selectableTimeSet = useMemo(
+    () => buildSelectableTimeSet(event, configs.weekStartsOn),
+    [event, configs.weekStartsOn],
+  );
 
-      if (
-        event.timezone !== timezone &&
-        dayChangeIndex !== 0 &&
-        !event.allDay
-      ) {
-        let times;
-        const localTimes = getTimesFromRange(localRange);
-        if (isRangeRearranged) {
-          times = getTimesFromRange([0, 24]);
-          localTimes.shift();
-          localTimes.pop();
-          localTimes.pop();
-          times = times.filter((t) => !localTimes.includes(t));
+  const gridCells = useMemo(() => {
+    const localTimezoneOffset = getUTCOffsetDifference("UTC", timezone);
+
+    return localTimes.dataWithTime.map((timeCell) => {
+      const cellLabel = event.allDay
+        ? getFullDateAndTime(timeCell.data, event.type, configs.lang)
+        : `${getFullDateAndTime(timeCell.data, event.type, configs.lang)}${
+            context.global.timeTable.at
+          }${displayTime(
+            event.type === "dates"
+              ? format(timeCell.data, "HHmm", { in: tz(timezone) })
+              : UTCTimeToLocalTime(
+                  parseFloat(timeCell.data.split("-")[1]),
+                  timezone,
+                  localTimezoneOffset,
+                ),
+            configs.usePM,
+          )}`;
+
+      return {
+        id: timeCell.data,
+        rowIndex: timeCell.rowIndex,
+        columnIndex: timeCell.columnIndex,
+        isSelectable: selectableTimeSet.has(timeCell.data),
+        label: cellLabel,
+      };
+    });
+  }, [
+    configs.lang,
+    configs.usePM,
+    context.global.timeTable.at,
+    event.allDay,
+    event.type,
+    localTimes.dataWithTime,
+    selectableTimeSet,
+    timezone,
+  ]);
+
+  const cellMatrix = useMemo(() => {
+    const matrix = [];
+    gridCells.forEach((cell) => {
+      if (!matrix[cell.rowIndex]) matrix[cell.rowIndex] = [];
+      matrix[cell.rowIndex][cell.columnIndex] = cell;
+    });
+    return matrix;
+  }, [gridCells]);
+
+  const cellById = useMemo(() => {
+    return new Map(gridCells.map((cell) => [cell.id, cell]));
+  }, [gridCells]);
+
+  const groupTime = useMemo(() => {
+    const availabilityByTime = {};
+    if (!readOnly) return availabilityByTime;
+
+    users?.forEach((eventUser) => {
+      eventUser.time?.forEach((time) => {
+        const normalizedTime =
+          event.type === "dates"
+            ? parseLegacyDateData(time, event, timezone)
+            : parseLegacyDayData(time, event);
+
+        if (normalizedTime === undefined) return;
+        if (availabilityByTime[normalizedTime]) {
+          availabilityByTime[normalizedTime].push(eventUser.user);
         } else {
-          times = localTimes;
+          availabilityByTime[normalizedTime] = [eventUser.user];
         }
+      });
+    });
 
-        let dataWithTime = [];
-        let updatedDates = [];
-        let updatedDays = [];
-        // if these is change in day, adjust the dates or days
-        if (event.type === "dates") {
-          updatedDates = adjustDatesToLocal(
-            event.dates,
-            dayChangeIndex,
-            isRangeRearranged,
-          );
-          dataWithTime = times.map((t, indexRow) =>
-            updatedDates.map((d, indexCol) => {
-              return {
-                indexRow,
-                indexCol,
-                data: combineDateAndTime(d, t, timezone, event.allDay),
-              };
-            }),
-          );
-        } else {
-          // fallback to old data - days
-          const isOldData = isNaN(parseInt(event.days[0]));
-          const targetDays = isOldData
-            ? event.days.map((d) => convertDaysToIndex(d))
-            : event.days;
+    return availabilityByTime;
+  }, [event, readOnly, timezone, users]);
 
-          updatedDays = reorderSunDay(
-            adjustDaysToLocal(targetDays, dayChangeIndex, isRangeRearranged),
-            configs.weekStartsOn,
-          );
-          dataWithTime = times.map((t, indexRow) =>
-            updatedDays.map((d, indexCol) => {
-              return {
-                indexRow,
-                indexCol,
-                data: combineDaysAndTime(d, t, timezone, event.allDay),
-              };
-            }),
-          );
-        }
-        setLocalTimes((prev) => {
-          return {
-            ...prev,
-            dates: updatedDates,
-            days: updatedDays,
-            range: localRange,
-            times,
-            dataWithTime: event.allDay
-              ? dataWithTime.flat()
-              : dataWithTime.slice(0, -1).flat(),
-          };
-        });
-      } else {
-        // reset  if timezone is the same or dayChangeIndex===0
-        const times = getTimesFromRange(localRange, event.allDay);
+  const previewSelection = useMemo(() => {
+    return buildSelectionPreview(dragSelection, cellMatrix) ?? selectedTime;
+  }, [cellMatrix, dragSelection, selectedTime]);
 
-        let dataWithTime = [];
-        let targetDays = [];
+  const activeGroupCell = activeGroupCellId
+    ? cellById.get(activeGroupCellId)
+    : null;
+  const activeGroupAvailability = activeGroupCell
+    ? groupTime[activeGroupCell.id]
+    : null;
 
-        if (event.type === "dates") {
-          dataWithTime = times.map((t, indexRow) =>
-            event.dates.map((d, indexCol) => {
-              return {
-                indexRow,
-                indexCol,
-                data: combineDateAndTime(d, t, timezone, event.allDay),
-              };
-            }),
-          );
-        } else {
-          // fallback to old data - days
-          const isOldData = isNaN(parseInt(event.days[0]));
-          targetDays = isOldData
-            ? event.days.map((d) => convertDaysToIndex(d)).sort((a, b) => a - b)
-            : event.days;
-
-          dataWithTime = times.map((t, indexRow) =>
-            reorderSunDay(targetDays, configs.weekStartsOn).map(
-              (d, indexCol) => {
-                return {
-                  indexRow,
-                  indexCol,
-                  data: combineDaysAndTime(d, t, timezone, event.allDay),
-                };
-              },
-            ),
-          );
-        }
-
-        setLocalTimes((prev) => {
-          return {
-            ...prev,
-            range: localRange,
-            dates: event.dates,
-            days: targetDays,
-            times,
-            dataWithTime: event.allDay
-              ? dataWithTime.flat()
-              : dataWithTime.slice(0, -1).flat(),
-          };
-        });
-      }
-    };
-    updateLocalTimes();
-  }, [timezone, configs.weekStartsOn]);
-
-  // get user selectedTime from event
   useEffect(() => {
-    const userSelectedTime = event.users?.find((u) => u.user === user)?.time;
+    if (readOnly) return;
 
-    if (userSelectedTime) {
-      const convertedDates =
-        event.type === "dates"
-          ? userSelectedTime.map((d) => parseOldDateData(d))
-          : userSelectedTime.map((d) => parseOldDayData(d));
-      setSelectedTime(convertedDates);
-    }
-  }, [user]);
+    const userSelectedTime = event.users?.find(
+      (eventUser) => eventUser.user === user,
+    )?.time;
+    if (!userSelectedTime) return;
 
-  // set default timezone
+    const normalizedSelection = userSelectedTime
+      .map((time) => {
+        return event.type === "dates"
+          ? parseLegacyDateData(time, event, timezoneRef.current)
+          : parseLegacyDayData(time, event);
+      })
+      .filter((time) => time !== undefined);
+    const nextSelection = new Set(normalizedSelection);
+    selectedTimeRef.current = nextSelection;
+    setSelectedTime(nextSelection);
+  }, [event, readOnly, user]);
+
   useEffect(() => {
-    // set saved timezone to default
     if (event.allDay) {
-      updateTimezone(event.timezone);
-    } else if (user && event.users) {
-      const savedTimezone = event.users.find((u) => u.user === user)?.timezone;
-      if (savedTimezone) updateTimezone(savedTimezone);
+      updateTimezoneRef.current(event.timezone);
+      return;
     }
-  }, [user]);
+
+    if (!user || !event.users) return;
+    const savedTimezone = event.users.find(
+      (eventUser) => eventUser.user === user,
+    )?.timezone;
+    if (savedTimezone) updateTimezoneRef.current(savedTimezone);
+  }, [event.allDay, event.timezone, event.users, user]);
 
   useEffect(() => {
-    let unsubscribeFromEventUpdates = () => {};
-
-    if (readOnly && isRealtimeEnabled) {
-      unsubscribeFromEventUpdates = subscribeToEventUsers(eventId, setUsers);
-    }
-
-    return () => {
-      unsubscribeFromEventUpdates();
-    };
+    if (!readOnly || !isRealtimeEnabled) return undefined;
+    return subscribeToEventUsers(eventId, setUsers);
   }, [subscribeToEventUsers, readOnly, isRealtimeEnabled, eventId]);
 
-  // update
+  // close the group tooltip when tapping anywhere outside a time cell (mobile)
   useEffect(() => {
-    if (selectedTime !== null && !selectingMode.current && !isLoading) {
-      const uniqueTime = [...new Set(selectedTime)];
-      POST_USER_TIME(eventId, { user, time: uniqueTime, timezone });
+    if (!readOnly || !activeGroupCellId) return undefined;
+
+    const handleOutsidePointer = (pointerEvent) => {
+      const isOnCell =
+        pointerEvent.target instanceof Element &&
+        pointerEvent.target.closest("[data-time-cell]");
+      if (!isOnCell) setActiveGroupCellId(null);
+    };
+
+    document.addEventListener("pointerdown", handleOutsidePointer);
+    return () =>
+      document.removeEventListener("pointerdown", handleOutsidePointer);
+  }, [readOnly, activeGroupCellId]);
+
+  const persistSelection = useCallback(
+    (nextSelection) => {
+      if (!user) return;
+      void POST_USER_TIME(eventId, {
+        user,
+        time: [...nextSelection],
+        timezone,
+      });
+    },
+    [POST_USER_TIME, eventId, timezone, user],
+  );
+
+  const commitSelection = useCallback(
+    (nextSelection, previousSelection) => {
+      selectedTimeRef.current = nextSelection;
+      setSelectedTime(nextSelection);
+
+      if (!areSetsEqual(nextSelection, previousSelection)) {
+        persistSelection(nextSelection);
+      }
+    },
+    [persistSelection],
+  );
+
+  const cancelScheduledDragRender = useCallback(() => {
+    if (dragAnimationFrameRef.current === null) return;
+    cancelAnimationFrame(dragAnimationFrameRef.current);
+    dragAnimationFrameRef.current = null;
+  }, []);
+
+  const clearDrag = useCallback(() => {
+    cancelScheduledDragRender();
+    dragSelectionRef.current = null;
+    activePointerIdRef.current = null;
+    capturedGridRef.current = null;
+    setDragSelection(null);
+  }, [cancelScheduledDragRender]);
+
+  const cancelDrag = useCallback(() => {
+    const capturedGrid = capturedGridRef.current;
+    const activePointerId = activePointerIdRef.current;
+
+    if (
+      capturedGrid &&
+      activePointerId !== null &&
+      capturedGrid.hasPointerCapture(activePointerId)
+    ) {
+      capturedGrid.releasePointerCapture(activePointerId);
     }
-  }, [selectedTime, POST_USER_TIME, user, eventId, selectingMode.current]);
+
+    clearDrag();
+  }, [clearDrag]);
 
   useEffect(() => {
-    if (readOnly) checkGroupTime();
-  }, [users]);
+    window.addEventListener("blur", cancelDrag);
 
-  // auto select
-  useEffect(() => {
-    const handleAutoSelect = () => {
-      if (selectingMode.current === "add") {
-        if (event.allDay) {
-          const selected = localTimes.dataWithTime
-            .filter(
-              (d) =>
-                checkIsInRange(selection.current.start, selection.current.end, {
-                  row: 0,
-                  col: d.indexCol,
-                }) && !checkIsSelect(selectedTime, d.data),
-            )
-            .map((d) => d.data);
+    return () => {
+      window.removeEventListener("blur", cancelDrag);
+      cancelScheduledDragRender();
 
-          setSelectedTime((prev) => [...prev, ...selected]);
-        } else {
-          const selected = localTimes.dataWithTime
-            .filter(
-              (d) =>
-                checkIsInRange(selection.current.start, selection.current.end, {
-                  row: d.indexRow,
-                  col: d.indexCol,
-                }) &&
-                !checkIsSelect(selectedTime, d.data) &&
-                isDateSelectable(truthTable, d.data),
-            )
-            .map((d) => d.data);
-          setSelectedTime((prev) => [...prev, ...selected]);
-        }
-      } else if (selectingMode.current === "remove") {
-        const toBeRemoved = localTimes.dataWithTime
-          .filter(
-            (d) =>
-              checkIsInRange(selection.current.start, selection.current.end, {
-                row: d.indexRow,
-                col: d.indexCol,
-              }) && checkIsSelect(selectedTime, d.data),
-          )
-          .map((d) => d.data);
-
-        // in filter method, if the return value is true, it will be kept
-        // !checkIsSelect means it is not in the toBeRemoved list -> it should be kept(true)
-        setSelectedTime((prev) =>
-          prev.filter((t) => !checkIsSelect(toBeRemoved, t)),
-        );
+      const capturedGrid = capturedGridRef.current;
+      const activePointerId = activePointerIdRef.current;
+      if (
+        capturedGrid &&
+        activePointerId !== null &&
+        capturedGrid.hasPointerCapture(activePointerId)
+      ) {
+        capturedGrid.releasePointerCapture(activePointerId);
       }
     };
-    handleAutoSelect();
-  }, [selection.current.start, selection.current.end, selectingMode.current]);
+  }, [cancelDrag, cancelScheduledDragRender]);
 
-  const times = getTimesFromRange(event.range, event.allDay);
+  const handlePointerDown = useCallback(
+    (pointerEvent) => {
+      if (readOnly || pointerEvent.button !== 0) return;
+      if (activePointerIdRef.current !== null) return;
 
-  const truthTable = times
-    .map((t) => {
-      if (event.allDay)
-        return event.type === "dates" ? event.dates : event.days;
-      if (event.type === "dates")
-        return event.dates.map((d) => combineDateAndTime(d, t, event.timezone));
-      else
-        return reorderSunDay(event.days, configs.weekStartsOn).map((d) =>
-          combineDaysAndTime(d, t, event.timezone),
-        );
-    })
-    .flat();
+      const gridElement = pointerEvent.currentTarget;
+      const cellElement = getCellElement(pointerEvent.target, gridElement);
+      if (!cellElement) return;
 
-  const checkIsSelect = (from, dataWithTime) => {
-    return from.some((t) => t === dataWithTime);
-  };
+      const cell = getCellCoordinates(cellElement);
+      if (!cell.isSelectable) return;
 
-  const checkIsInRange = (from, to, key) => {
-    if (from === null || to === null) return false;
-    const rowRange = [from.row, to.row].sort((a, b) => a - b);
-    const colRange = [from.col, to.col].sort((a, b) => a - b);
+      pointerEvent.preventDefault();
+      cellElement.focus({ preventScroll: true });
+      gridElement.setPointerCapture(pointerEvent.pointerId);
+      activePointerIdRef.current = pointerEvent.pointerId;
+      capturedGridRef.current = gridElement;
+
+      const baseSelection = new Set(selectedTimeRef.current);
+      const nextDragSelection = {
+        mode: baseSelection.has(cell.id) ? "remove" : "add",
+        baseSelection,
+        start: cell,
+        end: cell,
+      };
+      dragSelectionRef.current = nextDragSelection;
+      setDragSelection(nextDragSelection);
+      setFocusedCellId(cell.id);
+    },
+    [readOnly],
+  );
+
+  const handlePointerMove = useCallback((pointerEvent) => {
+    if (pointerEvent.pointerId !== activePointerIdRef.current) return;
+    const currentDragSelection = dragSelectionRef.current;
+    if (!currentDragSelection) return;
+
+    const cellElement = getCellElementFromPoint(
+      pointerEvent,
+      pointerEvent.currentTarget,
+    );
+    if (!cellElement) return;
+
+    const nextEndCell = getCellCoordinates(cellElement);
+    if (!nextEndCell.isSelectable) return;
     if (
-      key.row >= rowRange[0] &&
-      key.row <= rowRange[1] &&
-      key.col >= colRange[0] &&
-      key.col <= colRange[1]
-    )
-      return true;
-    else return false;
-  };
+      currentDragSelection.end.rowIndex === nextEndCell.rowIndex &&
+      currentDragSelection.end.columnIndex === nextEndCell.columnIndex
+    ) {
+      return;
+    }
 
-  const checkGroupTime = () => {
-    const group = {};
+    const nextDragSelection = {
+      ...currentDragSelection,
+      end: nextEndCell,
+    };
+    dragSelectionRef.current = nextDragSelection;
 
-    if (users)
-      users.forEach((u) => {
-        u.time.forEach((t) => {
-          // t = event.type === 'dates' ? parseOldDateData(t) : t
-          t = event.type === "dates" ? parseOldDateData(t) : parseOldDayData(t);
+    if (dragAnimationFrameRef.current !== null) return;
+    dragAnimationFrameRef.current = requestAnimationFrame(() => {
+      dragAnimationFrameRef.current = null;
+      setDragSelection(dragSelectionRef.current);
+    });
+  }, []);
 
-          if (group[t]) group[t].push(u.user);
-          else group[t] = [u.user];
-        });
+  const handlePointerUp = useCallback(
+    (pointerEvent) => {
+      if (pointerEvent.pointerId !== activePointerIdRef.current) return;
+      const completedDragSelection = dragSelectionRef.current;
+      if (!completedDragSelection) return;
+
+      const finalSelection = buildSelectionPreview(
+        completedDragSelection,
+        cellMatrix,
+      );
+      commitSelection(finalSelection, completedDragSelection.baseSelection);
+
+      if (
+        pointerEvent.currentTarget.hasPointerCapture(pointerEvent.pointerId)
+      ) {
+        pointerEvent.currentTarget.releasePointerCapture(pointerEvent.pointerId);
+      }
+      clearDrag();
+    },
+    [cellMatrix, clearDrag, commitSelection],
+  );
+
+  const handlePointerCancel = useCallback(
+    (pointerEvent) => {
+      if (pointerEvent.pointerId !== activePointerIdRef.current) return;
+      cancelDrag();
+    },
+    [cancelDrag],
+  );
+
+  const handleLostPointerCapture = useCallback(() => {
+    if (activePointerIdRef.current === null) return;
+    clearDrag();
+  }, [clearDrag]);
+
+  const moveKeyboardFocus = useCallback(
+    (keyboardEvent, currentCell, rowChange, columnChange) => {
+      let nextRowIndex = currentCell.rowIndex + rowChange;
+      let nextColumnIndex = currentCell.columnIndex + columnChange;
+
+      while (cellMatrix[nextRowIndex]?.[nextColumnIndex]) {
+        const nextCell = cellMatrix[nextRowIndex][nextColumnIndex];
+        if (readOnly || nextCell.isSelectable) {
+          const nextCellElement = keyboardEvent.currentTarget.querySelector(
+            `[data-time-row="${nextRowIndex}"][data-time-column="${nextColumnIndex}"]`,
+          );
+          nextCellElement?.focus();
+          return;
+        }
+
+        nextRowIndex += rowChange;
+        nextColumnIndex += columnChange;
+      }
+    },
+    [cellMatrix, readOnly],
+  );
+
+  const handleGridKeyDown = useCallback(
+    (keyboardEvent) => {
+      const cellElement = getCellElement(
+        keyboardEvent.target,
+        keyboardEvent.currentTarget,
+      );
+      if (!cellElement) return;
+
+      const currentCell = getCellCoordinates(cellElement);
+      const directionByKey = {
+        ArrowUp: [-1, 0],
+        ArrowDown: [1, 0],
+        ArrowLeft: [0, -1],
+        ArrowRight: [0, 1],
+      };
+      const direction = directionByKey[keyboardEvent.key];
+
+      if (direction) {
+        keyboardEvent.preventDefault();
+        moveKeyboardFocus(
+          keyboardEvent,
+          currentCell,
+          direction[0],
+          direction[1],
+        );
+        return;
+      }
+
+      if (keyboardEvent.key !== "Enter" && keyboardEvent.key !== " ") return;
+      keyboardEvent.preventDefault();
+
+      if (readOnly) {
+        setActiveGroupCellId(currentCell.id);
+        return;
+      }
+
+      if (!currentCell.isSelectable) return;
+      const previousSelection = selectedTimeRef.current;
+      const nextSelection = new Set(previousSelection);
+      if (nextSelection.has(currentCell.id)) {
+        nextSelection.delete(currentCell.id);
+      } else {
+        nextSelection.add(currentCell.id);
+      }
+      commitSelection(nextSelection, previousSelection);
+    },
+    [commitSelection, moveKeyboardFocus, readOnly],
+  );
+
+  const handleGridFocus = useCallback((focusEvent) => {
+    const cellElement = getCellElement(
+      focusEvent.target,
+      focusEvent.currentTarget,
+    );
+    if (!cellElement) return;
+    setFocusedCellId(cellElement.dataset.timeCell);
+  }, []);
+
+  const handleGroupPointerOver = useCallback(
+    (pointerEvent) => {
+      if (!readOnly || pointerEvent.pointerType === "touch") return;
+      const cellElement = getCellElement(
+        pointerEvent.target,
+        pointerEvent.currentTarget,
+      );
+      if (!cellElement) return;
+      setGroupAnchorRect(
+        getCellOffsetWithinGrid(cellElement, pointerEvent.currentTarget),
+      );
+      setActiveGroupCellId(cellElement.dataset.timeCell);
+    },
+    [readOnly],
+  );
+
+  const handleGroupPointerUp = useCallback(
+    (pointerEvent) => {
+      if (!readOnly || pointerEvent.pointerType !== "touch") return;
+      const cellElement = getCellElement(
+        pointerEvent.target,
+        pointerEvent.currentTarget,
+      );
+      if (!cellElement) return;
+
+      const nextCellId = cellElement.dataset.timeCell;
+      setGroupAnchorRect(
+        getCellOffsetWithinGrid(cellElement, pointerEvent.currentTarget),
+      );
+      setActiveGroupCellId((currentCellId) => {
+        return currentCellId === nextCellId ? null : nextCellId;
       });
+    },
+    [readOnly],
+  );
 
-    setGroupTime(group);
-  };
+  const handleGroupPointerLeave = useCallback(
+    (pointerEvent) => {
+      if (!readOnly || pointerEvent.pointerType === "touch") return;
+      setActiveGroupCellId(null);
+    },
+    [readOnly],
+  );
 
-  const generateColors = (percent, isDark) => {
-    if (isNaN(percent)) return "transparent";
-    if (isDark) return `hsla(47, 81%, ${61 * percent}%, ${percent * 0.8 + 20})`;
-    else return `hsla(51, 89%, ${100 - 33 * percent}%, ${percent * 0.8 + 20})`;
-  };
+  const columnHeaders =
+    event.type === "dates"
+      ? localTimes.dates.map((date) => (
+          <GridItem
+            key={date}
+            role="columnheader"
+            w="100%"
+            minW={{ base: "100px" }}
+            mb={event.allDay ? "8px" : { base: 4, md: 2 }}
+          >
+            <Center>{getMonthAndDate(date, configs.lang)}</Center>
+            <Center>{displayDay(date, configs.lang)}</Center>
+          </GridItem>
+        ))
+      : localTimes.days.map((day) => (
+          <GridItem
+            key={day}
+            role="columnheader"
+            mb={event.allDay ? "8px" : { base: 4, md: 2 }}
+          >
+            <Center>{translateDay(day, configs.lang)}</Center>
+          </GridItem>
+        ));
 
-  // fallback to old data - dates
-  const parseOldDateData = (d) => {
-    try {
-      // fallback to old data - dates - all day
-      if (event.allDay && !d.includes("Z")) {
-        const match = d.match(/(.*?)([+-]\d{1,2}(\.\d+)?$)/);
-        if (match) return;
+  const firstFocusableCell = gridCells.find((cell) => {
+    return readOnly || cell.isSelectable;
+  })?.id;
+  const columnCount =
+    event.type === "dates" ? localTimes.dates.length : localTimes.days.length;
+  const rowCount = event.allDay
+    ? 1
+    : Math.max(0, ...gridCells.map((cell) => cell.rowIndex + 1));
 
-        const delta = getUTCOffsetDifference("UTC", timezone);
-        return new Date(addMinutes(new Date(d), delta * 60)).toISOString();
-      }
-      return new Date(d).toISOString();
-    } catch {
-      const [dateTime, offset] = d.split(/([+-]\d{1,2}(\.\d+)?$)/);
-      return new Date(
-        addMinutes(new Date(dateTime), Math.abs(parseFloat(offset)) * 60, {
-          in: tz(timezone),
-        }),
-      ).toISOString();
-    }
-  };
+  const grid = (
+    <Grid
+      role="grid"
+      aria-rowcount={rowCount + 1}
+      aria-colcount={columnCount}
+      className="time-grid"
+      gridTemplateRows={`auto repeat(${rowCount}, auto)`}
+      gridTemplateColumns={`repeat(${columnCount}, 1fr)`}
+      w="100%"
+      h="fit-content"
+      pos="relative"
+      onPointerDown={readOnly ? undefined : handlePointerDown}
+      onPointerMove={readOnly ? undefined : handlePointerMove}
+      onPointerUp={readOnly ? handleGroupPointerUp : handlePointerUp}
+      onPointerCancel={readOnly ? undefined : handlePointerCancel}
+      onLostPointerCapture={readOnly ? undefined : handleLostPointerCapture}
+      onPointerOver={readOnly ? handleGroupPointerOver : undefined}
+      onPointerLeave={readOnly ? handleGroupPointerLeave : undefined}
+      onFocus={handleGridFocus}
+      onKeyDown={handleGridKeyDown}
+    >
+      {columnHeaders}
+      {gridCells.map((cell) => {
+        const isSelected = readOnly ? false : previewSelection.has(cell.id);
+        const availability = groupTime[cell.id];
+        return (
+          <TimeCell
+            key={cell.id}
+            id={cell.id}
+            rowIndex={cell.rowIndex}
+            columnIndex={cell.columnIndex}
+            isSelectable={cell.isSelectable}
+            isSelected={isSelected}
+            isReadOnly={readOnly}
+            label={cell.label}
+            tabIndex={
+              focusedCellId === cell.id ||
+              (!focusedCellId && firstFocusableCell === cell.id)
+                ? 0
+                : -1
+            }
+            backgroundColor={
+              readOnly
+                ? generateAvailabilityColor(
+                    availability?.length / users?.length,
+                    colorMode === "dark",
+                  )
+                : isSelected
+                  ? colors[colorMode].bg.timetableSelected
+                  : "transparent"
+            }
+            opacity={cell.isSelectable ? 1 : 0.1}
+            tableBorder={colors[colorMode].border.table}
+            alternateTableBorder={colors[colorMode].border.table2}
+            shouldAnimateBackground={readOnly}
+          />
+        );
+      })}
+      {readOnly && activeGroupCell && groupAnchorRect && (
+        <PopoverAnchor>
+          <Box
+            pos="absolute"
+            left={`${groupAnchorRect.left}px`}
+            top={`${groupAnchorRect.top}px`}
+            w={`${groupAnchorRect.width}px`}
+            h={`${groupAnchorRect.height}px`}
+            pointerEvents="none"
+            aria-hidden
+          />
+        </PopoverAnchor>
+      )}
+    </Grid>
+  );
 
-  // fallback to old data - days
-  const parseOldDayData = (d) => {
-    const isOldData = isNaN(parseInt(d));
-    if (isOldData && event.allDay) {
-      return convertDaysToIndex(d);
-    }
-    if (isOldData) {
-      const [day, time] = d.split("-");
-      const delta = getUTCOffsetDifference("UTC", event.timezone);
-      if (time - delta < 0) {
-        if (convertDaysToIndex(day) === 0) return "6-" + (time - delta + 24);
-        return convertDaysToIndex(day) - 1 + "-" + (time - delta + 24);
-      } else if (time - delta >= 24) {
-        if (convertDaysToIndex(day) === 6) return "0-" + (time - delta - 24);
-        return convertDaysToIndex(day) + 1 + "-" + (time - delta - 24);
-      }
-      return convertDaysToIndex(day) + "-" + (time - delta);
-    } else return d;
-  };
+  const table = (
+    <VStack
+      w="100%"
+      className="time-table"
+      overflowX="auto"
+      pos="relative"
+      p="0 4px 8px 0px"
+      alignItems="flex-start"
+      minH="300px"
+    >
+      {readOnly ? (
+        <Popover
+          returnFocusOnClose={false}
+          isOpen={Boolean(activeGroupCell)}
+          onClose={() => setActiveGroupCellId(null)}
+          closeOnBlur
+          isLazy
+          lazyBehavior="unmount"
+          autoFocus={false}
+          modifiers={[{ name: "preventOverflow", options: { padding: 8 } }]}
+        >
+          {grid}
+          <GroupPopoverContent
+            cell={activeGroupCell}
+            whoIsAvailable={activeGroupAvailability}
+            users={users}
+            colorMode={colorMode}
+            context={context}
+          />
+        </Popover>
+      ) : (
+        grid
+      )}
+    </VStack>
+  );
 
-  if (event.allDay)
-    return (
-      <Center
-        fontWeight="bold"
-        fontSize="12px"
-        margin={"0 auto"}
-        flexDir={"column"}
-        gap={5}
-        alignItems={"flex-start"}
-      >
+  return (
+    <Center
+      fontWeight="bold"
+      fontSize="12px"
+      margin="0 auto"
+      flexDir="column"
+      gap={5}
+      alignItems="flex-start"
+    >
+      {event.allDay ? (
         <VStack
           spacing={0}
-          pt={"0rem"}
-          pos={"absolute"}
+          pt="0rem"
+          pos="absolute"
           left={{ base: "-0px", md: "-50px" }}
           top={event.type === "dates" ? "40px" : "22px"}
           zIndex={1}
@@ -441,7 +1014,7 @@ const TimeTable = ({ readOnly, isRealtimeEnabled }) => {
             borderRadius="sm"
             border={{ base: colors[colorMode].border.table, md: "none" }}
             bg={{ base: colors[colorMode].bg.nav.primary, md: "none" }}
-            p={"2px"}
+            p="2px"
             top="-15px"
             w={{ base: "30px", md: "50px" }}
             textAlign="center"
@@ -450,329 +1023,17 @@ const TimeTable = ({ readOnly, isRealtimeEnabled }) => {
             {context.home.input.switch}
           </Center>
         </VStack>
-        <VStack
-          w="100%"
-          className="time-table"
-          overflowX="auto"
-          pos="relative"
-          p="0 4px 8px 0px"
-          alignItems="flex-start"
-          minH="300px"
-        >
-          <Grid
-            gridTemplateRows={`repeat(${1}, auto)`}
-            gridTemplateColumns={
-              event.type === "dates"
-                ? `repeat(${localTimes.dates.length}, 1fr)`
-                : `repeat(${localTimes.days.length}, 1fr)`
-            }
-            w="100%"
-            h="fit-content"
-          >
-            {event.type === "dates"
-              ? localTimes.dates.map((d) => (
-                  <GridItem key={d} w="100%" minW={{ base: "100px" }} mb="8px">
-                    <Center>{getMonthAndDate(d, configs.lang)}</Center>
-                    <Center>{displayDay(d, configs.lang)}</Center>
-                  </GridItem>
-                ))
-              : // fallback to old data - days
-                reorderSunDay(localTimes.days, configs.weekStartsOn).map(
-                  (d) => (
-                    <GridItem key={d} mb="8px">
-                      <Center>{translateDay(d, configs.lang)}</Center>
-                    </GridItem>
-                  ),
-                )}
+      ) : (
+        <TimeLabels
+          event={event}
+          localTimes={localTimes}
+          configs={configs}
+          colorMode={colorMode}
+        />
+      )}
 
-            {localTimes.dataWithTime.map((d) => {
-              return readOnly ? (
-                <GridGroupPopover
-                  id={d.data}
-                  key={d.data}
-                  index={0}
-                  borderBottom={colors[colorMode].border.table}
-                  bg={generateColors(
-                    groupTime[
-                      event.type === "dates"
-                        ? new Date(d.data).toISOString()
-                        : d.data
-                    ]?.length / users?.length,
-                    colorMode === "dark",
-                  )}
-                  whoIs={
-                    groupTime[
-                      event.type === "dates"
-                        ? new Date(d.data).toISOString()
-                        : d.data
-                    ]
-                  }
-                  users={users}
-                  type={event.type}
-                  allDayMode={event.allDay}
-                />
-              ) : (
-                <GridItemTemplate
-                  id={d.data}
-                  key={d.data}
-                  index={0}
-                  borderBottom={colors[colorMode].border.table}
-                  bg={
-                    checkIsSelect(selectedTime, d.data)
-                      ? colors[colorMode].bg.timetableSelected
-                      : "transparent"
-                  }
-                  onPointerDown={(e) => {
-                    e.preventDefault();
-                    selectingMode.current = checkIsSelect(selectedTime, d.data)
-                      ? "remove"
-                      : "add";
-                    if (
-                      selectingMode.current === "add" &&
-                      !checkIsSelect(selectedTime, d.data)
-                    )
-                      setSelectedTime((prev) => [...prev, d.data]);
-                    else if (selectingMode.current === "remove")
-                      setSelectedTime((prev) =>
-                        prev.filter((t) => t !== d.data),
-                      );
+      {table}
 
-                    selection.current = {
-                      start: { row: 0, col: d.indexCol },
-                      end: null,
-                    };
-                    e.currentTarget.releasePointerCapture(e.pointerId);
-
-                    document.addEventListener(
-                      "pointerup",
-                      () => {
-                        if (selectingMode.current === "remove") {
-                          setSelectedTime((prev) =>
-                            prev.filter((t) => t !== d.data),
-                          );
-                        }
-                        selectingMode.current = null;
-                      },
-                      { once: true },
-                    );
-                  }}
-                  onPointerOver={() => {
-                    if (selectingMode.current) {
-                      if (
-                        selectingMode.current === "add" &&
-                        !checkIsSelect(selectedTime, d.data)
-                      )
-                        setSelectedTime((prev) => [...prev, d.data]);
-                      else if (selectingMode.current === "remove")
-                        setSelectedTime((prev) =>
-                          prev.filter((t) => t !== d.data),
-                        );
-                      selection.current = {
-                        start: selection.current.start,
-                        end: { row: 0, col: d.indexCol },
-                      };
-                    }
-                  }}
-                />
-              );
-            })}
-          </Grid>
-        </VStack>
-        {readOnly && users && (
-          <CustomButton
-            onClick={() => downloadObjectAsJson(users)}
-            zIndex={10}
-            ghost
-          >
-            {context.event.export}
-          </CustomButton>
-        )}
-      </Center>
-    );
-  return (
-    <Center
-      fontWeight="bold"
-      fontSize="12px"
-      margin={"0 auto"}
-      flexDir={"column"}
-      gap={5}
-      alignItems={"flex-start"}
-    >
-      <VStack
-        spacing={0}
-        pt={"0rem"}
-        pos={"absolute"}
-        left={{ base: "-0px", md: "-48px" }}
-        top={
-          localTimes.times[0] % 1 === 0 ? { base: "14px", md: "5px" } : "36px"
-        }
-        zIndex={1}
-        alignItems={{ base: "flex-start", md: "center" }}
-      >
-        <Center h={event.type === "dates" ? "35px" : "20px"} />
-        {localTimes.times.map((t, i, arr) => {
-          const hasBreakpoint = i < arr.length - 1 && arr[i + 1] - t !== 0.5;
-          return (
-            t % 1 === 0 && (
-              <Center
-                key={t + "-time-col"}
-                h={{ base: "60px", md: "70px" }}
-                alignItems="flex-start"
-              >
-                <Center
-                  borderRadius="sm"
-                  border={{ base: colors[colorMode].border.table, md: "none" }}
-                  bg={{ base: colors[colorMode].bg.nav.primary, md: "none" }}
-                  p="2px"
-                  top="-10px"
-                >
-                  {displayTime(t, configs.usePM)}
-                </Center>
-                {hasBreakpoint && (
-                  <Center
-                    pos={"absolute"}
-                    color={colors[colorMode].font.subtitle}
-                    top={{ base: "30px", md: "35px" }}
-                    transform={"translateY(-50%)"}
-                  >
-                    |
-                  </Center>
-                )}
-              </Center>
-            )
-          );
-        })}
-      </VStack>
-      <VStack
-        w="100%"
-        className="time-table"
-        overflowX="auto"
-        pos="relative"
-        p="0 4px 8px 0px"
-        alignItems="flex-start"
-        minH="300px"
-      >
-        <Grid
-          gridTemplateRows={`repeat(${localTimes.times.length}, auto)`}
-          gridTemplateColumns={
-            event.type === "dates"
-              ? `repeat(${localTimes.dates.length}, 1fr)`
-              : `repeat(${localTimes.days.length}, 1fr)`
-          }
-          w="100%"
-          h="fit-content"
-        >
-          {event.type === "dates"
-            ? localTimes.dates.map((d, id) => (
-                <GridItem
-                  key={d + id}
-                  w="100%"
-                  minW={{ base: "100px" }}
-                  mb={{ base: 4, md: 2 }}
-                >
-                  <Center>{getMonthAndDate(d, configs.lang)}</Center>
-                  <Center>{displayDay(d, configs.lang)}</Center>
-                </GridItem>
-              ))
-            : reorderSunDay(localTimes.days, configs.weekStartsOn).map((d) => (
-                <GridItem key={d} mb={{ base: 4, md: 2 }}>
-                  <Center>{translateDay(d, configs.lang)}</Center>
-                </GridItem>
-              ))}
-
-          {localTimes.dataWithTime.map((d) =>
-            readOnly ? (
-              <GridGroupPopover
-                id={d.data}
-                key={d.data}
-                index={d.indexRow}
-                bg={generateColors(
-                  groupTime[
-                    event.type === "dates"
-                      ? new Date(d.data).toISOString()
-                      : d.data
-                  ]?.length / users?.length,
-                  colorMode === "dark",
-                )}
-                opacity={isDateSelectable(truthTable, d.data) ? 1 : 0.1}
-                whoIs={
-                  groupTime[
-                    event.type === "dates"
-                      ? new Date(d.data).toISOString()
-                      : d.data
-                  ]
-                }
-                users={users}
-                type={event.type}
-              />
-            ) : (
-              <GridItemTemplate
-                id={d.data}
-                key={d.data}
-                index={d.indexRow}
-                bg={
-                  checkIsSelect(selectedTime, d.data)
-                    ? colors[colorMode].bg.timetableSelected
-                    : "transparent"
-                }
-                opacity={isDateSelectable(truthTable, d.data) ? 1 : 0.1}
-                onPointerDown={(e) => {
-                  if (!isDateSelectable(truthTable, d.data)) return;
-                  e.preventDefault();
-                  selectingMode.current = checkIsSelect(selectedTime, d.data)
-                    ? "remove"
-                    : "add";
-
-                  if (
-                    selectingMode.current === "add" &&
-                    !checkIsSelect(selectedTime, d.data)
-                  )
-                    setSelectedTime((prev) => [...prev, d.data]);
-                  else if (selectingMode.current === "remove")
-                    setSelectedTime((prev) => prev.filter((t) => t !== d.data));
-
-                  selection.current = {
-                    start: { row: d.indexRow, col: d.indexCol },
-                    end: null,
-                  };
-                  e.currentTarget.releasePointerCapture(e.pointerId);
-
-                  document.addEventListener(
-                    "pointerup",
-                    () => {
-                      if (selectingMode.current === "remove") {
-                        setSelectedTime((prev) =>
-                          prev.filter((t) => t !== d.data),
-                        );
-                      }
-                      selectingMode.current = null;
-                    },
-                    { once: true },
-                  );
-                }}
-                onPointerOver={() => {
-                  if (!isDateSelectable(truthTable, d.data)) return;
-                  if (selectingMode.current) {
-                    if (
-                      selectingMode.current === "add" &&
-                      !checkIsSelect(selectedTime, d.data)
-                    )
-                      setSelectedTime((prev) => [...prev, d.data]);
-                    else if (selectingMode.current === "remove")
-                      setSelectedTime((prev) =>
-                        prev.filter((t) => t !== d.data),
-                      );
-                    selection.current = {
-                      start: selection.current.start,
-                      end: { row: d.indexRow, col: d.indexCol },
-                    };
-                  }
-                }}
-              />
-            ),
-          )}
-        </Grid>
-      </VStack>
       {readOnly && users && (
         <CustomButton
           onClick={() => downloadObjectAsJson(users)}
@@ -786,121 +1047,172 @@ const TimeTable = ({ readOnly, isRealtimeEnabled }) => {
   );
 };
 
-const GridGroupPopover = ({ whoIs, users, type, allDayMode, ...props }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const { configs } = useConfigs();
-  const { context } = useLang();
-  const { isTouch } = useTouchDevices();
-  const { colorMode } = useColorMode();
-  const { timezone } = useTimezone();
+const TimeLabels = ({ event, localTimes, configs, colorMode }) => {
   return (
-    <Popover
-      returnFocusOnClose={false}
-      isOpen={isOpen}
-      onClose={onClose}
-      closeOnBlur={true}
-      isLazy
-      lazyBehavior="unmount"
-      autoFocus={false}
+    <VStack
+      spacing={0}
+      pt="0rem"
+      pos="absolute"
+      left={{ base: "-0px", md: "-48px" }}
+      top={
+        localTimes.times[0] % 1 === 0 ? { base: "14px", md: "5px" } : "36px"
+      }
+      zIndex={1}
+      alignItems={{ base: "flex-start", md: "center" }}
     >
-      <PopoverTrigger>
-        <GridGroupTime
-          as={motion.div}
-          onHoverStart={isTouch ? onOpen : null}
-          onHoverEnd={isTouch ? onClose : null}
-          onMouseOver={isTouch ? null : onOpen}
-          onMouseLeave={isTouch ? null : onClose}
-          {...props}
-        />
-      </PopoverTrigger>
+      <Center h={event.type === "dates" ? "35px" : "20px"} />
+      {localTimes.times.map((time, index, allTimes) => {
+        const hasBreakpoint =
+          index < allTimes.length - 1 && allTimes[index + 1] - time !== 0.5;
+        if (time % 1 !== 0) return null;
 
-      <PopoverContent
-        w="fit-content"
-        maxW="360px"
-        bg={colors[colorMode].bg.primary}
-      >
-        <PopoverHeader fontWeight="semibold">
-          {users && (
-            <HStack spacing={1}>
-              <Text fontWeight="bold">
-                {whoIs?.length === users?.length
-                  ? context.global.timeTable.all
-                  : `${whoIs?.length ? whoIs.length : 0} / ${users?.length}`}
-              </Text>
-              <Text>{context.global.timeTable.available}</Text>
-            </HStack>
-          )}
-          {allDayMode ? (
-            <Text>{getFullDateAndTime(props.id, type, configs.lang)}</Text>
-          ) : (
-            <Text>
-              {getFullDateAndTime(props.id, type, configs.lang) +
-                context.global.timeTable.at +
-                displayTime(
-                  type === "dates"
-                    ? format(props.id, "HHmm", { in: tz(timezone) })
-                    : UTCTimeToLocalTime(
-                        parseFloat(props.id.split("-")[1]),
-                        timezone,
-                      ),
-                  configs.usePM,
-                )}
-            </Text>
-          )}
-        </PopoverHeader>
-        <PopoverArrow bg={colors[colorMode].bg.primary} />
-        <PopoverBody>
-          <HStack flexWrap="wrap">
-            {users &&
-              users.map((u) => (
-                <CustomTag
-                  key={u.user + "-user-tag"}
-                  isGhost={!whoIs?.some((w) => w === u.user)}
-                >
-                  {u.user}
-                </CustomTag>
-              ))}
-          </HStack>
-        </PopoverBody>
-      </PopoverContent>
-    </Popover>
+        return (
+          <Center
+            key={`${time}-time-column`}
+            h={{ base: "60px", md: "70px" }}
+            alignItems="flex-start"
+          >
+            <Center
+              borderRadius="sm"
+              border={{ base: colors[colorMode].border.table, md: "none" }}
+              bg={{ base: colors[colorMode].bg.nav.primary, md: "none" }}
+              p="2px"
+              top="-10px"
+            >
+              {displayTime(time, configs.usePM)}
+            </Center>
+            {hasBreakpoint && (
+              <Center
+                pos="absolute"
+                color={colors[colorMode].font.subtitle}
+                top={{ base: "30px", md: "35px" }}
+                transform="translateY(-50%)"
+              >
+                |
+              </Center>
+            )}
+          </Center>
+        );
+      })}
+    </VStack>
   );
 };
 
-const GridGroupTime = forwardRef(({ ...props }, ref) => {
-  return <GridItemTemplate ref={ref} {...props} />;
-});
+const GroupPopoverContent = ({
+  cell,
+  whoIsAvailable,
+  users,
+  colorMode,
+  context,
+}) => {
+  if (!cell) return null;
 
-GridGroupTime.displayName = "GridGroupTime";
+  // match the card border color so the arrow gets the same outline
+  const arrowBorderColor =
+    colorMode === "light" ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.8)";
 
-const GridItemTemplate = forwardRef(({ ...props }, ref) => {
-  const { colorMode } = useColorMode();
   return (
-    <GridItem
-      className="no-touch-action"
-      w="100%"
-      minW="100px"
-      h={{ base: "30px", md: "35px" }}
+    <PopoverContent
+      rootProps={{ style: { pointerEvents: "none" } }}
+      w="fit-content"
+      maxW="360px"
+      bg={colors[colorMode].bg.primary}
       border={colors[colorMode].border.table}
-      p={"4px 8px"}
-      borderRadius="sm"
-      transition=".2s"
-      borderBottom={
-        props.index % 2 === 0
-          ? colors[colorMode].border.table2
-          : colors[colorMode].border.table
-      }
-      borderTop={
-        props.index % 2 === 0 ? colors[colorMode].border.table : "none"
-      }
-      ref={ref}
-      {...props}
+      boxShadow="lg"
+      pointerEvents="none"
     >
-      <Center color="transparent" userSelect="none" />
-    </GridItem>
+      <PopoverHeader fontWeight="semibold">
+        {users && (
+          <HStack spacing={1}>
+            <Text fontWeight="bold">
+              {whoIsAvailable?.length === users.length
+                ? context.global.timeTable.all
+                : `${whoIsAvailable?.length ?? 0} / ${users.length}`}
+            </Text>
+            <Text>{context.global.timeTable.available}</Text>
+          </HStack>
+        )}
+        <Text>{cell.label}</Text>
+      </PopoverHeader>
+      <PopoverArrow
+        bg={colors[colorMode].bg.primary}
+        sx={{ "--popper-arrow-shadow-color": arrowBorderColor }}
+      />
+      <PopoverBody>
+        <HStack flexWrap="wrap" spacing="4px">
+          {users?.map((eventUser) => (
+            <CustomTag
+              key={`${eventUser.user}-user-tag`}
+              isGhost={!whoIsAvailable?.includes(eventUser.user)}
+            >
+              {eventUser.user}
+            </CustomTag>
+          ))}
+        </HStack>
+      </PopoverBody>
+    </PopoverContent>
   );
-});
+};
 
-GridItemTemplate.displayName = "GridItemTemplate";
+const TimeCell = memo(
+  forwardRef(
+    (
+      {
+        id,
+        rowIndex,
+        columnIndex,
+        isSelectable,
+        isSelected,
+        isReadOnly,
+        label,
+        backgroundColor,
+        tableBorder,
+        alternateTableBorder,
+        shouldAnimateBackground,
+        ...props
+      },
+      ref,
+    ) => {
+      return (
+        <GridItem
+          ref={ref}
+          // editable cells disable touch scrolling so drag-select works;
+          // read-only cells stay scrollable so the grid can be panned
+          className={isReadOnly ? undefined : "no-touch-action"}
+          role="gridcell"
+          aria-label={label}
+          aria-rowindex={rowIndex + 2}
+          aria-colindex={columnIndex + 1}
+          aria-selected={isReadOnly ? undefined : isSelected}
+          aria-disabled={isSelectable ? undefined : true}
+          data-time-cell={id}
+          data-time-row={rowIndex}
+          data-time-column={columnIndex}
+          data-is-selectable={isSelectable ? "true" : "false"}
+          w="100%"
+          minW="100px"
+          h={{ base: "30px", md: "35px" }}
+          border={tableBorder}
+          p="4px 8px"
+          borderRadius="sm"
+          backgroundColor={backgroundColor}
+          transition={
+            shouldAnimateBackground ? "background-color .2s ease" : "none"
+          }
+          borderBottom={
+            rowIndex % 2 === 0 ? alternateTableBorder : tableBorder
+          }
+          borderTop={rowIndex % 2 === 0 ? tableBorder : "none"}
+          cursor={
+            isReadOnly ? "default" : isSelectable ? "pointer" : "not-allowed"
+          }
+          {...props}
+        />
+      );
+    },
+  ),
+);
+
+TimeCell.displayName = "TimeCell";
 
 export default TimeTable;

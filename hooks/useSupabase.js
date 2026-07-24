@@ -56,7 +56,8 @@ const useSupabase = () => {
     if (createdEvent) router.push(`/events/${createdEvent.id}`);
   }, [router]);
   const POST_USER_TIME = useCallback(async (eventId, update) => {
-    setIsLoading(true);
+    if (!update.user) return;
+
     const { data: dataFound, error: errorFound } = await supabase
       .from("events")
       .select("users")
@@ -78,7 +79,6 @@ const useSupabase = () => {
           })
           .eq("id", eventId);
         setError(updateEventError);
-        setIsLoading(false);
         if (updateEventError) throw updateEventError;
       } else {
         const { error: updateEventError } = await supabase
@@ -88,7 +88,6 @@ const useSupabase = () => {
           })
           .eq("id", eventId);
         setError(updateEventError);
-        setIsLoading(false);
         if (updateEventError) throw updateEventError;
       }
     }

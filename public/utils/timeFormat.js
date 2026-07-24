@@ -169,13 +169,13 @@ const adjustDaysToLocal = (eventDays, dayChangeIndex, isRangeRearranged) => {
     return uniqueDays
 }
 
-const combineDateAndTime = (date, time, timezone, isAllDay) => {
+const combineDateAndTime = (date, time, timezone, isAllDay, offsetDifference) => {
     // if it's all day, ignore time
     if (isAllDay) return new Date(date).toISOString()
-    const delta = getUTCOffsetDifference('UTC', timezone)
+    const delta = offsetDifference ?? getUTCOffsetDifference('UTC', timezone)
     return addMinutes(date, time * 60 - delta * 60).toISOString()
 }
-const combineDaysAndTime = (day, time, timezone, isAllDay) => {
+const combineDaysAndTime = (day, time, timezone, isAllDay, offsetDifference) => {
     // if it's all day, ignore time
     if (isAllDay) return day
 
@@ -184,13 +184,13 @@ const combineDaysAndTime = (day, time, timezone, isAllDay) => {
         day = convertDaysToIndex(day)
     }
 
-    const delta = getUTCOffsetDifference('UTC', timezone)
+    const delta = offsetDifference ?? getUTCOffsetDifference('UTC', timezone)
     const fullDate = addMinutes(setDay(new Date('1999-11-24'), parseInt(day)), time * 60 - delta * 60).toISOString()
 
     return getDay(fullDate, { in: tz('UTC') }) + '-' + (getHours(fullDate, { in: tz('UTC') }) + getMinutes(fullDate, { in: tz('UTC') }) / 60)
 }
-const UTCTimeToLocalTime = (UTCTime, timezone) => {
-    const delta = getUTCOffsetDifference('UTC', timezone)
+const UTCTimeToLocalTime = (UTCTime, timezone, offsetDifference) => {
+    const delta = offsetDifference ?? getUTCOffsetDifference('UTC', timezone)
     const fullDate = addMinutes(setDay(new Date('1999-11-24'), 0), UTCTime * 60 + delta * 60).toISOString()
 
     return getHours(fullDate, { in: tz('UTC') }) + getMinutes(fullDate, { in: tz('UTC') }) / 60

@@ -21,11 +21,6 @@ export default function RootLayout({ children }) {
     logPageView()
   }, [])
 
-  // disable swipe to go back on iOS
-  useEffect(() => {
-    window.addEventListener('touchstart', (e) => e.preventDefault())
-  }, [])
-
   // FIXME: don't show intro console on dev
   // show console message
   useEffect(() => {
