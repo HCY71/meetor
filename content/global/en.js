@@ -42,13 +42,6 @@ const globalEn = {
         title: "This Could Be an Ad",
         content: "But since we care about your experience, its not. Consider donate to support us."
     },
-    updates: {
-        timezone: {
-            title: "Updated 🎉🎉",
-            content: "Timezone is now supported. Please note that events created before the update may have incorrect dates due to the timezone changes. Make sure the time is correct for you and your group. If you feel okay with it, it's better to create a new event."
-        },
-        close: "Got It"
-    },
     panel: {
         dates: "Dates",
         days: "Days",

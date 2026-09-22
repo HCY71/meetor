@@ -3,8 +3,7 @@ import { useState, useEffect } from "react"
 import {
     HStack,
     VStack,
-    Text,
-    useDisclosure
+    Text
 } from "@chakra-ui/react"
 import Header from "@/components/atoms/Header"
 import Subtitle from "@/components/atoms/Subtitle"
@@ -19,10 +18,8 @@ import { useLang } from "@/context/LangContext"
 import { useConfigs } from "@/context/ConfigsContext"
 import Link from "next/link"
 import CustomButton from "@/components/atoms/CustomButton"
-import UpdateModal from "@/components/cells/UpdateModal"
 import PageSkeleton from "@/components/cells/PageSkeleton"
 import { EventProvider } from "@/context/EventContext"
-import { isBefore } from "date-fns"
 
 const Page = () => {
     const [ event, setEvent ] = useState(null)
@@ -30,13 +27,10 @@ const Page = () => {
     const { currentDate } = useDate()
 
     const [ notFound, setNotFound ] = useState(false)
-    const { isOpen, onOpen, onClose } = useDisclosure()
 
     const { context } = useLang()
     const { configs } = useConfigs()
     const [ recent, setRecent ] = useLocalStorage('meetor_recent', [])
-    const [ isUpdateReadEn ] = useLocalStorage('meetor_update_timezone_read_en')
-    const [ isUpdateReadZh ] = useLocalStorage('meetor_update_timezone_read_zh')
 
     const { GET_BY_ID, isLoading, data } = useSupabase()
     useEffect(() => {
@@ -55,15 +49,6 @@ const Page = () => {
             if (!isLoading) setNotFound(true)
         }
     }, [ isLoading, data ])
-
-    useEffect(() => {
-        const isOutdated = isBefore(new Date(), new Date('2025/01/30'))
-        if (configs.lang === 'en') {
-            if (!(isUpdateReadEn) && isOutdated) onOpen()
-        } else {
-            if (!(isUpdateReadZh) && isOutdated) onOpen()
-        }
-    }, [])
 
     // handle event not found
     if (notFound) return (
@@ -85,7 +70,6 @@ const Page = () => {
     else if (!event) return <PageSkeleton />
     return (
         <EventProvider event={ event }>
-            <UpdateModal controls={ { isOpen, onClose } } />
             <VStack spacing={ 5 } w='520px' maxW='100%'>
                 { event
                     &&

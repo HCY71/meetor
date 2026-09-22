@@ -5,27 +5,19 @@ import Form from '../components/Form'
 import Header from '../components/atoms/Header'
 import Subtitle from '../components/atoms/Subtitle'
 import RecentVisited from '@/components/cells/RecentVisited'
-import UpdateModal from '@/components/cells/UpdateModal'
 import { useLang } from '@/context/LangContext'
-import { useConfigs } from '@/context/ConfigsContext'
 
 import useLocalStorage from '@/hooks/useLocalStorage'
 import useSupabase from '@/hooks/useSupabase'
 
 import { numberWithCommas } from '@/public/utils/numberFormatter'
-import { useDisclosure } from '@chakra-ui/react'
-import { isBefore } from "date-fns"
 
 export default function Home() {
   const { context } = useLang()
-  const { configs } = useConfigs()
   const [ name, setName ] = useLocalStorage('meetor_name', '')
-  const [ isUpdateReadEn ] = useLocalStorage('meetor_update_timezone_read_en')
-  const [ isUpdateReadZh ] = useLocalStorage('meetor_update_timezone_read_zh')
 
   const [ showCounter, setShowCounter ] = useState(false)
   const { data, isLoading, error, GET_EVENT_TOTAL } = useSupabase()
-  const { isOpen, onOpen, onClose } = useDisclosure()
 
   useEffect(() => {
     if (name) setName()
@@ -48,18 +40,8 @@ export default function Home() {
     if (!isLoading && typeof data === 'number') setShowCounter(true)
   }, [ isLoading, data ])
 
-  useEffect(() => {
-    const isOutdated = isBefore(new Date(), new Date('2025/01/30'))
-    if (configs.lang === 'en') {
-      if (!(isUpdateReadEn) && isOutdated) onOpen()
-    } else {
-      if (!(isUpdateReadZh) && isOutdated) onOpen()
-    }
-  }, [])
-
   return (
     <>
-      <UpdateModal controls={ { isOpen, onClose } } />
       <VStack spacing={ { base: 3, md: 5 } }>
         <VStack
           spacing='0'

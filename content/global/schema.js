@@ -34,13 +34,6 @@ const globalSchema = {
         title: "string",
         content: "string",
     },
-    updates: {
-        timezone: {
-            title: "string",
-            content: "string",
-        },
-        close: "string",
-    },
     panel: {
         dates: "string",
         days: "string",
