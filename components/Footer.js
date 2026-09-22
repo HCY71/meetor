@@ -8,11 +8,11 @@ const Footer = () => {
         <HStack
             borderTopWidth='1px'
             borderTopStyle='solid'
-            borderTopColor='border.subtle'
+            borderTopColor='border.faint'
             bg='bg.veil'
             backdropFilter='saturate(120%) blur(8px)'
             zIndex={ 1 }
-            p={ { base: '4px 20px', md: '12px 40px' } }
+            p={ { base: '8px 20px', md: '12px 40px' } }
             transition='.2s'
             justify='center'
             spacing={ 2 }

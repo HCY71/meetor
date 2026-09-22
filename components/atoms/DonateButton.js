@@ -9,6 +9,7 @@ const DonateButton = ({ isModal }) => {
     return (
         <Link href='https://portaly.cc/erkinhsu' target="_blank" rel="noopener noreferrer" onClick={ () => GAclickEvent(isModal ? 'popup' : 'footer', 'buy_me_a_coffee') }>
             <CustomButton
+                size='compact'
                 boxShadow='glow'
                 borderWidth='1px'
                 borderStyle='solid'
