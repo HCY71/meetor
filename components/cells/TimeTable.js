@@ -16,13 +16,9 @@ import {
   VStack,
   HStack,
   Popover,
-  PopoverAnchor,
-  PopoverContent,
-  PopoverHeader,
-  PopoverBody,
-  PopoverArrow,
-  useColorMode,
+  usePopover,
 } from "@chakra-ui/react";
+import { useColorMode } from "@/components/ColorMode";
 import {
   getMonthAndDate,
   displayTime,
@@ -504,6 +500,30 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
     ? groupTime[activeGroupCell.id]
     : null;
 
+  // The group tooltip follows the pointer by moving its anchor's left and top.
+  // v3's popover repositions on scroll and resize but not on that kind of
+  // move, so it is nudged once the anchor has been committed to the new cell.
+  // Its API object is rebuilt every render, so the latest one is kept in a
+  // ref, synced in an effect declared first so it runs before the nudge.
+  const groupPopover = usePopover({
+    open: Boolean(activeGroupCell),
+    onOpenChange: (details) => {
+      if (!details.open) setActiveGroupCellId(null);
+    },
+    autoFocus: false,
+    // v3 spaces the popover gutter plus half the arrow away from its anchor.
+    // With v2's 8px arrow, a 4px gutter keeps v2's 8px gap.
+    positioning: { overflowPadding: 8, gutter: 4 },
+  });
+  const groupPopoverRef = useRef(groupPopover);
+  useEffect(() => {
+    groupPopoverRef.current = groupPopover;
+  });
+  useEffect(() => {
+    if (!activeGroupCellId) return;
+    groupPopoverRef.current.reposition();
+  }, [activeGroupCellId, groupAnchorRect]);
+
   useEffect(() => {
     if (readOnly) return;
 
@@ -944,7 +964,9 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
         );
       })}
       {readOnly && activeGroupCell && groupAnchorRect && (
-        <PopoverAnchor>
+        // asChild makes the moving box itself the anchor; without it v3 wraps
+        // it in a div that sits at the end of the grid and never moves
+        <Popover.Anchor asChild>
           <Box
             pos="absolute"
             left={`${groupAnchorRect.left}px`}
@@ -954,7 +976,7 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
             pointerEvents="none"
             aria-hidden
           />
-        </PopoverAnchor>
+        </Popover.Anchor>
       )}
     </Grid>
   );
@@ -970,16 +992,7 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
       minH="300px"
     >
       {readOnly ? (
-        <Popover
-          returnFocusOnClose={false}
-          isOpen={Boolean(activeGroupCell)}
-          onClose={() => setActiveGroupCellId(null)}
-          closeOnBlur
-          isLazy
-          lazyBehavior="unmount"
-          autoFocus={false}
-          modifiers={[{ name: "preventOverflow", options: { padding: 8 } }]}
-        >
+        <Popover.RootProvider value={groupPopover} lazyMount unmountOnExit>
           {grid}
           <GroupPopoverContent
             cell={activeGroupCell}
@@ -987,7 +1000,7 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
             users={users}
             context={context}
           />
-        </Popover>
+        </Popover.RootProvider>
       ) : (
         grid
       )}
@@ -1005,7 +1018,7 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
     >
       {event.allDay ? (
         <VStack
-          spacing={0}
+          gap={0}
           pt="0rem"
           pos="absolute"
           left={{ base: "-0px", md: "-50px" }}
@@ -1014,7 +1027,7 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
         >
           <Center
             h={{ base: "60px", md: "70px" }}
-            borderRadius="sm"
+            borderRadius="xs"
             borderWidth={{ base: "1px", md: "0" }}
             borderStyle="solid"
             borderColor="border.strong"
@@ -1054,7 +1067,7 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
 const TimeLabels = ({ event, localTimes, configs }) => {
   return (
     <VStack
-      spacing={0}
+      gap={0}
       pt="0rem"
       pos="absolute"
       left={{ base: "-0px", md: "-48px" }}
@@ -1077,7 +1090,7 @@ const TimeLabels = ({ event, localTimes, configs }) => {
             alignItems="flex-start"
           >
             <Center
-              borderRadius="sm"
+              borderRadius="xs"
               borderWidth={{ base: "1px", md: "0" }}
               borderStyle="solid"
               borderColor="border.strong"
@@ -1108,20 +1121,41 @@ const GroupPopoverContent = ({ cell, whoIsAvailable, users, context }) => {
   if (!cell) return null;
 
   return (
-    <PopoverContent
-      rootProps={{ style: { pointerEvents: "none" } }}
+    <Popover.Positioner pointerEvents="none">
+    <Popover.Content
       w="fit-content"
       maxW="360px"
+      // v3 caps a popover at the viewport space left below its anchor, which
+      // cut the tooltip on the last visible row down to its heading; v2 let
+      // it run past the fold like any other page content
+      maxH="none"
+      // inherit the grid's 12px rather than v3's own 14px, as v2 did
+      fontSize="inherit"
+      lineHeight="inherit"
       bg="bg.canvas"
       borderWidth="1px"
       borderStyle="solid"
       borderColor="border.strong"
+      borderRadius="md"
       boxShadow="lg"
       pointerEvents="none"
+      // the arrow reads its fill from this variable
+      css={{ "--popover-bg": "var(--chakra-colors-bg-canvas)" }}
     >
-      <PopoverHeader fontWeight="semibold">
+      <Popover.Arrow css={{ "--arrow-size": "8px" }}>
+        {/* match the card border colour so the arrow gets the same outline */}
+        <Popover.ArrowTip borderColor="border.strong" />
+      </Popover.Arrow>
+      <Popover.Header
+        px="3"
+        py="2"
+        fontWeight="semibold"
+        borderBottomWidth="1px"
+        borderStyle="solid"
+        borderColor="border"
+      >
         {users && (
-          <HStack spacing={1}>
+          <HStack gap={1}>
             <Text fontWeight="bold">
               {whoIsAvailable?.length === users.length
                 ? context.global.timeTable.all
@@ -1131,14 +1165,9 @@ const GroupPopoverContent = ({ cell, whoIsAvailable, users, context }) => {
           </HStack>
         )}
         <Text>{cell.label}</Text>
-      </PopoverHeader>
-      <PopoverArrow
-        bg="bg.canvas"
-        // match the card border colour so the arrow gets the same outline
-        sx={{ "--popper-arrow-shadow-color": "var(--chakra-colors-border-strong)" }}
-      />
-      <PopoverBody>
-        <HStack flexWrap="wrap" spacing="4px">
+      </Popover.Header>
+      <Popover.Body px="3" py="2">
+        <HStack flexWrap="wrap" gap="4px">
           {users?.map((eventUser) => (
             <CustomTag
               key={`${eventUser.user}-user-tag`}
@@ -1148,8 +1177,9 @@ const GroupPopoverContent = ({ cell, whoIsAvailable, users, context }) => {
             </CustomTag>
           ))}
         </HStack>
-      </PopoverBody>
-    </PopoverContent>
+      </Popover.Body>
+    </Popover.Content>
+    </Popover.Positioner>
   );
 };
 
@@ -1193,7 +1223,7 @@ const TimeCell = memo(
           borderStyle="solid"
           borderColor="border.strong"
           p="4px 8px"
-          borderRadius="sm"
+          borderRadius="xs"
           backgroundColor={backgroundColor}
           transition={
             shouldAnimateBackground ? "background-color .2s ease" : "none"

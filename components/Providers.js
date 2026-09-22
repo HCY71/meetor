@@ -1,23 +1,23 @@
 'use client'
 
 
-import { ChakraProvider, createLocalStorageManager } from '@chakra-ui/react'
+import { ChakraProvider } from '@chakra-ui/react'
 import { ConfigsProvider } from '@/context/ConfigsContext'
 import { LangProvider } from '@/context/LangContext'
+import { ColorModeProvider } from '@/components/ColorMode'
 
-import theme from '@/public/theme'
-const manager = createLocalStorageManager("meetor_color_mode")
+import system from '@/public/theme'
 
 export function Providers({ children }) {
     return (
-        // <CacheProvider>
         <ConfigsProvider>
             <LangProvider>
-                <ChakraProvider theme={ theme } colorModeManager={ manager }>
-                    { children }
+                <ChakraProvider value={ system }>
+                    <ColorModeProvider>
+                        { children }
+                    </ColorModeProvider>
                 </ChakraProvider>
             </LangProvider>
         </ConfigsProvider>
-        // </CacheProvider>
     )
 }

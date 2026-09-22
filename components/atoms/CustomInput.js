@@ -7,11 +7,18 @@ const CustomInput = forwardRef(({ id, placeholder, onChange, ...props }, ref) =>
             id={ id }
             placeholder={ placeholder }
             onChange={ onChange }
-            focusBorderColor='ink.primary'
+            focusRingColor='ink.primary'
             fontWeight='medium'
             fontSize='1rem'
             size='lg'
             borderColor='border.subtle'
+            // The explicit border colour above outranks the recipe's focus colour,
+            // so the focused state is restated here: v2 turned the border ink and
+            // doubled it with a 1px ring, on any focus rather than only keyboard focus
+            _focus={ {
+                borderColor: 'ink.primary',
+                boxShadow: '0 0 0 1px var(--chakra-colors-ink-primary)',
+            } }
             ref={ ref }
             { ...props }
         />

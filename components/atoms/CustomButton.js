@@ -25,6 +25,10 @@ const CustomButton = forwardRef(({ children, ghost, ...props }, ref) => {
         <Button
             bg='ink.primary'
             color='ink.inverted'
+            // v3's solid variant carries a transparent 1px border so it lines
+            // up with outlined buttons; v2's did not, and the extra 2px widens
+            // every filled button
+            borderWidth='0'
             _hover={ {
                 bg: 'ink.hover',
                 transform: 'scale(1.05)'

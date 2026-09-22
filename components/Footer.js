@@ -15,7 +15,7 @@ const Footer = () => {
             p={ { base: '8px 20px', md: '12px 40px' } }
             transition='.2s'
             justify='center'
-            spacing={ 2 }
+            gap={ 2 }
             fontSize={ { base: '.75rem', md: '1rem' } }
             mt='20px'
         >

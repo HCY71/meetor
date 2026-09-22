@@ -2,12 +2,8 @@ import { useEffect } from "react"
 import {
     VStack,
     HStack,
-    RangeSlider,
-    RangeSliderTrack,
-    RangeSliderFilledTrack,
-    RangeSliderThumb,
-    FormErrorMessage,
-    FormControl,
+    Slider,
+    Field,
     Center,
 } from "@chakra-ui/react"
 
@@ -101,7 +97,7 @@ const ToastError = () => {
 }
 const Steps = () => {
     return (
-        <VStack w='520px' mt={ { base: '5', md: '10' } } spacing={ { base: 5, md: 10 } } maxW='100%'>
+        <VStack w='520px' mt={ { base: '5', md: '10' } } gap={ { base: 5, md: 10 } } maxW='100%'>
             <First />
             <Second />
             <Third />
@@ -116,16 +112,16 @@ const First = () => {
     const { context } = useLang()
     return (
         <Step step={ 1 } title={ context.home.input.name }>
-            <FormControl isInvalid={ errors.name && touched.name }>
+            <Field.Root invalid={ Boolean(errors.name && touched.name) }>
                 <CustomInput
                     id={ 'name' }
                     placeholder={ context.home.input.placeholder }
                     onChange={ handleChange }
                 />
-                <FormErrorMessage>
+                <Field.ErrorText>
                     { errors.name }
-                </FormErrorMessage>
-            </FormControl>
+                </Field.ErrorText>
+            </Field.Root>
         </Step>
     )
 }
@@ -155,8 +151,8 @@ const Third = () => {
                     <Center>{ context.home.input.switch }</Center>
                     <ChakraSwitch
                         name='allDay'
-                        isChecked={ values.allDay }
-                        onChange={ (e) => setFieldValue('allDay', e.target.checked) }
+                        checked={ values.allDay }
+                        onCheckedChange={ (details) => setFieldValue('allDay', details.checked) }
                         size={ { base: 'lg', md: 'md' } }
                     />
                 </HStack>
@@ -171,29 +167,35 @@ const Third = () => {
                 </Center>
             ) : (
                 // When is not all day mode
-                <FormControl isInvalid={ errors.range && touched.range }>
-                    <Center>
-                        <RangeSlider
+                <Field.Root invalid={ Boolean(errors.range && touched.range) }>
+                    <Center w='100%'>
+                        <Slider.Root
                             id='range'
                             aria-label={ [ 'min', 'max' ] }
                             defaultValue={ values.range }
                             min={ 0 }
                             max={ 24 }
                             step={ 1 }
-                            onChange={ (val) => setFieldValue('range', val) }
+                            minStepsBetweenThumbs={ 0 }
+                            onValueChange={ (details) => setFieldValue('range', details.value) }
                             w={ { base: '81%' } }
                         >
-                            <RangeSliderTrack bg='bg.track' h='12px' borderRadius='md'>
-                                <RangeSliderFilledTrack bg='ink.primary' />
-                            </RangeSliderTrack>
-                            <SliderThumb index={ 0 } value={ values.range[ 0 ] } />
-                            <SliderThumb index={ 1 } value={ values.range[ 1 ] } />
-                        </RangeSlider>
+                            { /* v2's slider stood 14px tall with the track and
+                                 thumbs centred on it; v3 sizes the row to its
+                                 own 20px thumb, pushing the page down 6px */ }
+                            <Slider.Control minH='14px'>
+                                <Slider.Track bg='bg.track' h='12px' borderRadius='md'>
+                                    <Slider.Range bg='ink.primary' />
+                                </Slider.Track>
+                                <SliderThumb index={ 0 } value={ values.range[ 0 ] } />
+                                <SliderThumb index={ 1 } value={ values.range[ 1 ] } />
+                            </Slider.Control>
+                        </Slider.Root>
                     </Center>
-                    <FormErrorMessage mt={ 8 }>
+                    <Field.ErrorText mt={ 8 }>
                         { errors.range }
-                    </FormErrorMessage>
-                </FormControl>
+                    </Field.ErrorText>
+                </Field.Root>
             ) }
         </Step >
     )
@@ -245,11 +247,14 @@ const Forth = () => {
 const SliderThumb = ({ index, value }) => {
     const { configs } = useConfigs()
     return (
-        <RangeSliderThumb
+        <Slider.Thumb
             boxSize={ 8 }
             index={ index }
-            border='solid 1px'
+            bg='white'
+            borderWidth='1px'
+            borderStyle='solid'
             borderColor='bg.track'
+            boxShadow='thumb'
             zIndex={ 0 }
             _after={ {
                 content: `"${displayTime(value, configs.usePM)}"`,
@@ -259,7 +264,9 @@ const SliderThumb = ({ index, value }) => {
                 width: '100px',
                 fontWeight: 'medium',
             } }
-        />
+        >
+            <Slider.HiddenInput />
+        </Slider.Thumb>
     )
 }
 

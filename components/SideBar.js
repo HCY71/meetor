@@ -1,4 +1,4 @@
-import { forwardRef, useEffect } from 'react'
+import { forwardRef } from 'react'
 import Link from 'next/link'
 import {
     HStack,
@@ -7,18 +7,12 @@ import {
     Box,
     Text,
     Popover,
-    PopoverAnchor,
-    PopoverContent,
-    PopoverHeader,
-    PopoverBody,
-    PopoverFooter,
     Portal,
-    useColorMode,
     useDisclosure,
-    // Link
 } from '@chakra-ui/react'
 import CustomButton from './atoms/CustomButton'
 import CustomSwitch from './atoms/CustomSwitch'
+import { useColorMode } from '@/components/ColorMode'
 import { useLang } from '@/context/LangContext'
 import { useConfigs } from '@/context/ConfigsContext'
 
@@ -26,34 +20,25 @@ const SideBar = () => {
     const { toggleColorMode } = useColorMode()
     const { context } = useLang()
     const { configs, setConfigs } = useConfigs()
-    const { isOpen, onToggle, onClose } = useDisclosure()
+    const { open, setOpen, onToggle, onClose } = useDisclosure()
 
-    // Chakra's Popover closeOnBlur is focus-based and never fires when tapping a
-    // non-focusable area, so close the menu ourselves on any pointer down
-    // outside the menu content and the trigger.
-    useEffect(() => {
-        if (!isOpen) return undefined
-        const handleOutsidePointer = (pointerEvent) => {
-            if (!(pointerEvent.target instanceof Element)) return
-            if (pointerEvent.target.closest('.chakra-popover__content')) return
-            if (pointerEvent.target.closest('[data-menu-trigger]')) return
-            onClose()
-        }
-        document.addEventListener('pointerdown', handleOutsidePointer)
-        return () => document.removeEventListener('pointerdown', handleOutsidePointer)
-    }, [isOpen, onClose])
-
+    // v2's Popover closed on blur, which never fired when tapping somewhere
+    // unfocusable, so this used to listen for outside pointer downs itself.
+    // v3 detects outside interaction by pointer, which covers that case.
     return (
-        <Popover placement='bottom-end' isLazy isOpen={ isOpen } onClose={ onClose } autoFocus={ false } closeOnBlur={ false }>
-            <PopoverAnchor>
+        <Popover.Root
+            open={ open }
+            onOpenChange={ (details) => setOpen(details.open) }
+            positioning={ { placement: 'bottom-end' } }
+            lazyMount
+            unmountOnExit
+            autoFocus={ false }
+        >
+            <Popover.Trigger asChild>
                 <MenuIcon
-                    isOpen={ isOpen }
-                    data-menu-trigger
+                    isOpen={ open }
                     role='button'
                     tabIndex={ 0 }
-                    aria-expanded={ isOpen }
-                    aria-haspopup='dialog'
-                    onClick={ onToggle }
                     onKeyDown={ (keyboardEvent) => {
                         if (keyboardEvent.key === 'Enter' || keyboardEvent.key === ' ') {
                             keyboardEvent.preventDefault()
@@ -61,11 +46,22 @@ const SideBar = () => {
                         }
                     } }
                 />
-            </PopoverAnchor>
+            </Popover.Trigger>
             <Portal>
-                    <PopoverContent rootProps={ { zIndex: 'popover' } } p={ 2 } bg='bg.surface' boxShadow='menu'>
-                        <PopoverHeader fontWeight='bold' borderBottom='none' fontSize='20px'>{ context.global.settings.title }</PopoverHeader>
-                        <PopoverBody pt='0' pb='20px' as={ VStack } align='flex-start' spacing={ 4 }>
+                <Popover.Positioner>
+                    <Popover.Content
+                        w='320px'
+                        textStyle='md'
+                        p={ 2 }
+                        bg='bg.surface'
+                        borderWidth='1px'
+                        borderStyle='solid'
+                        borderColor='border'
+                        borderRadius='md'
+                        boxShadow='menu'
+                    >
+                        <Popover.Header px='3' py='2' fontWeight='bold' fontSize='20px' lineHeight='1.5'>{ context.global.settings.title }</Popover.Header>
+                        <Popover.Body px='3' pt='0' pb='20px' display='flex' flexDirection='column' alignItems='flex-start' gap={ 4 }>
                             <Template title={ context.global.settings.theme } center>
                                 <CustomSwitch
                                     onClick={ toggleColorMode }
@@ -107,15 +103,18 @@ const SideBar = () => {
                                 </a>
                             </Center>
 
-                        </PopoverBody>
-                        <PopoverFooter>
-                            <Box as={ Link } href='/about' rel='noopener noreferrer' fontWeight='bold' onClick={ onClose }>
-                                { `${context.global.settings.about}` }
+                        </Popover.Body>
+                        <Popover.Footer px='3' py='2' borderTopWidth='1px' borderStyle='solid' borderColor='border'>
+                            <Box asChild fontWeight='bold'>
+                                <Link href='/about' rel='noopener noreferrer' onClick={ onClose }>
+                                    { `${context.global.settings.about}` }
+                                </Link>
                             </Box>
-                        </PopoverFooter>
-                    </PopoverContent>
+                        </Popover.Footer>
+                    </Popover.Content>
+                </Popover.Positioner>
             </Portal>
-        </Popover >
+        </Popover.Root>
     )
 }
 

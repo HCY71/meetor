@@ -6,8 +6,8 @@
 // variables and the global body background through emotion during hydration,
 // which is too late to cover the first paint, so a dark visitor saw a white
 // frame first. This stylesheet ships as a <link> in <head>, so it paints before
-// any script runs. The media query covers the frame before ColorModeScript
-// executes, and the data-theme attribute that script writes on <html> then wins
+// any script runs. The media query covers the frame before next-themes'
+// inline script executes, and the class that script writes on <html> then wins
 // so an explicit choice still beats the system preference.
 //
 // These two literals mirror the light and dark values of bg.canvas in
@@ -20,34 +20,42 @@ html {
     background: #020408;
   }
 }
-html[data-theme="light"] {
+html.light {
   background: #fff;
 }
-html[data-theme="dark"] {
+html.dark {
   background: #020408;
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-  position: relative;
+// Chakra v3 ships its styles in cascade layers, and any rule outside a layer
+// beats every rule inside one regardless of specificity. Left unlayered, this
+// reset would strip the padding, margin and positioning off every Chakra
+// component. Placing it in Chakra's own reset layer, which Chakra orders below
+// the rest of its layers, restores the v2 behaviour where the components won.
+@layer reset {
+  * {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    position: relative;
+  }
+
+  html,
+  body {
+    max-width: 100vw;
+    // debug
+    overflow-x: clip;
+    overscroll-behavior-x: none;
+    font-family: ui-sans-serif, system-ui, -apple-system, "system-ui", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    user-select: none;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
-html,
-body {
-  max-width: 100vw;
-  // debug
-  overflow-x: clip;
-  overscroll-behavior-x: none;
-  font-family: ui-sans-serif, system-ui, -apple-system, "system-ui", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  user-select: none;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
 .next-link-custom {
   width: 100%;
   &:hover {
@@ -95,7 +103,7 @@ a {
   border-radius: 10px;
 }
 
-.chakra-ui-dark #nprogress .bar {
+.dark #nprogress .bar {
   height: 2px;
 }
 

@@ -19,7 +19,7 @@ const DonateModal = ({ controls }) => {
             } }
             button={
                 <>
-                    <CustomButton colorScheme='blue' mr={ 3 } onClick={ handleClose } ghost>
+                    <CustomButton mr={ 3 } onClick={ handleClose } ghost>
                         { context.global.button.close }
                     </CustomButton>
                     <DonateButton isModal />

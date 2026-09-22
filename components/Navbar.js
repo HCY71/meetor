@@ -68,7 +68,7 @@ const ProgressiveBlur = () => {
                         key={ radius }
                         pos='absolute'
                         inset='0'
-                        sx={ {
+                        css={ {
                             backdropFilter: `blur(${radius}px)`,
                             WebkitBackdropFilter: `blur(${radius}px)`,
                             maskImage: mask,
@@ -83,7 +83,7 @@ const ProgressiveBlur = () => {
             <Box
                 pos='absolute'
                 inset='0'
-                sx={ {
+                css={ {
                     background: 'linear-gradient(to bottom, var(--chakra-colors-bg-veil), transparent 70%)',
                 } }
             />

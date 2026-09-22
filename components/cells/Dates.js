@@ -6,8 +6,7 @@ import {
     HStack,
     Center,
     Icon,
-    FormControl,
-    FormErrorMessage,
+    Field,
 } from "@chakra-ui/react"
 import useDate from "@/hooks/useDate"
 import { getDate, isToday, isPast, addDays, formatISO } from "date-fns"
@@ -135,7 +134,7 @@ const Dates = () => {
                     </Center>
                 ) }
             </HStack>
-            <FormControl isInvalid={ errors.dates && touched.dates }>
+            <Field.Root invalid={ Boolean(errors.dates && touched.dates) }>
                 <Grid
                     w='100%'
                     gridTemplateRows='repeat(5,1fr)'
@@ -217,10 +216,10 @@ const Dates = () => {
                         ) }
                     />
                 </Grid>
-                <FormErrorMessage>
+                <Field.ErrorText>
                     { errors.dates }
-                </FormErrorMessage>
-            </FormControl>
+                </Field.ErrorText>
+            </Field.Root>
         </VStack >
     )
 }

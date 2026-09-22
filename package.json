@@ -12,16 +12,15 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@chakra-ui/react": "^2.10.10",
+    "@chakra-ui/react": "^3.37.0",
     "@date-fns/tz": "^1.5.0",
     "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
     "@supabase/supabase-js": "^2.117.0",
     "@vercel/analytics": "^2.0.1",
     "date-fns": "^4.4.0",
     "formik": "^2.4.9",
-    "framer-motion": "^10.12.16",
     "next": "16.3.6",
+    "next-themes": "^0.4.6",
     "nprogress": "^0.2.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",

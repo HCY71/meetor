@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { HStack, Center, FormControl, FormErrorMessage } from "@chakra-ui/react"
+import { HStack, Center, Field } from "@chakra-ui/react"
 import { FieldArray, useFormikContext } from "formik"
 import useToday from "@/hooks/useDate"
 import { useLang } from "@/context/LangContext"
@@ -25,9 +25,9 @@ const Days = () => {
         return from.includes(check)
     }
     return (
-        <FormControl isInvalid={ errors.days && touched.days }>
+        <Field.Root invalid={ Boolean(errors.days && touched.days) }>
 
-            <HStack w='100%' spacing={ 1 }>
+            <HStack w='100%' gap={ 1 }>
                 <FieldArray
                     name="days"
                     render={ () => (
@@ -85,10 +85,10 @@ const Days = () => {
                 />
             </HStack>
 
-            <FormErrorMessage>
+            <Field.ErrorText>
                 { errors.days }
-            </FormErrorMessage>
-        </FormControl >
+            </Field.ErrorText>
+        </Field.Root>
     )
 }
 

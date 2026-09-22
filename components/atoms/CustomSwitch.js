@@ -1,8 +1,8 @@
 import {
     Center,
     Icon,
-    useColorMode
 } from '@chakra-ui/react'
+import { useColorMode } from '@/components/ColorMode'
 import { BsSunFill, BsFillMoonFill } from 'react-icons/bs'
 
 const CustomSwitch = ({ ...props }) => {

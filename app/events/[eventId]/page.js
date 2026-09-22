@@ -52,8 +52,8 @@ const Page = () => {
 
     // handle event not found
     if (notFound) return (
-        <VStack spacing={ 15 } >
-            <VStack spacing={ 5 }>
+        <VStack gap={ 15 } >
+            <VStack gap={ 5 }>
                 <Header fontSize={ { base: '4rem', md: '5rem' } }>{ context.eventNotFound.title }</Header>
                 <Header fontSize={ { base: '1.5rem', md: '2rem' } }>{ context.notFound.title }</Header>
             </VStack>
@@ -70,17 +70,17 @@ const Page = () => {
     else if (!event) return <PageSkeleton />
     return (
         <EventProvider event={ event }>
-            <VStack spacing={ 5 } w='520px' maxW='100%'>
+            <VStack gap={ 5 } w='520px' maxW='100%'>
                 { event
                     &&
-                    <VStack spacing={ { base: 2, md: 3 } }>
+                    <VStack gap={ { base: 2, md: 3 } }>
                         <Header>
                             { event.name }
                         </Header>
                         <Subtitle>
                             { context.event.createdAt + getTimeDistance(event, currentDate, configs.lang) + context.event.ago }
                         </Subtitle>
-                        <HStack mt={ 4 } mb={ 4 } spacing={ 3 }>
+                        <HStack mt={ 4 } mb={ 4 } gap={ 3 }>
                             <CopyLink />
                             <Share />
                         </HStack>

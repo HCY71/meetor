@@ -8,7 +8,7 @@ import { useLang } from '@/context/LangContext'
 export default function NotFound() {
     const { context } = useLang()
     return (
-        <VStack spacing={ 15 }>
+        <VStack gap={ 15 }>
             <VStack>
                 <Header fontSize='10rem'>404</Header>
                 <Header fontSize={ { base: '1.5rem', md: '2rem' } }>{ context.notFound.title }</Header>

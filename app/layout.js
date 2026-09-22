@@ -2,9 +2,7 @@
 import './globals.scss'
 import { useEffect } from 'react'
 
-import { ColorModeScript } from '@chakra-ui/react'
 import { Providers } from "../components/Providers"
-import theme from '@/public/theme'
 
 import PageContainer from '@/components/PageContainer'
 import { useProgress } from '@/hooks/useProgress'
@@ -62,9 +60,6 @@ export default function RootLayout({ children }) {
       </head>
 
       <body suppressHydrationWarning={ true }>
-        { /* Must stay the first child of body so it resolves the colour mode
-             before the markup below is parsed and painted */ }
-        <ColorModeScript initialColorMode={ theme.config.initialColorMode } storageKey='meetor_color_mode' />
         <Providers>
           <PageContainer>
             { children }

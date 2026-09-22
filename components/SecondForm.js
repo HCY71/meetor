@@ -2,8 +2,7 @@ import {
     HStack,
     VStack,
     Center,
-    FormControl,
-    FormErrorMessage,
+    Field,
     useDisclosure,
 } from "@chakra-ui/react"
 import { useRef, useState, useEffect } from "react"
@@ -26,11 +25,11 @@ import { useTouchDevices } from "@/hooks/useTouchDevices"
 import { useEvent } from "@/context/EventContext"
 
 const SecondForm = () => {
-    const { isOpen, onOpen, onClose } = useDisclosure()
+    const { open, onOpen, onClose } = useDisclosure()
 
     return (
         <TimezoneProvider>
-            <DonateModal controls={ { isOpen, onClose } } />
+            <DonateModal controls={ { isOpen: open, onClose } } />
             <Steps openModal={ onOpen } />
         </TimezoneProvider>
     )
@@ -66,7 +65,7 @@ const First = ({ inputRef, openModal }) => {
                 onSubmit={ handleSubmit }
             >
                 { ({ errors, touched, handleChange, handleSubmit }) => (
-                    <FormControl isInvalid={ errors.name && touched.name }>
+                    <Field.Root invalid={ Boolean(errors.name && touched.name) }>
                         <HStack as='form' w='100%' onSubmit={ handleSubmit }>
                             <CustomInput
                                 id='name'
@@ -76,10 +75,10 @@ const First = ({ inputRef, openModal }) => {
                             />
                             <Submit />
                         </HStack>
-                        <FormErrorMessage>
+                        <Field.ErrorText>
                             { errors.name }
-                        </FormErrorMessage>
-                    </FormControl>
+                        </Field.ErrorText>
+                    </Field.Root>
                 ) }
             </Formik>
         </Step>
@@ -140,7 +139,7 @@ const LoggedIn = () => {
                 lineHeight='1.5'
                 textAlign='center'
                 color='ink.primary'
-                spacing={ 4 }
+                gap={ 4 }
             >
                 <Center>
                     { context.event.go }

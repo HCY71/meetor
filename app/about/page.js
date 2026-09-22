@@ -1,5 +1,5 @@
 'use client'
-import { Box, Image, Divider, Link } from "@chakra-ui/react"
+import { Box, Image, Separator, Link } from "@chakra-ui/react"
 import { useLang } from "@/context/LangContext"
 import { author } from "@/content"
 
@@ -13,7 +13,7 @@ const AboutPage = () => {
             <BodyText mt='5'>{ context.about.description }</BodyText>
             <H2>{ context.about.meetorOverview }</H2>
             <BodyText>{ context.about.meetorOverviewDescription }</BodyText>
-            <Divider mt='10' bg='border.subtle' />
+            <Separator mt='10' borderColor='border.subtle' opacity='0.6' />
             <H1>{ context.about.howToUse }</H1>
             <Box display='flex' flexDir='column' gap='6'>
                 { context.about.meetorSteps.map((step, i) => (
@@ -24,7 +24,7 @@ const AboutPage = () => {
                     </Box>
                 )) }
             </Box>
-            <Divider mt='10' bg='border.subtle' />
+            <Separator mt='10' borderColor='border.subtle' opacity='0.6' />
             <H1>{ context.about.aboutAuthor }</H1>
             <Box display='flex' mt='5' gap={ { base: '8', md: '10' } }>
                 <Box>

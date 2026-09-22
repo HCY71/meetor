@@ -1,9 +1,5 @@
 import {
     Tabs,
-    Tab,
-    TabList,
-    TabPanels,
-    TabPanel,
     Tag,
     Center,
     HStack,
@@ -12,7 +8,7 @@ import CustomSelect from '../atoms/CustomSelect'
 import { toast } from 'react-hot-toast'
 import { useLang } from '@/context/LangContext'
 
-const CustomTabs = ({ onMouseDown = [ null, null ], tab, panel, isDisabled = false, inputRef = null, tips = [], timezoneConfigs, ...props }) => {
+const CustomTabs = ({ onMouseDown = [ null, null ], tab, panel, isDisabled = false, inputRef = null, tips = [], timezoneConfigs, index, onChange, ...props }) => {
     const { context } = useLang()
     const handleDisable = () => {
         toast(context.global.toast.nameFirst, {
@@ -23,34 +19,39 @@ const CustomTabs = ({ onMouseDown = [ null, null ], tab, panel, isDisabled = fal
     const handleReset = () => {
         timezoneConfigs.updateTimezone(props.event.timezone)
     }
+    // v3 tabs are keyed by string value rather than position. Callers still
+    // work in indexes, so the translation happens here and nowhere else.
+    const isControlled = index !== undefined
     return (
-        <Tabs
+        <Tabs.Root
             w='100%'
-            isFitted
-            isLazy
-            lazyBehavior='keepMounted'
-            { ...props }
+            fitted
+            lazyMount
+            value={ isControlled ? String(index) : undefined }
+            defaultValue={ isControlled ? undefined : '0' }
+            onValueChange={ (details) => onChange?.(Number(details.value)) }
         >
-            <TabList as={ HStack } spacing={ { base: 1, md: 2 } }>
+            <Tabs.List display='flex' gap={ { base: 1, md: 2 } }>
                 <Center
                     onClick={ isDisabled ? handleDisable : null }
                     pointerEvents={ isDisabled ? 'initial' : 'none' }
                     cursor={ isDisabled ? 'not-allowed' : 'none' }
                     flex='1'
                 >
-                    <Tab
+                    <Tabs.Trigger
+                        value='0'
+                        w='100%'
                         onMouseDown={ onMouseDown[ 0 ] }
                         pointerEvents={ isDisabled ? 'none' : 'initial' }
                     >
                         { tab[ 0 ] }
-                    </Tab>
+                    </Tabs.Trigger>
                 </Center>
                 <Center flex='1'>
-                    <Tab onMouseDown={ onMouseDown[ 1 ] }>{ tab[ 1 ] }</Tab>
+                    <Tabs.Trigger value='1' w='100%' onMouseDown={ onMouseDown[ 1 ] }>{ tab[ 1 ] }</Tabs.Trigger>
                 </Center>
-            </TabList>
-            <TabPanels >
-                <TabPanel p='1rem 0'>
+            </Tabs.List>
+            <Tabs.Content value='0' p='1rem 0'>
                     <HStack>
                         { tips[ 0 ] && <TagTemplate>{ `💡 ${tips[ 0 ]}` }</TagTemplate> }
                         { tips[ 2 ] && <TagTemplate>{ `💡 ${tips[ 2 ]}` }</TagTemplate> }
@@ -84,8 +85,8 @@ const CustomTabs = ({ onMouseDown = [ null, null ], tab, panel, isDisabled = fal
                         </HStack>
                     }
                     { panel[ 0 ] }
-                </TabPanel>
-                <TabPanel p='1rem 0'>
+            </Tabs.Content>
+            <Tabs.Content value='1' p='1rem 0'>
                     <HStack>
                         { tips[ 1 ] && <TagTemplate>{ `💡 ${tips[ 1 ]}` }</TagTemplate> }
                         { tips[ 2 ] && <TagTemplate>{ `💡 ${tips[ 2 ]}` }</TagTemplate> }
@@ -119,21 +120,29 @@ const CustomTabs = ({ onMouseDown = [ null, null ], tab, panel, isDisabled = fal
                         </HStack>
                     }
                     { panel[ 1 ] }
-                </TabPanel>
-            </TabPanels>
-        </Tabs >
+            </Tabs.Content>
+        </Tabs.Root>
     )
 }
 
 export const TagTemplate = ({ children, ...props }) => {
     return (
-        <Tag
-            colorScheme='orange'
+        <Tag.Root
+            bg='tip.bg'
+            color='tip.fg'
+            minH='6'
+            px='2'
+            borderRadius='md'
+            fontSize='sm'
+            fontWeight='medium'
+            lineHeight='1.2'
             mb='12px'
             { ...props }
         >
+            { /* Children go straight into the root: v3's Tag.Label clamps to one
+                 line, which would cut the long all-day hint short on phones */ }
             { children }
-        </Tag>
+        </Tag.Root>
     )
 }
 

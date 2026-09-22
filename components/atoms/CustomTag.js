@@ -25,7 +25,7 @@ const Template = ({ children, ...props }) => {
         <Center
             bg='ink.primary'
             color='ink.inverted'
-            borderRadius='sm'
+            borderRadius='xs'
             p='2px 4px'
             { ...props }
         >

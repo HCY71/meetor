@@ -42,9 +42,9 @@ export default function Home() {
 
   return (
     <>
-      <VStack spacing={ { base: 3, md: 5 } }>
+      <VStack gap={ { base: 3, md: 5 } }>
         <VStack
-          spacing='0'
+          gap='0'
           maxW={ { base: '100%', lg: '900px' } }
         >
           <Header>
