@@ -2,37 +2,39 @@
   "name": "meet-app",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint ."
   },
   "dependencies": {
-    "@chakra-ui/next-js": "^2.1.4",
-    "@chakra-ui/react": "^2.7.1",
-    "@date-fns/tz": "^1.2.0",
-    "@emotion/react": "^11.11.1",
-    "@emotion/styled": "^11.11.0",
-    "@supabase/supabase-js": "^2.25.0",
-    "@vercel/analytics": "^1.0.1",
-    "date-fns": "^4.1.0",
-    "date-fns-tz": "^2.0.0",
-    "encoding": "^0.1.13",
-    "eslint": "8.42.0",
-    "eslint-config-next": "13.4.4",
-    "formik": "^2.4.1",
+    "@chakra-ui/react": "^2.10.10",
+    "@date-fns/tz": "^1.5.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@supabase/supabase-js": "^2.117.0",
+    "@vercel/analytics": "^2.0.1",
+    "date-fns": "^4.4.0",
+    "formik": "^2.4.9",
     "framer-motion": "^10.12.16",
-    "next": "13.4.4",
+    "next": "16.3.6",
     "nprogress": "^0.2.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-ga4": "^2.1.0",
-    "react-hot-toast": "^2.4.1",
-    "react-icons": "^4.9.0",
-    "sass": "^1.62.1",
-    "swr": "^2.2.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-ga4": "^3.0.1",
+    "react-hot-toast": "^2.6.1",
+    "react-icons": "^5.7.0",
+    "sass": "^1.105.0",
+    "swr": "^2.5.1",
     "uid": "^2.0.2",
-    "yup": "^1.2.0"
+    "yup": "^1.7.1"
+  },
+  "devDependencies": {
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.3.6"
   }
 }

@@ -137,7 +137,7 @@ const Second = () => {
             <CustomTabs
                 onMouseDown={ [ () => setFieldValue('type', 'dates'), () => setFieldValue('type', 'days') ] }
                 tab={ [ context.global.panel.dates, context.global.panel.days ] }
-                panel={ [ <Dates />, <Days /> ] }
+                panel={ [ <Dates key='dates' />, <Days key='days' /> ] }
                 tips={ [ context.global.tips.dragSelect, context.global.tips.dragSelect ] }
             />
         </Step >
