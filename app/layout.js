@@ -2,7 +2,9 @@
 import './globals.scss'
 import { useEffect } from 'react'
 
+import { ColorModeScript } from '@chakra-ui/react'
 import { Providers } from "../components/Providers"
+import theme from '@/public/theme'
 
 import PageContainer from '@/components/PageContainer'
 import { useProgress } from '@/hooks/useProgress'
@@ -32,8 +34,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning={ true }>
       <head>
+        { /* Browser chrome colour on mobile. The dark value matches bg.canvas
+             so the address bar does not flash a lighter shade than the page */ }
         <meta name="theme-color" content="#fff" media="(prefers-color-scheme: light)" />
-        <meta name="theme-color" content="#000" media="(prefers-color-scheme: dark)" />
+        <meta name="theme-color" content="#020408" media="(prefers-color-scheme: dark)" />
 
         <title>{ seo.title }</title>
         <meta name="description" content={ seo.description } />
@@ -44,7 +48,6 @@ export default function RootLayout({ children }) {
         <link rel="manifest" href="/site.webmanifest" />
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#000000" />
         <meta name="msapplication-TileColor" content="#000" />
-        <meta name="theme-color" content="#ffffff" />
 
         <meta property="og:image" content={ seo.openGraphImage } />
         <meta property="og:image:type" content="image/png" />
@@ -59,6 +62,9 @@ export default function RootLayout({ children }) {
       </head>
 
       <body suppressHydrationWarning={ true }>
+        { /* Must stay the first child of body so it resolves the colour mode
+             before the markup below is parsed and painted */ }
+        <ColorModeScript initialColorMode={ theme.config.initialColorMode } storageKey='meetor_color_mode' />
         <Providers>
           <PageContainer>
             { children }
