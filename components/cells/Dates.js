@@ -79,10 +79,10 @@ const Dates = () => {
                     cursor='pointer'
                     transition='transform .2s'
                     _hover={ {
-                        transform: 'scale(1.05)'
+                        transform: 'scale(1.02)'
                     } }
                     _active={ {
-                        transform: 'scale(.95)'
+                        transform: 'scale(.98)'
                     } }
                 >
                     <ControlIcon transform='rotate(-180deg)' />
