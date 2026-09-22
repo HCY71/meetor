@@ -1,11 +1,11 @@
 const globalEn = {
     button: {
         submit: "Submit",
-        back: "BACK",
-        auto: "AUTO",
+        back: "Back",
+        auto: "Auto",
         close: "Later",
-        donate: "Buy me a coffee",
-        logout: "Log out"
+        donate: "Buy Me a Coffee",
+        logout: "Log Out"
     },
     weekdays: [
         "SUN",
@@ -47,7 +47,7 @@ const globalEn = {
             title: "Updated 🎉🎉",
             content: "Timezone is now supported. Please note that events created before the update may have incorrect dates due to the timezone changes. Make sure the time is correct for you and your group. If you feel okay with it, it's better to create a new event."
         },
-        close: "Got it"
+        close: "Got It"
     },
     panel: {
         dates: "Dates",
