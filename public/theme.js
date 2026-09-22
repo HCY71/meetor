@@ -1,4 +1,4 @@
-import { extendTheme } from '@chakra-ui/react'
+import { extendTheme, defineStyle, defineStyleConfig } from '@chakra-ui/react'
 import { tabsAnatomy, switchAnatomy } from '@chakra-ui/anatomy'
 import { createMultiStyleConfigHelpers } from '@chakra-ui/react'
 
@@ -34,10 +34,11 @@ const semanticTokens = {
         'bg.track': { _light: 'gray.100', _dark: 'gray.800' },
         'bg.veil': { _light: 'hsla(0,0%,100%,.75)', _dark: 'rgba(2,4,8,.75)' },
 
-        // Borders come in two weights: subtle for chrome and inputs, strong for
-        // the timetable grid, where the rule has to stay readable against a
-        // filled cell. Anything that wants the full-contrast outline uses
-        // ink.primary instead.
+        // Borders come in three weights: faint for a rule that should barely
+        // register, subtle for chrome and inputs, and strong for the timetable
+        // grid, where the rule has to stay readable against a filled cell.
+        // Anything that wants the full-contrast outline uses ink.primary.
+        'border.faint': { _light: 'gray.100', _dark: 'whiteAlpha.200' },
         'border.subtle': { _light: 'gray.200', _dark: 'whiteAlpha.300' },
         'border.strong': { _light: 'blackAlpha.800', _dark: 'whiteAlpha.800' },
 
@@ -117,6 +118,19 @@ const tabsTheme = defineMultiStyleConfig({
     defaultProps: { variant: 'toggle' },
 })
 
+// Chakra's smallest built-in button is 32px, which overpowers a button that
+// only sits alongside a line of footer text.
+const buttonTheme = defineStyleConfig({
+    sizes: {
+        compact: defineStyle({
+            h: '30px',
+            minW: '30px',
+            fontSize: '0.875rem',
+            px: 3,
+        }),
+    },
+})
+
 const theme = extendTheme({
     config: {
         disableTransitionOnChange: false,
@@ -134,6 +148,7 @@ const theme = extendTheme({
     components: {
         Tabs: tabsTheme,
         Switch: switchTheme,
+        Button: buttonTheme,
     },
 })
 
