@@ -8,7 +8,7 @@ const homeZhTw = {
         name: "幫行程取個名字",
         chooseDates: "選擇日期/星期",
         chooseRange: "設定一個時間範圍",
-        placeholder: "世界盃決賽，幾點集合？",
+        placeholder: "週五火鍋，誰有空？",
         switch: "整天",
         timezone: "時區",
         timezoneReset: "重置"

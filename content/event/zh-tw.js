@@ -6,7 +6,7 @@ const eventZhTw = {
     input: {
         name: "填上你的姓名",
         checkTime: "確認你的時間",
-        placeholder: "Mbappé"
+        placeholder: "周杰倫"
     },
     export: "匯出"
 }
