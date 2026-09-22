@@ -28,7 +28,7 @@ const AboutPage = () => {
             <H1>{ context.about.aboutAuthor }</H1>
             <Box display='flex' mt='5' gap={ { base: '8', md: '10' } }>
                 <Box>
-                    <Image src="./man.png" alt="profile picture" w={ '120px' } h='auto' />
+                    <Image src="./author-portrait.webp" alt="portrait of Erkin Hsu" w={ '120px' } h={ '120px' } borderRadius='full' />
                 </Box>
                 <Box>
                     <Box display='flex' flexDir={ { base: 'column', md: 'row' } } gap='2' alignItems={ { base: 'start', md: 'end' } }>
