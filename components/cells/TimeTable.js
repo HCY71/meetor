@@ -367,21 +367,19 @@ const getCellOffsetWithinGrid = (cellElement, gridElement) => {
   };
 };
 
-// FIXME: the alpha term `percent * 0.8 + 20` yields 20 to 20.8, and CSS clamps
-// alpha to 1, so every cell renders fully opaque and only the lightness carries
-// the availability signal. It was almost certainly meant to be `+ 0.2`, giving
-// the intended 0.2 to 1 ramp. Changing it visibly alters the heatmap, so it is
-// left as-is until that shift is reviewed.
+// Availability ramps through both lightness and alpha, so an empty cell fades
+// into the page rather than painting a flat block over it.
 //
-// This is also the one place that still needs the colour mode as a JS value:
-// the ramp is computed per cell from a percentage, so it cannot be expressed as
-// a semantic token in public/theme.js the way every other colour now is.
+// This is the one place that still needs the colour mode as a JS value: the
+// ramp is computed per cell from a percentage, so it cannot be expressed as a
+// semantic token in public/theme.js the way every other colour now is.
 const generateAvailabilityColor = (percent, isDarkMode) => {
   if (isNaN(percent)) return "transparent";
+  const alpha = percent * 0.8 + 0.2;
   if (isDarkMode) {
-    return `hsla(47, 81%, ${61 * percent}%, ${percent * 0.8 + 20})`;
+    return `hsla(47, 81%, ${61 * percent}%, ${alpha})`;
   }
-  return `hsla(51, 89%, ${100 - 33 * percent}%, ${percent * 0.8 + 20})`;
+  return `hsla(51, 89%, ${100 - 33 * percent}%, ${alpha})`;
 };
 
 const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
