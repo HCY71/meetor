@@ -5,8 +5,6 @@ import {
 import { MenuIconComposition } from './SideBar'
 import SideBar from './SideBar'
 import { useRouter } from 'next/navigation'
-import { colors } from '@/public/theme'
-import { useColorMode } from '@chakra-ui/react'
 
 const Navbar = ({ loading }) => {
     if (loading) return (
@@ -38,7 +36,6 @@ const Navbar = ({ loading }) => {
 
 
 const Template = ({ children }) => {
-    const { colorMode } = useColorMode()
     const router = useRouter()
     const goHome = () => {
         router.push('/')
@@ -50,8 +47,10 @@ const Template = ({ children }) => {
             top='0'
             h={ { base: '60px', md: '80px' } }
             justifyContent='space-between'
-            borderBottom={ colors[ colorMode ].border.nav }
-            bg={ colors[ colorMode ].bg.nav.primary }
+            borderBottomWidth='1px'
+            borderBottomStyle='solid'
+            borderBottomColor='border.subtle'
+            bg='bg.veil'
             backdropFilter='saturate(100%) blur(8px)'
             zIndex={ 10 }
             transition='.2s'

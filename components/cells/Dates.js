@@ -8,7 +8,6 @@ import {
     Icon,
     FormControl,
     FormErrorMessage,
-    useColorMode
 } from "@chakra-ui/react"
 import useDate from "@/hooks/useDate"
 import { getDate, isToday, isPast, addDays, formatISO } from "date-fns"
@@ -16,7 +15,6 @@ import { FaPlay } from 'react-icons/fa'
 import { FieldArray, useFormikContext } from "formik"
 import { toast } from "react-hot-toast"
 
-import { colors } from '@/public/theme'
 import { useLang } from '@/context/LangContext'
 import { useConfigs } from '@/context/ConfigsContext'
 import { checkWeekStart, isDateInRange } from '@/public/utils/timeFormat'
@@ -27,7 +25,6 @@ const Dates = () => {
     const { values, errors, touched, setFieldValue } = useFormikContext()
     const { currentDate, generateCalendar, monthControls } = useDate()
 
-    const { colorMode } = useColorMode()
     const { context } = useLang()
     const { configs } = useConfigs()
 
@@ -102,8 +99,8 @@ const Dates = () => {
                     <Center
                         fontSize='0.75rem'
                         fontWeight='medium'
-                        color={ colors[ colorMode ].font.dim }
-                        borderColor={ colors[ colorMode ].bg.dim }
+                        color='ink.muted'
+                        borderColor='ink.muted'
                         cursor='pointer'
                         p={ '4px 8px' }
                         border='solid 1px'
@@ -131,7 +128,7 @@ const Dates = () => {
                     <ControlIcon />
                 </Center>
             </HStack>
-            <HStack w='100%' color={ colors[ colorMode ].font.dim } fontSize={ { base: '.9rem', md: '1rem' } }>
+            <HStack w='100%' color='ink.muted' fontSize={ { base: '.9rem', md: '1rem' } }>
                 { checkWeekStart(context.global.weekdays, configs.weekStartsOn).map((d) =>
                     <Center w='100%' key={ d }>
                         { d }
@@ -156,17 +153,19 @@ const Dates = () => {
 
                                         w='100%'
                                         p={ 3 }
-                                        border='solid 2px rgba(0,0,0,0)'
+                                        borderWidth='2px'
+                                        borderStyle='solid'
+                                        borderColor='transparent'
                                         borderRadius='4px'
                                         color={
                                             isSelected(values.dates, formatISO(d)) ?
-                                                colors[ colorMode ].font.invert :
-                                                monthControls.isCurrentMonth(d) && !isPast(addDays(d, 1)) ? colors[ colorMode ].font.primary : colors[ colorMode ].font.dimMore
+                                                'ink.inverted' :
+                                                monthControls.isCurrentMonth(d) && !isPast(addDays(d, 1)) ? 'ink.primary' : 'ink.subtle'
                                         }
                                         fontWeight={
                                             isToday(d) ? 'bold' : 'normal'
                                         }
-                                        bg={ isSelected(values.dates, formatISO(d)) ? colors[ colorMode ].bg.invert : 'transparent' }
+                                        bg={ isSelected(values.dates, formatISO(d)) ? 'ink.primary' : 'transparent' }
                                         textAlign='center'
                                         key={ d }
 
@@ -174,7 +173,7 @@ const Dates = () => {
                                         userSelect='none'
                                         transition='.2s'
                                         _hover={ {
-                                            borderColor: !isPast(addDays(d, 1)) ? colors[ colorMode ].bg.invert : 'rgba(0,0,0,0)'
+                                            borderColor: !isPast(addDays(d, 1)) ? 'ink.primary' : 'transparent'
                                         } }
                                         onPointerDown={
                                             !isPast(addDays(d, 1)) ?
@@ -227,9 +226,8 @@ const Dates = () => {
 }
 
 const ControlIcon = ({ ...props }) => {
-    const { colorMode } = useColorMode()
     return (
-        <Icon as={ FaPlay } fontSize={ '32px' } color={ colors[ colorMode ].bg.invert } userSelect='none' { ...props } />
+        <Icon as={ FaPlay } fontSize={ '32px' } color='ink.primary' userSelect='none' { ...props } />
     )
 }
 

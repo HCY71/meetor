@@ -1,14 +1,14 @@
 import { forwardRef } from "react"
-import { Button, useColorMode } from "@chakra-ui/react"
-import { colors } from "@/public/theme"
+import { Button } from "@chakra-ui/react"
 
 const CustomButton = forwardRef(({ children, ghost, ...props }, ref) => {
-    const { colorMode } = useColorMode()
     if (ghost) return (
         <Button
             bg={ 'transparent' }
-            color={ colors[ colorMode ].font.primary }
-            border={ colors[ colorMode ].border.buttonGhost }
+            color='ink.primary'
+            borderWidth='1px'
+            borderStyle='solid'
+            borderColor='ink.primary'
             _hover={ {
                 transform: 'scale(1.05)'
             } }
@@ -23,14 +23,13 @@ const CustomButton = forwardRef(({ children, ghost, ...props }, ref) => {
     )
     return (
         <Button
-            bg={ colors[ colorMode ].bg.invert }
-            color={ colors[ colorMode ].font.invert }
+            bg='ink.primary'
+            color='ink.inverted'
             _hover={ {
-                bg: colors[ colorMode ].bg.button.hover,
+                bg: 'ink.hover',
                 transform: 'scale(1.05)'
             } }
             _active={ {
-                bg: colors[ colorMode ].bg.button.active,
                 transform: 'scale(.95)'
             } }
             ref={ ref }

@@ -43,7 +43,6 @@ import {
 import CustomTag from "../atoms/CustomTag";
 import CustomButton from "../atoms/CustomButton";
 
-import { colors } from "@/public/theme";
 
 import useSupabase from "@/hooks/useSupabase";
 import useLocalStorage from "@/hooks/useLocalStorage";
@@ -368,6 +367,15 @@ const getCellOffsetWithinGrid = (cellElement, gridElement) => {
   };
 };
 
+// FIXME: the alpha term `percent * 0.8 + 20` yields 20 to 20.8, and CSS clamps
+// alpha to 1, so every cell renders fully opaque and only the lightness carries
+// the availability signal. It was almost certainly meant to be `+ 0.2`, giving
+// the intended 0.2 to 1 ramp. Changing it visibly alters the heatmap, so it is
+// left as-is until that shift is reviewed.
+//
+// This is also the one place that still needs the colour mode as a JS value:
+// the ramp is computed per cell from a percentage, so it cannot be expressed as
+// a semantic token in public/theme.js the way every other colour now is.
 const generateAvailabilityColor = (percent, isDarkMode) => {
   if (isNaN(percent)) return "transparent";
   if (isDarkMode) {
@@ -929,12 +937,10 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
                     colorMode === "dark",
                   )
                 : isSelected
-                  ? colors[colorMode].bg.timetableSelected
+                  ? "accent"
                   : "transparent"
             }
             opacity={cell.isSelectable ? 1 : 0.1}
-            tableBorder={colors[colorMode].border.table}
-            alternateTableBorder={colors[colorMode].border.table2}
             shouldAnimateBackground={readOnly}
           />
         );
@@ -981,7 +987,6 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
             cell={activeGroupCell}
             whoIsAvailable={activeGroupAvailability}
             users={users}
-            colorMode={colorMode}
             context={context}
           />
         </Popover>
@@ -1012,8 +1017,10 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
           <Center
             h={{ base: "60px", md: "70px" }}
             borderRadius="sm"
-            border={{ base: colors[colorMode].border.table, md: "none" }}
-            bg={{ base: colors[colorMode].bg.nav.primary, md: "none" }}
+            borderWidth={{ base: "1px", md: "0" }}
+            borderStyle="solid"
+            borderColor="border.strong"
+            bg={{ base: "bg.veil", md: "transparent" }}
             p="2px"
             top="-15px"
             w={{ base: "30px", md: "50px" }}
@@ -1028,7 +1035,6 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
           event={event}
           localTimes={localTimes}
           configs={configs}
-          colorMode={colorMode}
         />
       )}
 
@@ -1047,7 +1053,7 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
   );
 };
 
-const TimeLabels = ({ event, localTimes, configs, colorMode }) => {
+const TimeLabels = ({ event, localTimes, configs }) => {
   return (
     <VStack
       spacing={0}
@@ -1074,8 +1080,10 @@ const TimeLabels = ({ event, localTimes, configs, colorMode }) => {
           >
             <Center
               borderRadius="sm"
-              border={{ base: colors[colorMode].border.table, md: "none" }}
-              bg={{ base: colors[colorMode].bg.nav.primary, md: "none" }}
+              borderWidth={{ base: "1px", md: "0" }}
+              borderStyle="solid"
+              borderColor="border.strong"
+              bg={{ base: "bg.veil", md: "transparent" }}
               p="2px"
               top="-10px"
             >
@@ -1084,7 +1092,7 @@ const TimeLabels = ({ event, localTimes, configs, colorMode }) => {
             {hasBreakpoint && (
               <Center
                 pos="absolute"
-                color={colors[colorMode].font.subtitle}
+                color="ink.muted"
                 top={{ base: "30px", md: "35px" }}
                 transform="translateY(-50%)"
               >
@@ -1098,26 +1106,18 @@ const TimeLabels = ({ event, localTimes, configs, colorMode }) => {
   );
 };
 
-const GroupPopoverContent = ({
-  cell,
-  whoIsAvailable,
-  users,
-  colorMode,
-  context,
-}) => {
+const GroupPopoverContent = ({ cell, whoIsAvailable, users, context }) => {
   if (!cell) return null;
-
-  // match the card border color so the arrow gets the same outline
-  const arrowBorderColor =
-    colorMode === "light" ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.8)";
 
   return (
     <PopoverContent
       rootProps={{ style: { pointerEvents: "none" } }}
       w="fit-content"
       maxW="360px"
-      bg={colors[colorMode].bg.primary}
-      border={colors[colorMode].border.table}
+      bg="bg.canvas"
+      borderWidth="1px"
+      borderStyle="solid"
+      borderColor="border.strong"
       boxShadow="lg"
       pointerEvents="none"
     >
@@ -1135,8 +1135,9 @@ const GroupPopoverContent = ({
         <Text>{cell.label}</Text>
       </PopoverHeader>
       <PopoverArrow
-        bg={colors[colorMode].bg.primary}
-        sx={{ "--popper-arrow-shadow-color": arrowBorderColor }}
+        bg="bg.canvas"
+        // match the card border colour so the arrow gets the same outline
+        sx={{ "--popper-arrow-shadow-color": "var(--chakra-colors-border-strong)" }}
       />
       <PopoverBody>
         <HStack flexWrap="wrap" spacing="4px">
@@ -1166,8 +1167,6 @@ const TimeCell = memo(
         isReadOnly,
         label,
         backgroundColor,
-        tableBorder,
-        alternateTableBorder,
         shouldAnimateBackground,
         ...props
       },
@@ -1192,17 +1191,19 @@ const TimeCell = memo(
           w="100%"
           minW="100px"
           h={{ base: "30px", md: "35px" }}
-          border={tableBorder}
+          borderWidth="1px"
+          borderStyle="solid"
+          borderColor="border.strong"
           p="4px 8px"
           borderRadius="sm"
           backgroundColor={backgroundColor}
           transition={
             shouldAnimateBackground ? "background-color .2s ease" : "none"
           }
-          borderBottom={
-            rowIndex % 2 === 0 ? alternateTableBorder : tableBorder
-          }
-          borderTop={rowIndex % 2 === 0 ? tableBorder : "none"}
+          // every other row closes with a dotted rule so the half-hour
+          // boundary stays readable without a second border colour
+          borderBottomStyle={rowIndex % 2 === 0 ? "dotted" : "solid"}
+          borderTopWidth={rowIndex % 2 === 0 ? "1px" : "0"}
           cursor={
             isReadOnly ? "default" : isSelectable ? "pointer" : "not-allowed"
           }

@@ -2,21 +2,18 @@
 import { Box, Image, Divider, Link } from "@chakra-ui/react"
 import { useLang } from "@/context/LangContext"
 import { author } from "@/content"
-import { useColorMode } from "@chakra-ui/react"
-import { colors } from "@/public/theme"
 
 import { GAclickEvent } from '@/public/utils/GA'
 
 const AboutPage = () => {
     const { context } = useLang()
-    const { colorMode } = useColorMode()
     return (
         <Box maxW='520px'>
             <Image src="./banner.png" w='100%' alt="meetor alt image" />
             <BodyText mt='5'>{ context.about.description }</BodyText>
             <H2>{ context.about.meetorOverview }</H2>
             <BodyText>{ context.about.meetorOverviewDescription }</BodyText>
-            <Divider mt='10' bg={ colors[ colorMode ].border.dim } />
+            <Divider mt='10' bg='border.subtle' />
             <H1>{ context.about.howToUse }</H1>
             <Box display='flex' flexDir='column' gap='6'>
                 { context.about.meetorSteps.map((step, i) => (
@@ -27,7 +24,7 @@ const AboutPage = () => {
                     </Box>
                 )) }
             </Box>
-            <Divider mt='10' bg={ colors[ colorMode ].border.dim } />
+            <Divider mt='10' bg='border.subtle' />
             <H1>{ context.about.aboutAuthor }</H1>
             <Box display='flex' mt='5' gap={ { base: '8', md: '10' } }>
                 <Box>
@@ -42,7 +39,7 @@ const AboutPage = () => {
                     <Box display='flex' gap='3' mt='5' alignSelf='end'>
                         { author.links.map((link) => (
                             <Link key={ link.label } href={ link.url } rel="noopener noreferrer" target="_blank" _hover={ { textDecor: 'none', transform: 'scale(1.03)' } } transition='.2s' onClick={ () => GAclickEvent('about_page', link.label.toLowerCase()) }>
-                                <Box fontWeight='bold' border='solid 1px' borderColor={ colors[ colorMode ].bg.invert } fontSize='14px' p='6px 12px' borderRadius='5px' className="link-button">{ link.label } <Box as={ 'span' } transition='.2s' display='inline-block'>➚</Box></Box>
+                                <Box fontWeight='bold' border='solid 1px' borderColor='ink.primary' fontSize='14px' p='6px 12px' borderRadius='5px' className="link-button">{ link.label } <Box as={ 'span' } transition='.2s' display='inline-block'>➚</Box></Box>
                             </Link>
                         )) }
                     </Box>
@@ -53,9 +50,8 @@ const AboutPage = () => {
 }
 
 const BodyText = ({ children, ...props }) => {
-    const { colorMode } = useColorMode()
     return (
-        <Box color={ colors[ colorMode ].font.dim } { ...props }>{ children }</Box>
+        <Box color='ink.muted' { ...props }>{ children }</Box>
     )
 }
 const H1 = ({ children, ...props }) => {

@@ -5,7 +5,6 @@ import {
     FormControl,
     FormErrorMessage,
     useDisclosure,
-    useColorMode
 } from "@chakra-ui/react"
 import { useRef, useState, useEffect } from "react"
 import Step from "./cells/Step"
@@ -20,7 +19,6 @@ import DonateModal from "./cells/DonateModal"
 import { Formik } from "formik"
 import { secondFormData } from "@/lib/initialValues"
 import useLocalStorage from "@/hooks/useLocalStorage"
-import { colors } from "@/public/theme"
 import { useLang } from "@/context/LangContext"
 import { useTimezone } from "@/context/TimezoneContext"
 import { TimezoneProvider } from "@/context/TimezoneContext"
@@ -131,7 +129,6 @@ const LoggedIn = () => {
     const [ name, setName ] = useLocalStorage('meetor_name')
     const { context } = useLang()
     const handleLogout = () => setName()
-    const { colorMode } = useColorMode()
     return (
         <VStack>
             <SubHeader>
@@ -142,7 +139,7 @@ const LoggedIn = () => {
                 fontWeight='500'
                 lineHeight='1.5'
                 textAlign='center'
-                color={ colors[ colorMode ].font.primary }
+                color='ink.primary'
                 spacing={ 4 }
             >
                 <Center>

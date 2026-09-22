@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { HStack, Center, FormControl, FormErrorMessage, useColorMode } from "@chakra-ui/react"
+import { HStack, Center, FormControl, FormErrorMessage } from "@chakra-ui/react"
 import { FieldArray, useFormikContext } from "formik"
 import useToday from "@/hooks/useDate"
-import { colors } from "@/public/theme"
 import { useLang } from "@/context/LangContext"
 import { checkWeekStart } from "@/public/utils/timeFormat"
 import { useConfigs } from "@/context/ConfigsContext"
@@ -11,7 +10,6 @@ import { useConfigs } from "@/context/ConfigsContext"
 const Days = () => {
     const { values, errors, touched, setFieldValue } = useFormikContext()
     const { today } = useToday()
-    const { colorMode } = useColorMode()
     const { context } = useLang()
     const { configs } = useConfigs()
 
@@ -39,7 +37,9 @@ const Days = () => {
                                     className='no-touch-action'
                                     id={ day }
                                     key={ day }
-                                    border={ colors[ colorMode ].border.buttonGhost }
+                                    borderWidth='1px'
+                                    borderStyle='solid'
+                                    borderColor='ink.primary'
                                     borderRadius='md'
                                     p={ 2 }
                                     w='100%'
@@ -49,8 +49,8 @@ const Days = () => {
                                     _active={ {
                                         transform: 'scale(.95)'
                                     } }
-                                    bg={ isSelected(values.days, day) ? colors[ colorMode ].bg.invert : 'transparent' }
-                                    color={ isSelected(values.days, day) ? colors[ colorMode ].font.invert : colors[ colorMode ].font.primary }
+                                    bg={ isSelected(values.days, day) ? 'ink.primary' : 'transparent' }
+                                    color={ isSelected(values.days, day) ? 'ink.inverted' : 'ink.primary' }
                                     transition='.2s'
                                     fontSize={ { base: '.875rem', md: '1rem' } }
 

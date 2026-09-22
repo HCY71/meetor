@@ -3,10 +3,8 @@ import {
     HStack,
     Text,
     Center,
-    useColorMode
 } from '@chakra-ui/react'
 
-import { colors } from '@/public/theme'
 const Step = ({ step, title, children, isDisable = false, insert, ...props }) => {
     if (insert) return (
         <VStack w='100%' alignItems='flex-start' { ...props }>
@@ -30,13 +28,12 @@ const Step = ({ step, title, children, isDisable = false, insert, ...props }) =>
 }
 
 const Title = ({ step, children, isDisable }) => {
-    const { colorMode } = useColorMode()
     return (
         <HStack display={ isDisable ? 'none' : 'flex' }>
             <Center
                 borderRadius='50%'
-                bg={ colors[ colorMode ].bg.invert }
-                color={ colors[ colorMode ].font.invert }
+                bg='ink.primary'
+                color='ink.inverted'
                 w='30px'
                 h='30px'
                 display='flex'

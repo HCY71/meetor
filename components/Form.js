@@ -9,7 +9,6 @@ import {
     FormErrorMessage,
     FormControl,
     Center,
-    useColorMode
 } from "@chakra-ui/react"
 
 import Step from "./cells/Step"
@@ -31,7 +30,6 @@ import useSupabase from "@/hooks/useSupabase"
 import useDate from "@/hooks/useDate"
 import { toast } from "react-hot-toast"
 import { uid } from "uid"
-import { colors } from "@/public/theme"
 import { useLang } from "@/context/LangContext"
 import { useConfigs } from "@/context/ConfigsContext"
 
@@ -148,7 +146,6 @@ const Second = () => {
 
 const Third = () => {
     const { values, errors, touched, setFieldValue } = useFormikContext()
-    const { colorMode } = useColorMode()
     const { context } = useLang()
     return (
         <Step step={ 3 } title={ context.home.input.chooseRange }
@@ -186,8 +183,8 @@ const Third = () => {
                             onChange={ (val) => setFieldValue('range', val) }
                             w={ { base: '81%' } }
                         >
-                            <RangeSliderTrack bg={ colors[ colorMode ].border.sliderTrack } h='12px' borderRadius='md'>
-                                <RangeSliderFilledTrack bg={ colors[ colorMode ].bg.invert } />
+                            <RangeSliderTrack bg='bg.track' h='12px' borderRadius='md'>
+                                <RangeSliderFilledTrack bg='ink.primary' />
                             </RangeSliderTrack>
                             <SliderThumb index={ 0 } value={ values.range[ 0 ] } />
                             <SliderThumb index={ 1 } value={ values.range[ 1 ] } />
@@ -206,7 +203,6 @@ const Forth = () => {
     const { values, setFieldValue } = useFormikContext()
     const { userTimezone } = useDate()
     const { context } = useLang()
-    const { colorMode } = useColorMode()
 
     useEffect(() => {
         setFieldValue('timezone', userTimezone)
@@ -228,8 +224,8 @@ const Forth = () => {
             <Center
                 fontSize='0.75rem'
                 fontWeight='medium'
-                color={ colors[ colorMode ].font.dim }
-                borderColor={ colors[ colorMode ].bg.dim }
+                color='ink.muted'
+                borderColor='ink.muted'
                 cursor='pointer'
                 p={ '4px 8px' }
                 border='solid 1px'
@@ -247,14 +243,13 @@ const Forth = () => {
 }
 
 const SliderThumb = ({ index, value }) => {
-    const { colorMode } = useColorMode()
     const { configs } = useConfigs()
     return (
         <RangeSliderThumb
             boxSize={ 8 }
             index={ index }
             border='solid 1px'
-            borderColor={ colors[ colorMode ].border.sliderTrack }
+            borderColor='bg.track'
             zIndex={ 0 }
             _after={ {
                 content: `"${displayTime(value, configs.usePM)}"`,

@@ -8,179 +8,114 @@ const { definePartsStyle, defineMultiStyleConfig } =
 const { definePartsStyle: switchPartStyle, defineMultiStyleConfig: switchStyleConfig } =
     createMultiStyleConfigHelpers(switchAnatomy.keys)
 
-const colors = {
-    light: {
-        font: {
-            header: '#0f172a',
-            subHeader: '#0f172a',
-            subtitle: 'gray.600',
-            primary: 'black',
-            highlight: 'yellow.300',
-            invert: 'white',
-            dim: 'gray.600',
-            dimMore: 'gray.400'
+// The single source of truth for colour in the app. Every token carries its own
+// light and dark value, and Chakra compiles each one to a CSS variable that
+// swaps on the .chakra-ui-dark class. Components reference tokens by name
+// (color='ink.muted') and never read the colour mode to pick a value.
+//
+// Keys are written flat and dotted on purpose: Chakra treats a nested key
+// literally named 'default' as a condition rather than a token name, so a
+// nested group would silently break the moment it held only that one key.
+const semanticTokens = {
+    colors: {
+        // Ink is the one colour that flips end to end with the mode. The same
+        // value is text, the fill of primary buttons, tags and step markers,
+        // and the outline of ghost controls, so it carries no fg/bg/border
+        // prefix. Three separate tokens used to hold this value and drifted.
+        'ink.primary': { _light: 'black', _dark: 'white' },
+        'ink.inverted': { _light: 'white', _dark: 'black' },
+        'ink.hover': { _light: 'gray.800', _dark: 'gray.100' },
+        'ink.muted': { _light: 'gray.600', _dark: 'gray.300' },
+        'ink.subtle': { _light: 'gray.400', _dark: 'gray.500' },
+
+        // Surfaces, from the page backdrop up to the blurred nav
+        'bg.canvas': { _light: 'white', _dark: '#020408' },
+        'bg.surface': { _light: 'white', _dark: 'gray.900' },
+        'bg.track': { _light: 'gray.100', _dark: 'gray.800' },
+        'bg.veil': { _light: 'hsla(0,0%,100%,.75)', _dark: 'rgba(2,4,8,.75)' },
+
+        // Borders come in two weights: subtle for chrome and inputs, strong for
+        // the timetable grid, where the rule has to stay readable against a
+        // filled cell. Anything that wants the full-contrast outline uses
+        // ink.primary instead.
+        'border.subtle': { _light: 'gray.200', _dark: 'whiteAlpha.300' },
+        'border.strong': { _light: 'blackAlpha.800', _dark: 'whiteAlpha.800' },
+
+        // Rim that pairs with the shadows.glow effect. It stays white in both
+        // modes because the glow it outlines is white in both modes.
+        'border.glow': { _light: 'whiteAlpha.800', _dark: 'whiteAlpha.800' },
+
+        accent: { _light: 'yellow.300', _dark: 'yellow.400' },
+    },
+    shadows: {
+        glow: {
+            _light: 'rgba(255, 255, 255, 0.7) 0px 0px 76.9166px, rgba(255, 255, 255, 0.4) 0px 0px 26.3055px, rgba(255, 255, 255, 0.3) 0px 0px 13.1528px, rgb(255, 255, 255) 0px 0px 3.75793px, rgb(255, 255, 255) 0px 0px 1.87897px',
+            _dark: 'rgba(255, 255, 255, 0.7) 0px 0px 76.9166px, rgba(255, 255, 255, 0.4) 0px 0px 26.3055px, rgba(255, 255, 255, 0.3) 0px 0px 13.1528px, rgb(255, 255, 255) 0px 0px 3.75793px, rgb(255, 255, 255) 0px 0px 1.87897px',
         },
-        bg: {
-            primary: 'white',
-            invert: 'black',
-            sidebar: 'white',
-            button: {
-                hover: 'gray.800',
-                active: 'gray.900'
-            },
-            timetableSelected: 'yellow.300',
-            timetableSelectedAlpha: 'rgba(255,124,0, .3)',
-            nav: {
-                primary: 'hsla(0,0%,100%,.75)',
-                invert: 'rgba(2,4,8,.9)'
-            }
-        },
-        border: {
-            nav: 'solid 1px rgba(229, 231, 235, 1)',
-            button: 'solid 2px black',
-            buttonGhost: 'solid 1px black',
-            focus: 'black',
-            table: 'solid 1px rgba(0,0,0,0.8)',
-            table2: 'dotted 1px black',
-            sliderTrack: 'gray.100',
-            dim: 'gray.600',
-            dimMore: 'gray.400'
+        // The dark surface already reads as raised, so it needs no drop shadow
+        menu: { _light: '0 8px 32px rgba(0,0,0,0.10)', _dark: 'none' },
+        switchTrack: {
+            _light: 'inset 0px -1px 4px rgba(0,0,0,0.06)',
+            _dark: 'inset 0px -1px 2px rgba(255,255,255,0.1)',
         },
     },
-    dark: {
-        font: {
-            header: 'white',
-            subHeader: 'white',
-            subtitle: 'gray.300',
-            primary: 'white',
-            highlight: 'yellow.400',
-            invert: 'black',
-            dim: 'gray.300',
-            dimMore: 'gray.500'
-        },
-        bg: {
-            primary: '#020408',
-            invert: 'white',
-            sidebar: 'gray.900',
-            button: {
-                hover: 'gray.100',
-                active: 'whiteAlpha.900'
-            },
-            timetableSelected: 'yellow.400',
-            timetableSelectedAlpha: 'rgba(255,124,0, .3)',
-            nav: {
-                invert: 'hsla(0,0%,100%,.9)',
-                primary: 'rgba(2,4,8,.75)'
-            }
-        },
-        border: {
-            nav: 'solid 2px rgba(100, 100, 100, .4)',
-            button: 'solid 2px white',
-            buttonGhost: 'solid 1px white',
-            focus: 'white',
-            table: 'solid 1px rgba(255,255,255,0.8)',
-            table2: 'dotted 1px white',
-            sliderTrack: 'gray.800',
-            dim: 'gray.600',
-        },
-
-    }
 }
-
 // Switch
-const darkSwitch = switchPartStyle({
+const switchBaseStyle = switchPartStyle({
     track: {
-        bg: 'gray.800',
-        // border: 'solid 1px',
-        // borderColor: 'gray.600',
-        boxShadow: 'inset 0px -1px 3px rgba(255,255,255,0.1)',
+        bg: 'bg.track',
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        borderColor: 'border.subtle',
+        boxShadow: 'switchTrack',
         _checked: {
-            bg: 'white'
-        }
+            bg: 'ink.primary',
+        },
     },
     thumb: {
-        border: 'solid 1px',
-        borderColor: 'gray.500',
-    }
-})
-const lightSwitch = switchPartStyle({
-    track: {
-        bg: 'gray.100',
-        border: 'solid 1px',
-        borderColor: 'gray.200',
-        _checked: {
-            bg: 'black'
-        }
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        borderColor: 'border.subtle',
     },
 })
 
-// Tabs
-const blackVariant = definePartsStyle(() => {
-    return {
-        tab: {
-            bg: 'transparent',
-            borderRadius: 'md',
-            p: 3,
-            color: 'gray.400',
-            border: 'solid 1px',
-            borderColor: 'gray.200',
-            _selected: {
-                bg: 'black',
-                color: 'white',
-                fontWeight: 'bold',
-                borderColor: 'inherit',
-                borderBottom: 'none',
-            },
-        },
-        tablist: {
-            borderColor: 'inherit',
-        },
-        tabpanel: {
-            borderColor: 'inherit',
-            borderBottomRadius: 'lg',
-            borderTopRightRadius: 'lg',
-        },
-    }
-})
-const whiteVariant = definePartsStyle(() => {
-    return {
-        tab: {
-            bg: 'transparent',
-            borderRadius: 'md',
-            p: 3,
-            color: 'gray.400',
-            border: 'solid 1px',
-            borderColor: 'gray.200',
-            _selected: {
-                bg: 'white',
-                color: 'black',
-                fontWeight: 'bold',
-                borderColor: 'inherit',
-                borderBottom: 'none',
-            },
-        },
-        tablist: {
-            borderColor: 'inherit',
-        },
-        tabpanel: {
-            borderColor: 'inherit',
-            borderBottomRadius: 'lg',
-            borderTopRightRadius: 'lg',
-        },
-    }
-})
-const variants = {
-    black: blackVariant,
-    white: whiteVariant,
-}
-const tabsTheme = defineMultiStyleConfig({ variants })
+const switchTheme = switchStyleConfig({ baseStyle: switchBaseStyle })
 
-const switchVariants = {
-    dark: darkSwitch,
-    light: lightSwitch
-}
+// Tabs. The two former 'black' and 'white' variants only differed by which end
+// of the mode they painted the selected tab, so the tokens collapse them into
+// one. It stays a named variant, and the default, because Chakra's built-in
+// 'line' variant would otherwise layer its own 2px underline on top.
+const toggleVariant = definePartsStyle({
+    tab: {
+        bg: 'transparent',
+        borderRadius: 'md',
+        p: 3,
+        color: 'ink.subtle',
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        borderColor: 'border.subtle',
+        _selected: {
+            bg: 'ink.primary',
+            color: 'ink.inverted',
+            fontWeight: 'bold',
+            borderColor: 'inherit',
+            borderBottom: 'none',
+        },
+    },
+    tablist: {
+        borderColor: 'inherit',
+    },
+    tabpanel: {
+        borderColor: 'inherit',
+        borderBottomRadius: 'lg',
+        borderTopRightRadius: 'lg',
+    },
+})
 
-const switchTheme = switchStyleConfig({ variants: switchVariants })
+const tabsTheme = defineMultiStyleConfig({
+    variants: { toggle: toggleVariant },
+    defaultProps: { variant: 'toggle' },
+})
 
 const theme = extendTheme({
     config: {
@@ -188,18 +123,18 @@ const theme = extendTheme({
         initialColorMode: 'system',
         useSystemColorMode: false,
     },
+    semanticTokens,
     styles: {
-        global: (props) => ({
+        global: {
             body: {
-                bg: props.colorMode == 'dark' ? '#020408' : 'white',
+                bg: 'bg.canvas',
             },
-        }),
+        },
     },
     components: {
         Tabs: tabsTheme,
-        Switch: switchTheme
+        Switch: switchTheme,
     },
 })
 
 export default theme
-export { colors }

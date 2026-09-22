@@ -7,12 +7,10 @@ import {
     Tag,
     Center,
     HStack,
-    useColorMode
 } from '@chakra-ui/react'
 import CustomSelect from '../atoms/CustomSelect'
 import { toast } from 'react-hot-toast'
 import { useLang } from '@/context/LangContext'
-import { colors } from '@/public/theme'
 
 const CustomTabs = ({ onMouseDown = [ null, null ], tab, panel, isDisabled = false, inputRef = null, tips = [], timezoneConfigs, ...props }) => {
     const { context } = useLang()
@@ -22,13 +20,11 @@ const CustomTabs = ({ onMouseDown = [ null, null ], tab, panel, isDisabled = fal
         })
         inputRef.current.focus()
     }
-    const { colorMode } = useColorMode()
     const handleReset = () => {
         timezoneConfigs.updateTimezone(props.event.timezone)
     }
     return (
         <Tabs
-            variant={ colorMode === 'light' ? 'black' : 'white' }
             w='100%'
             isFitted
             isLazy
@@ -73,8 +69,8 @@ const CustomTabs = ({ onMouseDown = [ null, null ], tab, panel, isDisabled = fal
                             <Center
                                 fontSize='0.75rem'
                                 fontWeight='medium'
-                                color={ colors[ colorMode ].font.dim }
-                                borderColor={ colors[ colorMode ].bg.dim }
+                                color='ink.muted'
+                                borderColor='ink.muted'
                                 cursor='pointer'
                                 p={ '4px 8px' }
                                 h={ '100%' }
@@ -108,8 +104,8 @@ const CustomTabs = ({ onMouseDown = [ null, null ], tab, panel, isDisabled = fal
                             <Center
                                 fontSize='0.75rem'
                                 fontWeight='medium'
-                                color={ colors[ colorMode ].font.dim }
-                                borderColor={ colors[ colorMode ].bg.dim }
+                                color='ink.muted'
+                                borderColor='ink.muted'
                                 cursor='pointer'
                                 p={ '4px 8px' }
                                 h={ '100%' }

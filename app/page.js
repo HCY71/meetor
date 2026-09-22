@@ -13,8 +13,7 @@ import useLocalStorage from '@/hooks/useLocalStorage'
 import useSupabase from '@/hooks/useSupabase'
 
 import { numberWithCommas } from '@/public/utils/numberFormatter'
-import { useColorMode, useDisclosure } from '@chakra-ui/react'
-import { colors } from '@/public/theme'
+import { useDisclosure } from '@chakra-ui/react'
 import { isBefore } from "date-fns"
 
 export default function Home() {
@@ -27,8 +26,6 @@ export default function Home() {
   const [ showCounter, setShowCounter ] = useState(false)
   const { data, isLoading, error, GET_EVENT_TOTAL } = useSupabase()
   const { isOpen, onOpen, onClose } = useDisclosure()
-
-  const { colorMode } = useColorMode()
 
   useEffect(() => {
     if (name) setName()
@@ -71,7 +68,7 @@ export default function Home() {
           <Header>
             { context.home.header }
           </Header>
-          <Text fontSize={ { base: '14px', md: '16px' } } mt={ { base: '8px', md: '20px' } } w={ { base: '100%', md: '60%' } } color={ colors[ colorMode ].font.dim } maxW={ { base: '520px', md: 'unset' } }>
+          <Text fontSize={ { base: '14px', md: '16px' } } mt={ { base: '8px', md: '20px' } } w={ { base: '100%', md: '60%' } } color='ink.muted' maxW={ { base: '520px', md: 'unset' } }>
             { context.home.description }
           </Text>
         </VStack>

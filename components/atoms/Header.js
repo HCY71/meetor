@@ -1,8 +1,6 @@
-import { Text, useColorMode } from '@chakra-ui/react'
-import { colors } from '@/public/theme'
+import { Text } from '@chakra-ui/react'
 
 const Header = ({ children, ...props }) => {
-    const { colorMode } = useColorMode()
     return (
         <Text
             as={ 'h1' }
@@ -11,7 +9,7 @@ const Header = ({ children, ...props }) => {
             lineHeight='1.15'
             letterSpacing='0px'
             textAlign='center'
-            color={ colors[ colorMode ].font.header }
+            color='ink.primary'
             whiteSpace='pre-line'
             { ...props }
         >

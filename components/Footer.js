@@ -1,15 +1,15 @@
-import { HStack, Text, useColorMode } from "@chakra-ui/react"
+import { HStack, Text } from "@chakra-ui/react"
 import DonateButton from "./atoms/DonateButton"
-import { colors } from "@/public/theme"
 import { useLang } from "@/context/LangContext"
 
 const Footer = () => {
-    const { colorMode } = useColorMode()
     const { context } = useLang()
     return (
         <HStack
-            borderTop={ colors[ colorMode ].border.nav }
-            bg={ colors[ colorMode ].bg.nav.primary }
+            borderTopWidth='1px'
+            borderTopStyle='solid'
+            borderTopColor='border.subtle'
+            bg='bg.veil'
             backdropFilter='saturate(120%) blur(8px)'
             zIndex={ 1 }
             p={ { base: '4px 20px', md: '12px 40px' } }
@@ -19,7 +19,7 @@ const Footer = () => {
             fontSize={ { base: '.75rem', md: '1rem' } }
             mt='20px'
         >
-            <Text opacity={ .9 } color={ colors[ colorMode ].font.default }>{ context.global.footer.title }</Text>
+            <Text opacity={ .9 }>{ context.global.footer.title }</Text>
             <DonateButton />
         </HStack >
     )

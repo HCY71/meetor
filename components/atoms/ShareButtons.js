@@ -1,8 +1,7 @@
-import { Icon, useColorMode } from "@chakra-ui/react"
+import { Icon } from "@chakra-ui/react"
 import { FiShare, FiLink } from 'react-icons/fi'
 import { toast } from 'react-hot-toast'
 
-import { colors } from "@/public/theme"
 import { useLang } from "@/context/LangContext"
 
 const CopyLink = () => {
@@ -32,23 +31,23 @@ const Share = () => {
 }
 
 const Template = ({ as, onClick }) => {
-    const { colorMode } = useColorMode()
-
     return (
         <Icon
             as={ as }
             onClick={ onClick }
             fontSize='2rem'
             borderRadius='50%'
-            border={ colors[ colorMode ].border.button }
+            borderWidth='2px'
+            borderStyle='solid'
+            borderColor='ink.primary'
             w='52px'
             h='52px'
             p={ 3 }
             cursor='pointer'
             transition='.2s'
             _hover={ {
-                bg: colors[ colorMode ].bg.invert,
-                color: colors[ colorMode ].bg.primary
+                bg: 'ink.primary',
+                color: 'ink.inverted'
             } }
             _active={ {
                 transform: 'scale(.95)'

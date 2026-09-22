@@ -1,20 +1,18 @@
 import { forwardRef } from "react"
-import { Select, useColorMode } from "@chakra-ui/react"
-import { colors } from "@/public/theme"
+import { Select } from "@chakra-ui/react"
 import { timezoneNames } from "@/public/utils/timezoneNames"
 
 const CustomSelect = forwardRef(({ id, placeholder, onChange, ...props }, ref) => {
-    const { colorMode } = useColorMode()
     return (
         <Select
             id={ id }
             placeholder={ placeholder }
             onChange={ onChange }
-            focusBorderColor={ colors[ colorMode ].border.focus }
+            focusBorderColor='ink.primary'
             fontWeight='medium'
             fontSize='1rem'
             size='lg'
-            borderColor={ 'gray.200' }
+            borderColor='border.subtle'
             ref={ ref }
             { ...props }
         >

@@ -2,26 +2,23 @@ import { VStack, HStack, Center } from "@chakra-ui/react"
 import Link from "next/link"
 import { useLang } from "@/context/LangContext"
 import { useConfigs } from "@/context/ConfigsContext"
-import { useColorMode } from "@chakra-ui/react"
 import useLocalStorage from "@/hooks/useLocalStorage"
 import useDate from "@/hooks/useDate"
 import { getTimeDistance } from "@/public/utils/timeFormat"
-import { colors } from "@/public/theme"
 
 const RecentVisited = () => {
     const [ recent, setRecent ] = useLocalStorage('meetor_recent', [])
     const { currentDate } = useDate()
     const { context } = useLang()
     const { configs } = useConfigs()
-    const { colorMode } = useColorMode()
 
     if (!recent || !recent.length) return
 
     return (
         <VStack
-            bg={ colors[ colorMode ].bg.nav.invert }
+            bg='ink.primary'
             borderRadius='md' p={ 5 }
-            color={ colors[ colorMode ].font.invert }
+            color='ink.inverted'
             w='100%'
             maxW={ { base: '100%', md: '520px' } }
             fontSize={ { base: '1rem', md: '1.25rem' } }
@@ -32,8 +29,8 @@ const RecentVisited = () => {
                 <Center
                     fontSize='0.75rem'
                     fontWeight='medium'
-                    color={ colors[ colorMode ].font.invert }
-                    borderColor={ colors[ colorMode ].bg.invert }
+                    color='ink.inverted'
+                    borderColor='ink.inverted'
                     cursor='pointer'
                     p={ 1 }
                     border='solid 1px'

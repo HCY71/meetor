@@ -1,19 +1,17 @@
 import { forwardRef } from "react"
-import { Input, useColorMode } from "@chakra-ui/react"
-import { colors } from "@/public/theme"
+import { Input } from "@chakra-ui/react"
 
 const CustomInput = forwardRef(({ id, placeholder, onChange, ...props }, ref) => {
-    const { colorMode } = useColorMode()
     return (
         <Input
             id={ id }
             placeholder={ placeholder }
             onChange={ onChange }
-            focusBorderColor={ colors[ colorMode ].border.focus }
+            focusBorderColor='ink.primary'
             fontWeight='medium'
             fontSize='1rem'
             size='lg'
-            borderColor={ 'gray.200' }
+            borderColor='border.subtle'
             ref={ ref }
             { ...props }
         />

@@ -1,17 +1,31 @@
-@use "sass:map";
-$dark-theme: false !default;
-$font-colors: (
-  "header": #0f172a,
-  "primary": #000,
-  "secondary": rgb(100, 116, 139),
-  "invert": #fff,
-);
-$background-colors: (
-  "primary": #fff,
-  "invert": #171923,
-);
-$border-color: rgb(229, 231, 235);
-$border-color-dark: rgba(0,0,0,0.8);
+// Colours here come from the semantic tokens in public/theme.js, which Chakra
+// compiles to --chakra-colors-* variables that already flip with the colour
+// mode. Do not reintroduce a palette in this file.
+//
+// The one exception is the bootstrap background below. Chakra injects both the
+// variables and the global body background through emotion during hydration,
+// which is too late to cover the first paint, so a dark visitor saw a white
+// frame first. This stylesheet ships as a <link> in <head>, so it paints before
+// any script runs. The media query covers the frame before ColorModeScript
+// executes, and the data-theme attribute that script writes on <html> then wins
+// so an explicit choice still beats the system preference.
+//
+// These two literals mirror the light and dark values of bg.canvas in
+// public/theme.js and have to be changed alongside it.
+html {
+  background: #fff;
+}
+@media (prefers-color-scheme: dark) {
+  html {
+    background: #020408;
+  }
+}
+html[data-theme="light"] {
+  background: #fff;
+}
+html[data-theme="dark"] {
+  background: #020408;
+}
 
 * {
   box-sizing: border-box;
@@ -69,7 +83,7 @@ a {
 }
 
 #nprogress .bar {
-  background: map-get($background-colors, 'invert' );
+  background: var(--chakra-colors-ink-primary);
 
   position: fixed;
   z-index: 1031;
@@ -82,7 +96,6 @@ a {
 }
 
 .chakra-ui-dark #nprogress .bar {
-  background: white;
   height: 2px;
 }
 
@@ -128,11 +141,7 @@ a {
 .time-table::-webkit-scrollbar-thumb {
   border-radius: 12px;
   width: 12px;
-  background: $border-color-dark;
-}
-
-.chakra-ui-dark .time-table::-webkit-scrollbar-thumb {
-  background: $border-color;
+  background: var(--chakra-colors-border-strong);
 }
 
 .link-button:hover span{

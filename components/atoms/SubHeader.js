@@ -1,8 +1,6 @@
-import { Text, useColorMode } from '@chakra-ui/react'
-import { colors } from '@/public/theme'
+import { Text } from '@chakra-ui/react'
 
 const SubHeader = ({ children }) => {
-    const { colorMode } = useColorMode()
     return (
         <Text
             fontSize={ { base: '2rem', md: '2.5rem' } }
@@ -10,7 +8,7 @@ const SubHeader = ({ children }) => {
             lineHeight='1'
             letterSpacing='0px'
             textAlign='center'
-            color={ colors[ colorMode ].font.subHeader }
+            color='ink.primary'
         >
             { children }
         </Text>

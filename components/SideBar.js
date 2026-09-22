@@ -19,12 +19,11 @@ import {
 } from '@chakra-ui/react'
 import CustomButton from './atoms/CustomButton'
 import CustomSwitch from './atoms/CustomSwitch'
-import { colors } from '@/public/theme'
 import { useLang } from '@/context/LangContext'
 import { useConfigs } from '@/context/ConfigsContext'
 
 const SideBar = () => {
-    const { colorMode, toggleColorMode } = useColorMode()
+    const { toggleColorMode } = useColorMode()
     const { context } = useLang()
     const { configs, setConfigs } = useConfigs()
     const { isOpen, onToggle, onClose } = useDisclosure()
@@ -64,24 +63,25 @@ const SideBar = () => {
                 />
             </PopoverAnchor>
             <Portal>
-                    <PopoverContent rootProps={ { zIndex: 'popover' } } p={ 2 } bg={ colors[ colorMode ].bg.sidebar } boxShadow={ colorMode === 'light' ? '0 8px 32px rgb(0,0,0,0.10)' : null }>
+                    <PopoverContent rootProps={ { zIndex: 'popover' } } p={ 2 } bg='bg.surface' boxShadow='menu'>
                         <PopoverHeader fontWeight='bold' borderBottom='none' fontSize='20px'>{ context.global.settings.title }</PopoverHeader>
                         <PopoverBody pt='0' pb='20px' as={ VStack } align='flex-start' spacing={ 4 }>
                             <Template title={ context.global.settings.theme } center>
                                 <CustomSwitch
                                     onClick={ toggleColorMode }
-                                    // boxShadow='inset 0px -1px 2px rgba(255,255,255,0.1)'
-                                    boxShadow={ colorMode === 'light' ? 'inset 0px -1px 4px rgba(0,0,0,0.06)' : 'inset 0px -1px 2px rgba(255,255,255,0.1)' }
+                                    boxShadow='switchTrack'
                                 />
                                 {/* <CustomButton
                                     ghost={ !configs.useSystemColorMode }
                                     fontSize='0.75rem'
                                     fontWeight='medium'
-                                    color={ !configs.useSystemColorMode ? colors[ colorMode ].font.primary : colors[ colorMode ].font.invert }
+                                    color={ !configs.useSystemColorMode ? 'ink.primary' : 'ink.inverted' }
                                     cursor='pointer'
                                     p={ '8px 16px' }
                                     h='fit-content'
-                                    border={ colors[ colorMode ].border.buttonGhost }
+                                    borderWidth='1px'
+                                    borderStyle='solid'
+                                    borderColor='ink.primary'
                                     borderRadius='md'
                                     onClick={ () => setConfigs({ ...configs, useSystemColorMode: !configs.useSystemColorMode }) }
                                 >
@@ -145,11 +145,10 @@ const MenuIcon = forwardRef(({ isOpen, ...props }, ref) => {
 MenuIcon.displayName = 'MenuIcon'
 
 const MenuIconComposition = ({ ...props }) => {
-    const { colorMode } = useColorMode()
     return (
         <Box
             h='6px'
-            bg={ colors[ colorMode ].bg.invert }
+            bg='ink.primary'
             pos='absolute'
             borderRadius='1000px'
             opacity={ 1 }
