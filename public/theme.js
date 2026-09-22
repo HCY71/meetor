@@ -136,8 +136,12 @@ const config = defineConfig({
                 },
                 variants: {
                     size: {
+                        // 36px rather than v3's and v2's 40px, which read heavy
+                        // beside the site's 16px body text
                         md: {
                             textStyle: 'md',
+                            h: '9',
+                            minW: '9',
                         },
                         // v3's smallest useful size is 32px, which overpowers a
                         // button that only sits alongside a line of footer text
