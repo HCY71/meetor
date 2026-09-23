@@ -6,7 +6,7 @@ import {
 // The spacing, width and backdrop below are v2 Modal's defaults written out,
 // since v3's Dialog ships different ones and the donate prompt was designed
 // against the old proportions.
-const CustomModal = ({ controls, context, button }) => {
+const CustomModal = ({ controls, context, button, initialFocusRef }) => {
     return (
         <Dialog.Root
             open={ controls.isOpen }
@@ -15,6 +15,7 @@ const CustomModal = ({ controls, context, button }) => {
             } }
             preventScroll={ false }
             placement='top'
+            initialFocusEl={ initialFocusRef ? () => initialFocusRef.current : undefined }
         >
             <Portal>
                 <Dialog.Backdrop bg='rgba(0, 0, 0, 0.48)' />

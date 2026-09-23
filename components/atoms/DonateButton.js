@@ -1,10 +1,11 @@
+import { forwardRef } from "react";
 import Link from "next/link";
 import CustomButton from "./CustomButton";
 import { useLang } from "@/context/LangContext";
 
 import { GAclickEvent } from "@/public/utils/GA";
 
-const DonateButton = ({ isModal }) => {
+const DonateButton = forwardRef(({ isModal }, ref) => {
   const { context } = useLang();
   return (
     <Link
@@ -16,6 +17,7 @@ const DonateButton = ({ isModal }) => {
       }
     >
       <CustomButton
+        ref={ref}
         // the footer pairs it with a line of small print; the modal gives it room
         size={isModal ? "md" : "compact"}
         boxShadow="glow"
@@ -27,6 +29,8 @@ const DonateButton = ({ isModal }) => {
       </CustomButton>
     </Link>
   );
-};
+});
+
+DonateButton.displayName = "DonateButton";
 
 export default DonateButton;
