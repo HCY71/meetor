@@ -8,7 +8,14 @@ const eventEn = {
         checkTime: "Check your time",
         placeholder: "Taylor"
     },
-    export: "Export"
+    export: "Export",
+    exportOptions: {
+        csv: "CSV",
+        csvDescription: "View availability and names in Excel.",
+        json: "JSON",
+        jsonDescription: "Event details, time slots and original responses.",
+        csvHeaders: ["Event", "Date / Day", "Start", "End", "Timezone", "Available", "Participants", "Available names"]
+    }
 }
 
 export default eventEn

@@ -38,7 +38,7 @@ import {
   convertDaysToIndex,
 } from "@/public/utils/timeFormat";
 import CustomTag from "../atoms/CustomTag";
-import CustomButton from "../atoms/CustomButton";
+import ExportMenu from "./ExportMenu";
 
 
 import useSupabase from "@/hooks/useSupabase";
@@ -48,7 +48,7 @@ import { useConfigs } from "@/context/ConfigsContext";
 import { useLang } from "@/context/LangContext";
 import { useEvent } from "@/context/EventContext";
 import { useTimezone } from "@/context/TimezoneContext";
-import { downloadObjectAsJson } from "@/lib/download";
+import { downloadObjectAsJson, downloadRowsAsCsv } from "@/lib/download";
 
 import { format, addMinutes } from "date-fns";
 import { tz } from "@date-fns/tz";
@@ -899,6 +899,65 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
           </GridItem>
         ));
 
+  const getExportTimeSlots = () => {
+    return gridCells
+      .filter((cell) => cell.isSelectable)
+      .sort((first, second) =>
+        first.columnIndex - second.columnIndex || first.rowIndex - second.rowIndex,
+      )
+      .map((cell) => {
+        const dateOrDay = event.type === "dates"
+          ? { date: format(localTimes.dates[cell.columnIndex], "yyyy-MM-dd") }
+          : { day: getFullDateAndTime(localTimes.days[cell.columnIndex], "days", configs.lang) };
+        const start = localTimes.times[cell.rowIndex];
+        const available = groupTime[cell.id] ?? [];
+
+        return {
+          ...dateOrDay,
+          ...(event.allDay
+            ? { allDay: true }
+            : {
+                start: displayTime(start, configs.usePM),
+                end: displayTime(start + 0.5, configs.usePM),
+              }),
+          availableCount: available.length,
+          availableParticipants: available,
+        };
+      });
+  };
+
+  const handleExportCsv = () => {
+    const rows = getExportTimeSlots().map((slot) => [
+      event.name,
+      slot.date ?? slot.day,
+      slot.allDay ? context.home.input.switch : slot.start,
+      slot.end ?? "",
+      timezone,
+      slot.availableCount,
+      users.length,
+      slot.availableParticipants.join("; "),
+    ]);
+
+    downloadRowsAsCsv([context.event.exportOptions.csvHeaders, ...rows]);
+  };
+
+  const handleExportJson = () => {
+    downloadObjectAsJson({
+      event: {
+        id: eventId,
+        name: event.name,
+        type: event.type === "dates" ? "dates" : "weekly",
+        allDay: event.allDay,
+        timezone: event.timezone,
+      },
+      displayTimezone: timezone,
+      participantCount: users.length,
+      participants: users.map((participant) => participant.user),
+      timeSlots: getExportTimeSlots(),
+      originalResponses: users,
+    });
+  };
+
   const firstFocusableCell = gridCells.find((cell) => {
     return readOnly || cell.isSelectable;
   })?.id;
@@ -1060,13 +1119,10 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
       {table}
 
       {readOnly && users && (
-        <CustomButton
-          onClick={() => downloadObjectAsJson(users)}
-          zIndex={10}
-          ghost
-        >
-          {context.event.export}
-        </CustomButton>
+        <ExportMenu
+          onExportCsv={handleExportCsv}
+          onExportJson={handleExportJson}
+        />
       )}
     </Center>
   );

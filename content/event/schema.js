@@ -9,6 +9,13 @@ const eventSchema = {
         placeholder: "string",
     },
     export: "string",
+    exportOptions: {
+        csv: "string",
+        csvDescription: "string",
+        json: "string",
+        jsonDescription: "string",
+        csvHeaders: "string[]",
+    },
 }
 
 export default eventSchema
