@@ -49,6 +49,7 @@ const globalZhTw = {
         groupTime: "我們的時間"
     },
     timeTable: {
+        everyoneAvailable: "所有人都有空",
         available: "有空",
         at: " 的 ",
         all: "所有人都"

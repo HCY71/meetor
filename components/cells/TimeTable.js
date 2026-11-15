@@ -18,6 +18,7 @@ import {
   Popover,
   usePopover,
 } from "@chakra-ui/react";
+import { LuCheck } from "react-icons/lu";
 import { useColorMode } from "@/components/ColorMode";
 import {
   getMonthAndDate,
@@ -932,6 +933,8 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
       {gridCells.map((cell) => {
         const isSelected = readOnly ? false : previewSelection.has(cell.id);
         const availability = groupTime[cell.id];
+        const isEveryoneAvailable =
+          readOnly && users?.length > 0 && availability?.length === users.length;
         return (
           <TimeCell
             key={cell.id}
@@ -941,7 +944,12 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
             isSelectable={cell.isSelectable}
             isSelected={isSelected}
             isReadOnly={readOnly}
-            label={cell.label}
+            showAvailabilityCheck={isEveryoneAvailable && users.length > 5}
+            label={
+              isEveryoneAvailable
+                ? `${cell.label}, ${context.global.timeTable.everyoneAvailable}`
+                : cell.label
+            }
             tabIndex={
               focusedCellId === cell.id ||
               (!focusedCellId && firstFocusableCell === cell.id)
@@ -1193,6 +1201,7 @@ const TimeCell = memo(
         isSelectable,
         isSelected,
         isReadOnly,
+        showAvailabilityCheck,
         label,
         backgroundColor,
         shouldAnimateBackground,
@@ -1236,7 +1245,20 @@ const TimeCell = memo(
             isReadOnly ? "default" : isSelectable ? "pointer" : "not-allowed"
           }
           {...props}
-        />
+        >
+          {showAvailabilityCheck && (
+            <Center
+              as="span"
+              aria-hidden="true"
+              h="100%"
+              justifyContent="flex-end"
+              color="fg"
+              pointerEvents="none"
+            >
+              <LuCheck size={12} strokeWidth={3} />
+            </Center>
+          )}
+        </GridItem>
       );
     },
   ),

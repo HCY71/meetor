@@ -49,6 +49,7 @@ const globalEn = {
         groupTime: "Group Time"
     },
     timeTable: {
+        everyoneAvailable: "Everyone is available",
         available: "available on",
         at: " at ",
         all: "All are"

@@ -41,6 +41,7 @@ const globalSchema = {
         groupTime: "string",
     },
     timeTable: {
+        everyoneAvailable: "string",
         available: "string",
         at: "string",
         all: "string",
