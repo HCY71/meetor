@@ -8,7 +8,7 @@ const homeEn = {
         name: "Give your event a name",
         chooseDates: "Choose your dates",
         chooseRange: "Set a time range",
-        placeholder: "Friday hotpot, who's in?",
+        placeholder: "Christmas Dinner",
         switch: "All Day",
         timezone: "Timezone",
         timezoneReset: "Reset"

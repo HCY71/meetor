@@ -7,7 +7,7 @@ const eventEn = {
     input: {
         name: "Enter your name",
         checkTime: "Check your time",
-        placeholder: "Taylor"
+        placeholder: "Santa Claus"
     },
     export: "Export",
     exportOptions: {

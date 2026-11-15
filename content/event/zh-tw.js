@@ -7,7 +7,7 @@ const eventZhTw = {
     input: {
         name: "填上你的姓名",
         checkTime: "確認你的時間",
-        placeholder: "周杰倫"
+        placeholder: "聖誕老人"
     },
     export: "匯出",
     exportOptions: {
