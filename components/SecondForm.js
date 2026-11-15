@@ -119,7 +119,6 @@ const Second = ({ inputRef }) => {
                 timezoneConfigs={ timezoneConfigs }
                 event={ event }
             />
-            { name }
         </Step>
     )
 }

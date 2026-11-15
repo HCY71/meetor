@@ -17,7 +17,7 @@ const ExportMenu = ({ onExportCsv, onExportJson }) => {
       unmountOnExit
     >
       <Menu.Trigger asChild>
-        <CustomButton ghost>{context.event.export}</CustomButton>
+        <CustomButton ghost flexShrink={0}>{context.event.export}</CustomButton>
       </Menu.Trigger>
       <Portal>
         <Menu.Positioner>

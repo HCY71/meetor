@@ -3,6 +3,7 @@ const eventEn = {
     createdAt: "created at ",
     ago: " ago",
     go: "Start to check your time.",
+    yourName: "User: ",
     input: {
         name: "Enter your name",
         checkTime: "Check your time",

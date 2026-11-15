@@ -1118,11 +1118,29 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
 
       {table}
 
-      {readOnly && users && (
-        <ExportMenu
-          onExportCsv={handleExportCsv}
-          onExportJson={handleExportJson}
-        />
+      {((readOnly && users) || user) && (
+        <HStack w="100%" gap="3" pr="4px">
+          {readOnly && users && (
+            <ExportMenu
+              onExportCsv={handleExportCsv}
+              onExportJson={handleExportJson}
+            />
+          )}
+          {user && (
+            <Text
+              flex="1"
+              minW="0"
+              fontSize="xs"
+              fontWeight="normal"
+              color="ink.muted"
+              textAlign="right"
+              title={user}
+              truncate
+            >
+              {context.event.yourName}{user}
+            </Text>
+          )}
+        </HStack>
       )}
     </Center>
   );

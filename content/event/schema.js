@@ -3,6 +3,7 @@ const eventSchema = {
     createdAt: "string",
     ago: "string",
     go: "string",
+    yourName: "string",
     input: {
         name: "string",
         checkTime: "string",
