@@ -364,19 +364,16 @@ const getCellOffsetWithinGrid = (cellElement, gridElement) => {
   };
 };
 
-// Availability ramps through both lightness and alpha, so an empty cell fades
-// into the page rather than painting a flat block over it.
-//
-// This is the one place that still needs the colour mode as a JS value: the
-// ramp is computed per cell from a percentage, so it cannot be expressed as a
-// semantic token in public/theme.js the way every other colour now is.
+// Use five visible steps for non-empty cells, preserving the minimum and
+// full-availability colours. Empty cells stay transparent.
 const generateAvailabilityColor = (percent, isDarkMode) => {
-  if (isNaN(percent)) return "transparent";
-  const alpha = percent * 0.8 + 0.2;
+  if (!Number.isFinite(percent) || percent <= 0) return "transparent";
+  const step = Math.ceil(Math.min(percent, 1) * 5);
+  const intensity = (step - 1) / 4;
   if (isDarkMode) {
-    return `hsla(47, 81%, ${61 * percent}%, ${alpha})`;
+    return `hsl(47, 81%, ${26 + 35 * intensity}%)`;
   }
-  return `hsla(51, 89%, ${100 - 33 * percent}%, ${alpha})`;
+  return `hsl(51, 89%, ${88 - 21 * intensity}%)`;
 };
 
 const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
