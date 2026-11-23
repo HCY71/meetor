@@ -41,10 +41,14 @@ const globalSchema = {
         groupTime: "string",
     },
     timeTable: {
-        everyoneAvailable: "string",
         available: "string",
         at: "string",
-        all: "string",
+        availableCount: "string",
+        responses: "string",
+        noResponses: "string",
+        noAvailableSlots: "string",
+        bestSlots: "string",
+        jumpToBestSlots: "string",
     },
     footer: {
         title: "string",

@@ -49,10 +49,14 @@ const globalZhTw = {
         groupTime: "我們的時間"
     },
     timeTable: {
-        everyoneAvailable: "所有人都有空",
         available: "有空",
         at: " 的 ",
-        all: "所有人都"
+        availableCount: "{total} 人中有 {count} 人有空",
+        responses: "{count} 人已回覆",
+        noResponses: "還沒有人回覆",
+        noAvailableSlots: "目前沒有可用時段",
+        bestSlots: "最佳時段",
+        jumpToBestSlots: "看最佳時段"
     },
     footer: {
         title: "喜歡這個專案，可以考慮"

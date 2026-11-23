@@ -49,10 +49,14 @@ const globalEn = {
         groupTime: "Group Time"
     },
     timeTable: {
-        everyoneAvailable: "Everyone is available",
         available: "available on",
         at: " at ",
-        all: "All are"
+        availableCount: "{count} of {total} available",
+        responses: "{count} responded",
+        noResponses: "No responses yet",
+        noAvailableSlots: "No available times yet",
+        bestSlots: "Best Times",
+        jumpToBestSlots: "See Best Times"
     },
     footer: {
         title: "If you love this, consider"

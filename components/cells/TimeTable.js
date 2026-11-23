@@ -3,6 +3,7 @@ import {
   memo,
   useCallback,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -18,10 +19,8 @@ import {
   Popover,
   usePopover,
 } from "@chakra-ui/react";
-import { LuCheck } from "react-icons/lu";
 import { useColorMode } from "@/components/ColorMode";
 import {
-  getMonthAndDate,
   displayTime,
   displayDay,
   getFullDateAndTime,
@@ -29,7 +28,6 @@ import {
   adjustDaysToLocal,
   combineDateAndTime,
   combineDaysAndTime,
-  UTCTimeToLocalTime,
   translateDay,
   reorderSunDay,
   getUTCOffsetDifference,
@@ -39,6 +37,7 @@ import {
 } from "@/public/utils/timeFormat";
 import CustomTag from "../atoms/CustomTag";
 import ExportMenu from "./ExportMenu";
+import GroupTimeSummary from "./GroupTimeSummary";
 
 
 import useSupabase from "@/hooks/useSupabase";
@@ -366,9 +365,8 @@ const getCellOffsetWithinGrid = (cellElement, gridElement) => {
 
 // Use five visible steps for non-empty cells, preserving the minimum and
 // full-availability colours. Empty cells stay transparent.
-const generateAvailabilityColor = (percent, isDarkMode) => {
-  if (!Number.isFinite(percent) || percent <= 0) return "transparent";
-  const step = Math.ceil(Math.min(percent, 1) * 5);
+const getAvailabilityColor = (step, isDarkMode) => {
+  if (step === 0) return "transparent";
   const intensity = (step - 1) / 4;
   if (isDarkMode) {
     return `hsl(47, 81%, ${26 + 35 * intensity}%)`;
@@ -399,6 +397,13 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
   const [activeGroupCellId, setActiveGroupCellId] = useState(null);
   const [groupAnchorRect, setGroupAnchorRect] = useState(null);
   const [focusedCellId, setFocusedCellId] = useState(null);
+  const [highlightedSlotId, setHighlightedSlotId] = useState(null);
+  const gridRef = useRef(null);
+  const summaryHeadingRef = useRef(null);
+  const summaryId = useId();
+  const tableText = context.global.timeTable;
+  const participantCount = users?.length ?? 0;
+  const isDarkMode = colorMode === "dark";
 
   timezoneRef.current = timezone;
   updateTimezoneRef.current = updateTimezone;
@@ -414,21 +419,15 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
   );
 
   const gridCells = useMemo(() => {
-    const localTimezoneOffset = getUTCOffsetDifference("UTC", timezone);
-
     return localTimes.dataWithTime.map((timeCell) => {
+      const day = event.type === "dates"
+        ? localTimes.dates[timeCell.columnIndex]
+        : localTimes.days[timeCell.columnIndex];
+      const dateLabel = getFullDateAndTime(day, event.type, configs.lang);
       const cellLabel = event.allDay
-        ? getFullDateAndTime(timeCell.data, event.type, configs.lang)
-        : `${getFullDateAndTime(timeCell.data, event.type, configs.lang)}${
-            context.global.timeTable.at
-          }${displayTime(
-            event.type === "dates"
-              ? format(timeCell.data, "HHmm", { in: tz(timezone) })
-              : UTCTimeToLocalTime(
-                  parseFloat(timeCell.data.split("-")[1]),
-                  timezone,
-                  localTimezoneOffset,
-                ),
+        ? dateLabel
+        : `${dateLabel}${tableText.at}${displayTime(
+            localTimes.times[timeCell.rowIndex],
             configs.usePM,
           )}`;
 
@@ -443,12 +442,11 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
   }, [
     configs.lang,
     configs.usePM,
-    context.global.timeTable.at,
+    tableText.at,
     event.allDay,
     event.type,
-    localTimes.dataWithTime,
+    localTimes,
     selectableTimeSet,
-    timezone,
   ]);
 
   const cellMatrix = useMemo(() => {
@@ -469,6 +467,7 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
     if (!readOnly) return availabilityByTime;
 
     users?.forEach((eventUser) => {
+      const countedSlots = new Set();
       eventUser.time?.forEach((time) => {
         const normalizedTime =
           event.type === "dates"
@@ -476,16 +475,65 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
             : parseLegacyDayData(time, event);
 
         if (normalizedTime === undefined) return;
-        if (availabilityByTime[normalizedTime]) {
-          availabilityByTime[normalizedTime].push(eventUser.user);
+        const slotId = String(normalizedTime);
+        if (countedSlots.has(slotId)) return;
+        countedSlots.add(slotId);
+        if (availabilityByTime[slotId]) {
+          availabilityByTime[slotId].push(eventUser.user);
         } else {
-          availabilityByTime[normalizedTime] = [eventUser.user];
+          availabilityByTime[slotId] = [eventUser.user];
         }
       });
     });
 
     return availabilityByTime;
   }, [event, readOnly, timezone, users]);
+
+  const bestSlots = useMemo(() => {
+    if (!readOnly || participantCount === 0) return [];
+
+    return gridCells
+      .filter((cell) => cell.isSelectable && groupTime[cell.id]?.length > 0)
+      .sort(
+        (first, second) =>
+          groupTime[second.id].length - groupTime[first.id].length ||
+          first.columnIndex - second.columnIndex ||
+          first.rowIndex - second.rowIndex,
+      )
+      .slice(0, 3)
+      .map((cell) => {
+        const date = localTimes.dates?.[cell.columnIndex];
+        const day = date
+          ? `${format(date, "MM/dd")} ${displayDay(date, configs.lang)}`
+          : getFullDateAndTime(localTimes.days[cell.columnIndex], event.type, configs.lang);
+        const start = localTimes.times[cell.rowIndex];
+        const time = event.allDay
+          ? context.home.input.switch
+          : `${displayTime(start, configs.usePM)}–${displayTime((start + 0.5) % 24, configs.usePM)}`;
+
+        return { cell, day, time, count: groupTime[cell.id].length };
+      });
+  }, [
+    configs.lang, configs.usePM, context.home.input.switch, event.allDay,
+    event.type, gridCells, groupTime, localTimes, participantCount, readOnly,
+  ]);
+
+  const jumpToSlot = (cell) => {
+    const target = gridRef.current?.querySelector(
+      `[data-time-row="${cell.rowIndex}"][data-time-column="${cell.columnIndex}"]`,
+    );
+    if (!target) return;
+
+    setActiveGroupCellId(null);
+    setHighlightedSlotId(cell.id);
+    target.focus({ preventScroll: true });
+    target.scrollIntoView({ block: "center", inline: "center" });
+  };
+
+  const jumpToSummary = () => {
+    summaryHeadingRef.current?.focus({ preventScroll: true });
+    summaryHeadingRef.current?.scrollIntoView({ block: "center" });
+  };
 
   const previewSelection = useMemo(() => {
     return buildSelectionPreview(dragSelection, cellMatrix) ?? selectedTime;
@@ -802,6 +850,9 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
       keyboardEvent.preventDefault();
 
       if (readOnly) {
+        setGroupAnchorRect(
+          getCellOffsetWithinGrid(cellElement, keyboardEvent.currentTarget),
+        );
         setActiveGroupCellId(currentCell.id);
         return;
       }
@@ -882,7 +933,7 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
             minW={{ base: "100px" }}
             mb={event.allDay ? "8px" : { base: 4, md: 2 }}
           >
-            <Center>{getMonthAndDate(date, configs.lang)}</Center>
+            <Center>{format(date, "MM/dd")}</Center>
             <Center>{displayDay(date, configs.lang)}</Center>
           </GridItem>
         ))
@@ -966,6 +1017,7 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
 
   const grid = (
     <Grid
+      ref={gridRef}
       role="grid"
       aria-rowcount={rowCount + 1}
       aria-colcount={columnCount}
@@ -988,9 +1040,11 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
       {columnHeaders}
       {gridCells.map((cell) => {
         const isSelected = readOnly ? false : previewSelection.has(cell.id);
-        const availability = groupTime[cell.id];
-        const isEveryoneAvailable =
-          readOnly && users?.length > 0 && availability?.length === users.length;
+        const showGroupCount = readOnly && cell.isSelectable && participantCount > 0;
+        const availableCount = showGroupCount ? groupTime[cell.id]?.length ?? 0 : 0;
+        const step = showGroupCount
+          ? Math.ceil(Math.min(availableCount / participantCount, 1) * 5)
+          : 0;
         return (
           <TimeCell
             key={cell.id}
@@ -1000,10 +1054,18 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
             isSelectable={cell.isSelectable}
             isSelected={isSelected}
             isReadOnly={readOnly}
-            showAvailabilityCheck={isEveryoneAvailable && users.length > 5}
+            visibleCount={
+              bestSlots.some(({ cell: bestCell }) => bestCell.id === cell.id)
+                ? availableCount
+                : null
+            }
+            availabilityTextColor={isDarkMode && step === 1 ? "white" : "black"}
+            isHighlighted={readOnly && highlightedSlotId === cell.id}
             label={
-              isEveryoneAvailable
-                ? `${cell.label}, ${context.global.timeTable.everyoneAvailable}`
+              showGroupCount
+                ? `${cell.label}, ${tableText.availableCount
+                    .replace("{count}", availableCount)
+                    .replace("{total}", participantCount)}`
                 : cell.label
             }
             tabIndex={
@@ -1014,10 +1076,7 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
             }
             backgroundColor={
               readOnly
-                ? generateAvailabilityColor(
-                    availability?.length / users?.length,
-                    colorMode === "dark",
-                  )
+                ? getAvailabilityColor(step, isDarkMode)
                 : isSelected
                   ? "accent"
                   : "transparent"
@@ -1075,45 +1134,93 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
     <Center
       fontWeight="bold"
       fontSize="12px"
+      fontVariantNumeric="tabular-nums"
       margin="0 auto"
       flexDir="column"
       gap={5}
       alignItems="flex-start"
     >
-      {event.allDay ? (
-        <VStack
-          gap={0}
-          pt="0rem"
-          pos="absolute"
-          left={{ base: "-0px", md: "-50px" }}
-          top={event.type === "dates" ? "40px" : "22px"}
-          zIndex={1}
-        >
-          <Center
-            h={{ base: "60px", md: "70px" }}
-            borderRadius="xs"
-            borderWidth={{ base: "1px", md: "0" }}
-            borderStyle="solid"
-            borderColor="border.strong"
-            bg={{ base: "bg.veil", md: "transparent" }}
-            p="2px"
-            top="-15px"
-            w={{ base: "30px", md: "50px" }}
-            textAlign="center"
-            whiteSpace="pre-wrap"
-          >
-            {context.home.input.switch}
-          </Center>
-        </VStack>
-      ) : (
-        <TimeLabels
-          event={event}
-          localTimes={localTimes}
-          configs={configs}
-        />
-      )}
+      <Box w="100%">
+        {readOnly && (
+          <HStack minH="8" justify="space-between" gap="2" mb="2">
+            <Text fontWeight="medium" color="ink.muted">
+              {participantCount > 0
+                ? tableText.responses.replace("{count}", participantCount)
+                : tableText.noResponses}
+            </Text>
+            {bestSlots.length > 0 && (
+              <Box
+                as="button"
+                type="button"
+                aria-controls={summaryId}
+                onClick={jumpToSummary}
+                color="ink.muted"
+                fontWeight="medium"
+                textDecoration="underline"
+                textUnderlineOffset="3px"
+                cursor="pointer"
+                minH="8"
+                _hover={{ color: "ink.primary" }}
+                focusVisibleRing="outside"
+              >
+                {tableText.jumpToBestSlots}
+              </Box>
+            )}
+          </HStack>
+        )}
 
-      {table}
+        <Box pos="relative">
+          {event.allDay ? (
+            <VStack
+              gap={0}
+              pt="0rem"
+              pos="absolute"
+              left={{ base: "-0px", md: "-50px" }}
+              top={event.type === "dates" ? "40px" : "22px"}
+              zIndex={1}
+            >
+              <Center
+                h={{ base: "60px", md: "70px" }}
+                borderRadius="xs"
+                borderWidth={{ base: "1px", md: "0" }}
+                borderStyle="solid"
+                borderColor="border.strong"
+                bg={{ base: "bg.veil", md: "transparent" }}
+                p="2px"
+                top="-15px"
+                w={{ base: "30px", md: "50px" }}
+                textAlign="center"
+                whiteSpace="pre-wrap"
+              >
+                {context.home.input.switch}
+              </Center>
+            </VStack>
+          ) : (
+            <TimeLabels
+              event={event}
+              localTimes={localTimes}
+              configs={configs}
+            />
+          )}
+          {table}
+        </Box>
+      </Box>
+
+      {bestSlots.length > 0 ? (
+        <GroupTimeSummary
+          id={summaryId}
+          headingRef={summaryHeadingRef}
+          slots={bestSlots}
+          participantCount={participantCount}
+          highlightedSlotId={highlightedSlotId}
+          labels={tableText}
+          onJump={jumpToSlot}
+        />
+      ) : readOnly && participantCount > 0 && (
+        <Text fontWeight="medium" color="ink.muted">
+          {tableText.noAvailableSlots}
+        </Text>
+      )}
 
       {((readOnly && users) || user) && (
         <HStack w="100%" gap="3" pr="4px">
@@ -1233,12 +1340,10 @@ const GroupPopoverContent = ({ cell, whoIsAvailable, users, context }) => {
         borderStyle="solid"
         borderColor="border"
       >
-        {users && (
+        {users?.length > 0 && (
           <HStack gap={1}>
             <Text fontWeight="bold">
-              {whoIsAvailable?.length === users.length
-                ? context.global.timeTable.all
-                : `${whoIsAvailable?.length ?? 0} / ${users.length}`}
+              {whoIsAvailable?.length ?? 0} / {users.length}
             </Text>
             <Text>{context.global.timeTable.available}</Text>
           </HStack>
@@ -1272,7 +1377,9 @@ const TimeCell = memo(
         isSelectable,
         isSelected,
         isReadOnly,
-        showAvailabilityCheck,
+        visibleCount,
+        availabilityTextColor,
+        isHighlighted,
         label,
         backgroundColor,
         shouldAnimateBackground,
@@ -1296,6 +1403,7 @@ const TimeCell = memo(
           data-time-row={rowIndex}
           data-time-column={columnIndex}
           data-is-selectable={isSelectable ? "true" : "false"}
+          data-slot-highlighted={isHighlighted || undefined}
           w="100%"
           minW="100px"
           h={{ base: "30px", md: "35px" }}
@@ -1305,6 +1413,9 @@ const TimeCell = memo(
           p="4px 8px"
           borderRadius="xs"
           backgroundColor={backgroundColor}
+          boxShadow={isHighlighted
+            ? "inset 0 0 0 2px var(--chakra-colors-ink-primary), inset 0 0 0 4px var(--chakra-colors-ink-inverted)"
+            : undefined}
           transition={
             shouldAnimateBackground ? "background-color .2s ease" : "none"
           }
@@ -1317,16 +1428,17 @@ const TimeCell = memo(
           }
           {...props}
         >
-          {showAvailabilityCheck && (
+          {visibleCount !== null && (
             <Center
               as="span"
               aria-hidden="true"
               h="100%"
               justifyContent="flex-end"
-              color="fg"
+              color={availabilityTextColor}
+              fontSize="0.6875rem"
               pointerEvents="none"
             >
-              <LuCheck size={12} strokeWidth={3} />
+              {visibleCount}
             </Center>
           )}
         </GridItem>
