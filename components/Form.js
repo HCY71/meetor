@@ -219,8 +219,9 @@ const Forth = () => {
     return (
         <Step step={ 4 } title={ context.home.input.timezone } mt={ { base: 5, md: 10 } }>
             <CustomSelect
-                id={ 'timezone' }
-                onChange={ (e) => setFieldValue('timezone', e.target.value) }
+                id='timezone'
+                label={ context.home.input.timezone }
+                onChange={ (timezone) => setFieldValue('timezone', timezone) }
                 value={ values.timezone }
             />
             <Center
@@ -253,7 +254,7 @@ const SliderThumb = ({ index, value }) => {
             bg='white'
             borderWidth='1px'
             borderStyle='solid'
-            borderColor='bg.track'
+            borderColor='border.subtle'
             boxShadow='thumb'
             zIndex={ 0 }
             _after={ {

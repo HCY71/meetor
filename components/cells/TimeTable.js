@@ -17,6 +17,7 @@ import {
   VStack,
   HStack,
   Popover,
+  Portal,
   usePopover,
 } from "@chakra-ui/react";
 import { useColorMode } from "@/components/ColorMode";
@@ -41,7 +42,6 @@ import GroupTimeSummary from "./GroupTimeSummary";
 
 
 import useSupabase from "@/hooks/useSupabase";
-import useLocalStorage from "@/hooks/useLocalStorage";
 import { useParams } from "next/navigation";
 import { useConfigs } from "@/context/ConfigsContext";
 import { useLang } from "@/context/LangContext";
@@ -396,12 +396,11 @@ const groupCellFocusStyles = {
   "&[data-slot-highlighted]::after": { borderWidth: "2px" },
 };
 
-const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
+const TimeTable = ({ readOnly, user, onShowGroup }) => {
   const event = useEvent();
   const { eventId } = useParams();
   const { POST_USER_TIME, subscribeToEventUsers } = useSupabase();
-  const [user] = useLocalStorage("meetor_name");
-  const [users, setUsers] = useState(event.users);
+  const [responses, setResponses] = useState(event.users);
   const { timezone, updateTimezone } = useTimezone();
   const { configs } = useConfigs();
   const { context } = useLang();
@@ -424,6 +423,16 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
   const summaryHeadingRef = useRef(null);
   const summaryId = useId();
   const tableText = context.global.timeTable;
+  const users = useMemo(() => {
+    if (!Array.isArray(responses)) return null;
+    return responses.filter((response) =>
+      typeof response?.user === "string" || Number.isFinite(response?.user),
+    );
+  }, [responses]);
+  const savedResponse = useMemo(() => {
+    if (!user || !Array.isArray(event.users)) return undefined;
+    return event.users.find((response) => response?.user === user);
+  }, [event.users, user]);
   const participantCount = users?.length ?? 0;
   const isDarkMode = colorMode === "dark";
 
@@ -486,11 +495,12 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
 
   const groupTime = useMemo(() => {
     const availabilityByTime = {};
-    if (!readOnly) return availabilityByTime;
 
     users?.forEach((eventUser) => {
+      if (!Array.isArray(eventUser.time)) return;
+
       const countedSlots = new Set();
-      eventUser.time?.forEach((time) => {
+      eventUser.time.forEach((time) => {
         const normalizedTime =
           event.type === "dates"
             ? parseLegacyDateData(time, event, timezone)
@@ -509,10 +519,10 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
     });
 
     return availabilityByTime;
-  }, [event, readOnly, timezone, users]);
+  }, [event, timezone, users]);
 
   const bestSlots = useMemo(() => {
-    if (!readOnly || participantCount === 0) return [];
+    if (participantCount === 0) return [];
 
     return gridCells
       .filter((cell) => cell.isSelectable && groupTime[cell.id]?.length > 0)
@@ -537,7 +547,7 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
       });
   }, [
     configs.lang, configs.usePM, context.home.input.switch, event.allDay,
-    event.type, gridCells, groupTime, localTimes, participantCount, readOnly,
+    event.type, gridCells, groupTime, localTimes, participantCount,
   ]);
 
   const jumpToSlot = (cell) => {
@@ -546,6 +556,7 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
     );
     if (!target) return;
 
+    onShowGroup();
     setActiveGroupCellId(null);
     setHighlightedSlotId(cell.id);
     target.focus({ preventScroll: true });
@@ -561,7 +572,7 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
     return buildSelectionPreview(dragSelection, cellMatrix) ?? selectedTime;
   }, [cellMatrix, dragSelection, selectedTime]);
 
-  const activeGroupCell = activeGroupCellId
+  const activeGroupCell = readOnly && activeGroupCellId
     ? cellById.get(activeGroupCellId)
     : null;
   const activeGroupAvailability = activeGroupCell
@@ -593,12 +604,7 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
   }, [activeGroupCellId, groupAnchorRect]);
 
   useEffect(() => {
-    if (readOnly) return;
-
-    const userSelectedTime = event.users?.find(
-      (eventUser) => eventUser.user === user,
-    )?.time;
-    if (!userSelectedTime) return;
+    const userSelectedTime = Array.isArray(savedResponse?.time) ? savedResponse.time : [];
 
     const normalizedSelection = userSelectedTime
       .map((time) => {
@@ -610,7 +616,7 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
     const nextSelection = new Set(normalizedSelection);
     selectedTimeRef.current = nextSelection;
     setSelectedTime(nextSelection);
-  }, [event, readOnly, user]);
+  }, [event, user, savedResponse]);
 
   useEffect(() => {
     if (event.allDay) {
@@ -618,17 +624,15 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
       return;
     }
 
-    if (!user || !event.users) return;
-    const savedTimezone = event.users.find(
-      (eventUser) => eventUser.user === user,
-    )?.timezone;
+    const savedTimezone = savedResponse?.timezone;
     if (savedTimezone) updateTimezoneRef.current(savedTimezone);
-  }, [event.allDay, event.timezone, event.users, user]);
+  }, [event.allDay, event.timezone, savedResponse]);
+
+  useEffect(() => subscribeToEventUsers(eventId, setResponses), [subscribeToEventUsers, eventId]);
 
   useEffect(() => {
-    if (!readOnly || !isRealtimeEnabled) return undefined;
-    return subscribeToEventUsers(eventId, setUsers);
-  }, [subscribeToEventUsers, readOnly, isRealtimeEnabled, eventId]);
+    if (!readOnly) setActiveGroupCellId(null);
+  }, [readOnly]);
 
   // close the group tooltip when tapping anywhere outside a time cell (mobile)
   useEffect(() => {
@@ -698,6 +702,10 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
 
     clearDrag();
   }, [clearDrag]);
+
+  useEffect(() => {
+    if (readOnly && activePointerIdRef.current !== null) cancelDrag();
+  }, [cancelDrag, readOnly]);
 
   useEffect(() => {
     window.addEventListener("blur", cancelDrag);
@@ -953,7 +961,7 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
             role="columnheader"
             w="100%"
             minW={{ base: "100px" }}
-            mb={event.allDay ? "8px" : { base: 4, md: 2 }}
+            alignContent="center"
           >
             <Center>{format(date, "MM/dd")}</Center>
             <Center>{displayDay(date, configs.lang)}</Center>
@@ -963,7 +971,7 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
           <GridItem
             key={day}
             role="columnheader"
-            mb={event.allDay ? "8px" : { base: 4, md: 2 }}
+            alignContent="center"
           >
             <Center>{translateDay(day, configs.lang)}</Center>
           </GridItem>
@@ -1024,13 +1032,17 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
       participantCount: users.length,
       participants: users.map((participant) => participant.user),
       timeSlots: getExportTimeSlots(),
-      originalResponses: users,
+      originalResponses: responses,
     });
   };
 
   const firstFocusableCell = gridCells.find((cell) => {
     return readOnly || cell.isSelectable;
   })?.id;
+  const focusedCell = cellById.get(focusedCellId);
+  const tabStopId = focusedCell && (readOnly || focusedCell.isSelectable)
+    ? focusedCell.id
+    : firstFocusableCell;
   const columnCount =
     event.type === "dates" ? localTimes.dates.length : localTimes.days.length;
   const rowCount = event.allDay
@@ -1044,7 +1056,7 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
       aria-rowcount={rowCount + 1}
       aria-colcount={columnCount}
       className="time-grid"
-      gridTemplateRows={`auto repeat(${rowCount}, auto)`}
+      gridTemplateRows={`var(--time-heading-height) repeat(${rowCount}, var(--time-slot-height))`}
       gridTemplateColumns={`repeat(${columnCount}, 1fr)`}
       w="100%"
       h="fit-content"
@@ -1077,7 +1089,7 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
             isSelected={isSelected}
             isReadOnly={readOnly}
             visibleCount={
-              bestSlots.some(({ cell: bestCell }) => bestCell.id === cell.id)
+              readOnly && bestSlots.some(({ cell: bestCell }) => bestCell.id === cell.id)
                 ? availableCount
                 : null
             }
@@ -1090,12 +1102,7 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
                     .replace("{total}", participantCount)}`
                 : cell.label
             }
-            tabIndex={
-              focusedCellId === cell.id ||
-              (!focusedCellId && firstFocusableCell === cell.id)
-                ? 0
-                : -1
-            }
+            tabIndex={tabStopId === cell.id ? 0 : -1}
             backgroundColor={
               readOnly
                 ? getAvailabilityColor(step, isDarkMode)
@@ -1132,23 +1139,20 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
       className="time-table"
       overflowX="auto"
       pos="relative"
-      p="0 4px 8px 0px"
+      p="0 4px 10px 0px"
       alignItems="flex-start"
-      minH="300px"
     >
-      {readOnly ? (
-        <Popover.RootProvider value={groupPopover} lazyMount unmountOnExit>
-          {grid}
+      <Popover.RootProvider value={groupPopover} lazyMount unmountOnExit>
+        {grid}
+        <Portal>
           <GroupPopoverContent
             cell={activeGroupCell}
             whoIsAvailable={activeGroupAvailability}
             users={users}
             context={context}
           />
-        </Popover.RootProvider>
-      ) : (
-        grid
-      )}
+        </Portal>
+      </Popover.RootProvider>
     </VStack>
   );
 
@@ -1159,73 +1163,49 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
       fontVariantNumeric="tabular-nums"
       margin="0 auto"
       flexDir="column"
-      gap={5}
+      gap="2"
       alignItems="flex-start"
     >
-      <Box w="100%">
-        {readOnly && (
-          <HStack minH="8" justify="space-between" gap="2" mb="2">
-            <Text fontWeight="medium" color="ink.muted">
-              {participantCount > 0
-                ? tableText.responses.replace("{count}", participantCount)
-                : tableText.noResponses}
-            </Text>
-            {bestSlots.length > 0 && (
-              <Box
-                as="button"
-                type="button"
-                aria-controls={summaryId}
-                onClick={jumpToSummary}
-                color="ink.muted"
-                fontWeight="medium"
-                textDecoration="underline"
-                textUnderlineOffset="3px"
-                cursor="pointer"
-                minH="8"
-                _hover={{ color: "ink.primary" }}
-                focusVisibleRing="outside"
-              >
-                {tableText.jumpToBestSlots}
-              </Box>
-            )}
-          </HStack>
+      <HStack w="100%" minH="6" justify="space-between" gap="2">
+        <Text fontWeight="medium" color="ink.muted">
+          {participantCount > 0
+            ? tableText.responses.replace("{count}", participantCount)
+            : tableText.noResponses}
+        </Text>
+        {bestSlots.length > 0 && (
+          <Box
+            as="button"
+            type="button"
+            aria-controls={summaryId}
+            onClick={jumpToSummary}
+            color="ink.muted"
+            fontWeight="medium"
+            textDecoration="underline"
+            textUnderlineOffset="3px"
+            cursor="pointer"
+            minH="6"
+            _hover={{ color: "ink.primary" }}
+            focusVisibleRing="outside"
+          >
+            {tableText.jumpToBestSlots}
+          </Box>
         )}
+      </HStack>
 
-        <Box pos="relative">
-          {event.allDay ? (
-            <VStack
-              gap={0}
-              pt="0rem"
-              pos="absolute"
-              left={{ base: "-0px", md: "-50px" }}
-              top={event.type === "dates" ? "40px" : "22px"}
-              zIndex={1}
-            >
-              <Center
-                h={{ base: "60px", md: "70px" }}
-                borderRadius="xs"
-                borderWidth={{ base: "1px", md: "0" }}
-                borderStyle="solid"
-                borderColor="border.strong"
-                bg={{ base: "bg.veil", md: "transparent" }}
-                p="2px"
-                top="-15px"
-                w={{ base: "30px", md: "50px" }}
-                textAlign="center"
-                whiteSpace="pre-wrap"
-              >
-                {context.home.input.switch}
-              </Center>
-            </VStack>
-          ) : (
-            <TimeLabels
-              event={event}
-              localTimes={localTimes}
-              configs={configs}
-            />
-          )}
-          {table}
-        </Box>
+      <Box
+        pos="relative"
+        w="100%"
+        css={{
+          "--time-heading-height": event.type === "dates" ? "42px" : "26px",
+          "--time-slot-height": event.allDay ? "38px" : { base: "28px", md: "30px" },
+        }}
+      >
+        <TimeLabels
+          allDayLabel={event.allDay ? context.home.input.switch : null}
+          times={localTimes.times}
+          usePM={configs.usePM}
+        />
+        {table}
       </Box>
 
       {bestSlots.length > 0 ? (
@@ -1238,15 +1218,15 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
           labels={tableText}
           onJump={jumpToSlot}
         />
-      ) : readOnly && participantCount > 0 && (
+      ) : participantCount > 0 && (
         <Text fontWeight="medium" color="ink.muted">
           {tableText.noAvailableSlots}
         </Text>
       )}
 
-      {((readOnly && users) || user) && (
+      {(users || user) && (
         <HStack w="100%" gap="3" pr="4px">
-          {readOnly && users && (
+          {users && (
             <ExportMenu
               onExportCsv={handleExportCsv}
               onExportJson={handleExportJson}
@@ -1272,56 +1252,50 @@ const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
   );
 };
 
-const TimeLabels = ({ event, localTimes, configs }) => {
+const TimeLabels = ({ allDayLabel, times, usePM }) => {
+  const labels = allDayLabel ? [allDayLabel] : times;
+  const rowStep = (index) => `calc(var(--time-heading-height) + var(--time-slot-height) * ${index})`;
+
   return (
-    <VStack
-      gap={0}
-      pt="0rem"
+    <Box
+      aria-hidden
+      pointerEvents="none"
       pos="absolute"
-      left={{ base: "-0px", md: "-48px" }}
-      top={
-        localTimes.times[0] % 1 === 0 ? { base: "14px", md: "5px" } : "36px"
-      }
+      left={{ base: "0", md: "-48px" }}
+      top="0"
+      w={{ base: "30px", md: "45px" }}
       zIndex={1}
-      alignItems={{ base: "flex-start", md: "center" }}
     >
-      <Center h={event.type === "dates" ? "35px" : "20px"} />
-      {localTimes.times.map((time, index, allTimes) => {
-        const hasBreakpoint =
-          index < allTimes.length - 1 && allTimes[index + 1] - time !== 0.5;
-        if (time % 1 !== 0) return null;
+      {labels.map((time, index) => {
+        const hasGap = !allDayLabel && index > 0 && time - times[index - 1] !== 0.5;
+        const wholeHour = (time * 2) % 1 === 0 ? time % 1 === 0 : index % 2 === 0;
+        if (!allDayLabel && index !== 0 && !wholeHour && !hasGap) return null;
 
         return (
           <Center
-            key={`${time}-time-column`}
-            h={{ base: "60px", md: "70px" }}
-            alignItems="flex-start"
+            key={index}
+            pos="absolute"
+            w="max-content"
+            maxW={allDayLabel ? "100%" : undefined}
+            left={0}
+            right={{ md: 0 }}
+            mx={{ md: "auto" }}
+            top={rowStep(allDayLabel ? 0.5 : index)}
+            transform="translateY(-50%)"
+            borderRadius="xs"
+            borderWidth={{ base: "1px", md: "0" }}
+            borderColor="border.strong"
+            bg={{ base: "bg.veil", md: "transparent" }}
+            px="0.5"
+            textAlign="center"
+            lineHeight="short"
           >
-            <Center
-              borderRadius="xs"
-              borderWidth={{ base: "1px", md: "0" }}
-              borderStyle="solid"
-              borderColor="border.strong"
-              bg={{ base: "bg.veil", md: "transparent" }}
-              p="2px"
-              top="-10px"
-            >
-              {displayTime(time, configs.usePM)}
-            </Center>
-            {hasBreakpoint && (
-              <Center
-                pos="absolute"
-                color="ink.muted"
-                top={{ base: "30px", md: "35px" }}
-                transform="translateY(-50%)"
-              >
-                |
-              </Center>
-            )}
+            {hasGap && <Box as="span" pos="absolute" bottom="100%" color="ink.muted">|</Box>}
+            {allDayLabel || displayTime(time, usePM)}
           </Center>
         );
       })}
-    </VStack>
+    </Box>
   );
 };
 
@@ -1332,15 +1306,15 @@ const GroupPopoverContent = ({ cell, whoIsAvailable, users, context }) => {
     <Popover.Positioner pointerEvents="none">
     <Popover.Content
       w="fit-content"
-      maxW="360px"
+      maxW="min(360px, calc(100vw - 16px))"
       // v3 caps a popover at the viewport space left below its anchor, which
       // cut the tooltip on the last visible row down to its heading; v2 let
       // it run past the fold like any other page content
       maxH="none"
-      // inherit the grid's 12px rather than v3's own 14px, as v2 did
-      fontSize="inherit"
-      lineHeight="inherit"
-      bg="bg.canvas"
+      fontSize="12px"
+      lineHeight="normal"
+      fontWeight="bold"
+      bg="bg.surface"
       borderWidth="1px"
       borderStyle="solid"
       borderColor="border.strong"
@@ -1348,7 +1322,7 @@ const GroupPopoverContent = ({ cell, whoIsAvailable, users, context }) => {
       boxShadow="lg"
       pointerEvents="none"
       // the arrow reads its fill from this variable
-      css={{ "--popover-bg": "var(--chakra-colors-bg-canvas)" }}
+      css={{ "--popover-bg": "var(--chakra-colors-bg-surface)" }}
     >
       <Popover.Arrow css={{ "--arrow-size": "8px" }}>
         {/* match the card border colour so the arrow gets the same outline */}
@@ -1428,7 +1402,7 @@ const TimeCell = memo(
           data-slot-highlighted={isHighlighted || undefined}
           w="100%"
           minW="100px"
-          h={{ base: "30px", md: "35px" }}
+          h="var(--time-slot-height)"
           borderWidth="1px"
           borderStyle="solid"
           borderColor="border.strong"

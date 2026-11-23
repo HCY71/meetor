@@ -65,7 +65,6 @@ const globalZhTw = {
         dragSelect: "你可以拖曳來多選",
         hoverToShow: "游標移到格子查看細節",
         tapToShow: "按住可查看細節",
-        forMore: "右滑可能有更多日期",
         allDay: "選擇「整天」時，不會出現時間欄位"
     }
 }

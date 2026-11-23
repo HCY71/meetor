@@ -57,7 +57,6 @@ const globalSchema = {
         dragSelect: "string",
         hoverToShow: "string",
         tapToShow: "string",
-        forMore: "string?",
         allDay: "string",
     },
 }

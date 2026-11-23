@@ -1,7 +1,7 @@
 import {
     HStack,
-    VStack,
-    Center,
+    Box,
+    Text,
     Field,
     useDisclosure,
 } from "@chakra-ui/react"
@@ -12,7 +12,6 @@ import TimeTable from "./cells/TimeTable"
 import CustomInput from "./atoms/CustomInput"
 import Submit from "./atoms/Submit"
 import CustomButton from "./atoms/CustomButton"
-import SubHeader from "./atoms/SubHeader"
 import DonateModal from "./cells/DonateModal"
 
 import { Formik } from "formik"
@@ -58,6 +57,8 @@ const First = ({ inputRef, openModal }) => {
         <Step
             step={ 1 }
             title={ context.event.input.name }
+            mt='3'
+            gap='1.5'
         >
             <Formik
                 initialValues={ secondFormData.initialValues }
@@ -69,11 +70,14 @@ const First = ({ inputRef, openModal }) => {
                         <HStack as='form' w='100%' onSubmit={ handleSubmit }>
                             <CustomInput
                                 id='name'
+                                aria-label={ context.event.input.name }
                                 placeholder={ context.event.input.placeholder }
                                 onChange={ handleChange }
                                 ref={ inputRef }
+                                size='md'
+                                h='9'
                             />
-                            <Submit />
+                            <Submit size='md' h='9' flexShrink={ 0 } />
                         </HStack>
                         <Field.ErrorText>
                             { errors.name }
@@ -104,14 +108,12 @@ const Second = ({ inputRef }) => {
             step={ 2 }
             title={ context.event.input.checkTime }
             isDisable={ name ? true : false }
+            gap='1.5'
         >
             <CustomTabs
                 tab={ [ context.global.panel.yourTime, context.global.panel.groupTime ] }
-                panel={ [
-                    <TimeTable key='personal-time' />,
-                    <TimeTable key='group-time' readOnly isRealtimeEnabled={ tabIndex === 1 } />
-                ] }
-                tips={ [ context.global.tips.dragSelect, isTouch ? context.global.tips.tapToShow : context.global.tips.hoverToShow, context.global.tips.forMore ] }
+                sharedPanel={ <TimeTable user={ name } readOnly={ tabIndex === 1 } onShowGroup={ () => setTabIndex(1) } /> }
+                tips={ [ context.global.tips.dragSelect, isTouch ? context.global.tips.tapToShow : context.global.tips.hoverToShow ] }
                 inputRef={ inputRef }
                 isDisabled={ name ? false : true }
                 index={ tabIndex }
@@ -128,26 +130,16 @@ const LoggedIn = () => {
     const { context } = useLang()
     const handleLogout = () => setName()
     return (
-        <VStack>
-            <SubHeader>
-                { context.event.hello + (name || " ") }
-            </SubHeader>
-            <HStack
-                fontSize={ { base: '1rem', md: '1.5rem' } }
-                fontWeight='500'
-                lineHeight='1.5'
-                textAlign='center'
-                color='ink.primary'
-                gap={ 4 }
-            >
-                <Center>
-                    { context.event.go }
-                </Center>
-                <CustomButton onClick={ handleLogout }>
-                    { context.global.button.logout }
-                </CustomButton>
-            </HStack>
-        </VStack>
+        <HStack w='100%' justify='space-between' gap='2'>
+            <Box flex='1' minW='0' fontSize='sm' overflowWrap='anywhere'>
+                <Text as='span' fontWeight='semibold'>{ context.event.hello + name }</Text>
+                { ' ' }
+                <Text as='span' color='ink.muted'>{ context.event.go }</Text>
+            </Box>
+            <CustomButton ghost size='sm' h='8' px='2.5' fontSize='xs' flexShrink={ 0 } onClick={ handleLogout }>
+                { context.global.button.logout }
+            </CustomButton>
+        </HStack>
     )
 }
 

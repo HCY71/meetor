@@ -1,40 +1,81 @@
-import { forwardRef } from "react"
-import { NativeSelect } from "@chakra-ui/react"
+import { useMemo } from "react"
+import { createListCollection, Portal, Select } from "@chakra-ui/react"
 import { timezoneNames } from "@/public/utils/timezoneNames"
 
-// Width and size belong to the root, which carries the dropdown indicator
-// alongside the field; everything else styles the field itself.
-const CustomSelect = forwardRef(({ id, placeholder, onChange, size = 'lg', width, ...props }, ref) => {
+const timezones = createListCollection({ items: timezoneNames })
+
+const CustomSelect = ({ id, label, value, onChange, size = 'lg' }) => {
+    const collection = useMemo(() => {
+        // The browser or an existing event may use a timezone alias outside the list.
+        if (!value || timezones.has(value)) return timezones
+        return createListCollection({ items: [ value, ...timezoneNames ] })
+    }, [ value ])
+    const isCompact = size === 'sm'
+
     return (
-        <NativeSelect.Root size={ size } width={ width }>
-            <NativeSelect.Field
-                id={ id }
-                placeholder={ placeholder }
-                onChange={ onChange }
-                focusRingColor='ink.primary'
-                fontWeight='medium'
-                fontSize='1rem'
-                borderColor='border.subtle'
-                // The explicit border colour above outranks the recipe's focus colour,
-                // so the focused state is restated here: v2 turned the border ink and
-                // doubled it with a 1px ring, on any focus rather than only keyboard focus
-                _focus={ {
-                    borderColor: 'ink.primary',
-                    boxShadow: '0 0 0 1px var(--chakra-colors-ink-primary)',
-                } }
-                ref={ ref }
-                { ...props }
-            >
-                { timezoneNames.map((tz) => (
-                    <option value={ tz } key={ tz }>{ tz }</option>
-                )) }
-            </NativeSelect.Field>
-            <NativeSelect.Indicator />
-        </NativeSelect.Root>
+        <Select.Root
+            ids={ { trigger: id } }
+            collection={ collection }
+            value={ value ? [ value ] : [] }
+            onValueChange={ ({ value: [ timezone ] }) => onChange(timezone) }
+            size={ size }
+            minW='0'
+            positioning={ { sameWidth: true, gutter: 4 } }
+            lazyMount
+            unmountOnExit
+        >
+            <Select.Control>
+                <Select.Trigger
+                    aria-label={ label }
+                    minH={ isCompact ? '8' : undefined }
+                    px={ isCompact ? '3' : undefined }
+                    fontSize={ isCompact ? 'xs' : 'md' }
+                    fontWeight='medium'
+                    borderColor='border.subtle'
+                    cursor='pointer'
+                    _hover={ { bg: 'bg.track' } }
+                    _expanded={ { borderColor: 'ink.muted' } }
+                    focusVisibleRing='outside'
+                    focusRingColor='ink.primary'
+                >
+                    <Select.ValueText maxW='none' overflowWrap='anywhere' />
+                    <Select.Indicator color='ink.muted' flexShrink={ 0 } />
+                </Select.Trigger>
+            </Select.Control>
+            <Portal>
+                <Select.Positioner>
+                    <Select.Content
+                        aria-label={ label }
+                        maxH='min(16rem, var(--available-height, 16rem))'
+                        overscrollBehavior='contain'
+                        bg='bg.surface'
+                        borderWidth='1px'
+                        borderColor='border.subtle'
+                        borderRadius='md'
+                        boxShadow='menu'
+                        p='1'
+                        _motionReduce={ { animation: 'none' } }
+                    >
+                        { collection.items.map((timezone) => (
+                            <Select.Item
+                                key={ timezone }
+                                item={ timezone }
+                                minH='8'
+                                px='2'
+                                cursor='pointer'
+                                borderRadius='sm'
+                                _highlighted={ { bg: 'bg.track' } }
+                                _selected={ { fontWeight: 'semibold' } }
+                            >
+                                <Select.ItemText minW='0' overflowWrap='anywhere'>{ timezone }</Select.ItemText>
+                                <Select.ItemIndicator flexShrink={ 0 } />
+                            </Select.Item>
+                        )) }
+                    </Select.Content>
+                </Select.Positioner>
+            </Portal>
+        </Select.Root>
     )
-})
-
-CustomSelect.displayName = 'CustomSelect'
-
+}
 
 export default CustomSelect

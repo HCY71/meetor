@@ -22,9 +22,17 @@ const GroupTimeSummary = ({
     >
       {labels.bestSlots}
     </Text>
-    <Box as="ul" listStyleType="none" m="0" p="0">
+    <Box
+      as="ul"
+      display="grid"
+      gridTemplateColumns="repeat(3, minmax(0, 1fr))"
+      gap="1.5"
+      listStyleType="none"
+      m="0"
+      p="0"
+    >
       {slots.map(({ cell, day, time, count }) => (
-        <Box as="li" key={cell.id} borderBottomWidth="1px" borderColor="border.subtle">
+        <Box as="li" key={cell.id}>
           <Flex
             as="button"
             type="button"
@@ -32,30 +40,39 @@ const GroupTimeSummary = ({
               .replace("{count}", count)
               .replace("{total}", participantCount)}`}
             aria-current={highlightedSlotId === cell.id ? "location" : undefined}
-            align="center"
+            direction={{ base: "column", sm: "row" }}
+            align={{ base: "flex-start", sm: "center" }}
             justify="space-between"
-            gap="3"
+            gap={{ base: "0.5", sm: "1.5" }}
             w="100%"
-            minH="9"
+            h="100%"
+            minH="11"
             py="1.5"
-            px="3"
-            borderRadius="sm"
+            px="1.5"
+            borderWidth="1px"
+            borderColor="border.subtle"
+            borderRadius="md"
             textAlign="start"
-            fontSize="sm"
+            fontSize="xs"
+            lineHeight="short"
             fontWeight="medium"
             fontVariantNumeric="tabular-nums"
             cursor="pointer"
-            _hover={{ bg: "bg.track" }}
+            transitionProperty="background-color, border-color"
+            transitionDuration="fast"
+            _motionReduce={{ transition: "none" }}
+            _hover={{ bg: "bg.track", borderColor: "ink.subtle" }}
+            _active={{ bg: "bg.track", borderColor: "ink.muted" }}
             focusVisibleRing="inside"
             onClick={() => onJump(cell)}
           >
-            <Flex as="span" flexWrap="wrap" columnGap="2">
+            <Flex as="span" direction="column" gap="0.5" minW="0" overflowWrap="anywhere">
               <Text as="span">{day}</Text>
-              <Text as="span" color="ink.muted" whiteSpace="nowrap">
+              <Text as="span" color="ink.muted">
                 {time}
               </Text>
             </Flex>
-            <Text as="span" fontWeight="semibold">
+            <Text as="span" flexShrink="0" fontWeight="semibold">
               {count}/{participantCount}
             </Text>
           </Flex>

@@ -1,127 +1,136 @@
 import {
+    Box,
     Tabs,
     Tag,
     Center,
     HStack,
 } from '@chakra-ui/react'
+import { useId } from 'react'
 import CustomSelect from '../atoms/CustomSelect'
 import { toast } from 'react-hot-toast'
 import { useLang } from '@/context/LangContext'
 
-const CustomTabs = ({ onMouseDown = [ null, null ], tab, panel, isDisabled = false, inputRef = null, tips = [], timezoneConfigs, index, onChange, ...props }) => {
+const CustomTabs = ({
+    onMouseDown = [],
+    tab,
+    panel,
+    sharedPanel,
+    isDisabled = false,
+    inputRef,
+    tips = [],
+    timezoneConfigs,
+    index,
+    onChange,
+    event,
+}) => {
     const { context } = useLang()
+    const id = useId()
+    const sharedPanelId = `${id}-panel`
+    const triggerId = (value) => `${id}-tab-${value}`
+
     const handleDisable = () => {
-        toast(context.global.toast.nameFirst, {
-            icon: '😵‍💫',
-        })
-        inputRef.current.focus()
+        toast(context.global.toast.nameFirst, { icon: '😵‍💫' })
+        inputRef?.current?.focus()
     }
-    const handleReset = () => {
-        timezoneConfigs.updateTimezone(props.event.timezone)
-    }
-    // v3 tabs are keyed by string value rather than position. Callers still
-    // work in indexes, so the translation happens here and nowhere else.
-    const isControlled = index !== undefined
+
     return (
         <Tabs.Root
             w='100%'
             fitted
             lazyMount
-            value={ isControlled ? String(index) : undefined }
-            defaultValue={ isControlled ? undefined : '0' }
-            onValueChange={ (details) => onChange?.(Number(details.value)) }
+            ids={ sharedPanel ? { trigger: triggerId, content: () => sharedPanelId } : undefined }
+            value={ index === undefined ? undefined : String(index) }
+            defaultValue={ index === undefined ? '0' : undefined }
+            onValueChange={ ({ value }) => onChange?.(Number(value)) }
         >
-            <Tabs.List display='flex' gap={ { base: 1, md: 2 } }>
+            <Tabs.List display='flex' gap='1.5'>
                 <Center
-                    onClick={ isDisabled ? handleDisable : null }
-                    pointerEvents={ isDisabled ? 'initial' : 'none' }
-                    cursor={ isDisabled ? 'not-allowed' : 'none' }
+                    onClick={ isDisabled ? handleDisable : undefined }
+                    cursor={ isDisabled ? 'not-allowed' : undefined }
                     flex='1'
                 >
                     <Tabs.Trigger
                         value='0'
+                        disabled={ isDisabled }
                         w='100%'
-                        onMouseDown={ onMouseDown[ 0 ] }
-                        pointerEvents={ isDisabled ? 'none' : 'initial' }
+                        onMouseDown={ onMouseDown[0] }
+                        pointerEvents={ isDisabled ? 'none' : undefined }
                     >
-                        { tab[ 0 ] }
+                        { tab[0] }
                     </Tabs.Trigger>
                 </Center>
                 <Center flex='1'>
-                    <Tabs.Trigger value='1' w='100%' onMouseDown={ onMouseDown[ 1 ] }>{ tab[ 1 ] }</Tabs.Trigger>
+                    <Tabs.Trigger value='1' w='100%' onMouseDown={ onMouseDown[1] }>
+                        { tab[1] }
+                    </Tabs.Trigger>
                 </Center>
             </Tabs.List>
-            <Tabs.Content value='0' p='1rem 0'>
+            { sharedPanel ? (
+                <Box id={ sharedPanelId } role='tabpanel' aria-labelledby={ triggerId(index) } py='2'>
+                    <ScheduleControls tips={ tips } index={ index } timezoneConfigs={ timezoneConfigs } event={ event } />
+                    { sharedPanel }
+                </Box>
+            ) : panel.map((content, value) => (
+                <Tabs.Content key={ value } value={ String(value) } p='1rem 0'>
                     <HStack>
-                        { tips[ 0 ] && <TagTemplate>{ `💡 ${tips[ 0 ]}` }</TagTemplate> }
-                        { tips[ 2 ] && <TagTemplate>{ `💡 ${tips[ 2 ]}` }</TagTemplate> }
+                        { tips[value] && <TagTemplate>{ `💡 ${tips[value]}` }</TagTemplate> }
                     </HStack>
-                    { timezoneConfigs && !props.event.allDay &&
-                        <HStack mt='-4px' mb={ 2 } justifyContent={ { base: 'space-between', md: 'flex-start' } } gap={ 3 }>
-                            <CustomSelect
-                                id='timezone'
-                                value={ timezoneConfigs.timezone }
-                                size='sm'
-                                rounded='md'
-                                width={ { base: '80%', sm: '50%' } }
-                                fontSize='.75rem'
-                                onChange={ (e) => timezoneConfigs.updateTimezone(e.target.value) }
-                            />
-                            <Center
-                                fontSize='0.75rem'
-                                fontWeight='medium'
-                                color='ink.muted'
-                                borderColor='ink.muted'
-                                cursor='pointer'
-                                p={ '4px 8px' }
-                                h={ '100%' }
-                                border='solid 1px'
-                                borderRadius='md'
-                                onClick={ handleReset }
-                                visibility={ props.event.timezone === timezoneConfigs.timezone ? 'hidden' : 'visible' }
-                            >
-                                { context.home.input.timezoneReset }
-                            </Center>
-                        </HStack>
-                    }
-                    { panel[ 0 ] }
-            </Tabs.Content>
-            <Tabs.Content value='1' p='1rem 0'>
-                    <HStack>
-                        { tips[ 1 ] && <TagTemplate>{ `💡 ${tips[ 1 ]}` }</TagTemplate> }
-                        { tips[ 2 ] && <TagTemplate>{ `💡 ${tips[ 2 ]}` }</TagTemplate> }
-                    </HStack>
-                    { timezoneConfigs && !props.event.allDay &&
-                        <HStack mt='-4px' mb={ 2 } justifyContent={ { base: 'space-between', md: 'flex-start' } } gap={ 3 }>
-                            <CustomSelect
-                                id='timezone'
-                                value={ timezoneConfigs.timezone }
-                                size='sm'
-                                rounded='md'
-                                width={ { base: '80%', sm: '50%' } }
-                                fontSize='.75rem'
-                                onChange={ (e) => timezoneConfigs.updateTimezone(e.target.value) }
-                            />
-                            <Center
-                                fontSize='0.75rem'
-                                fontWeight='medium'
-                                color='ink.muted'
-                                borderColor='ink.muted'
-                                cursor='pointer'
-                                p={ '4px 8px' }
-                                h={ '100%' }
-                                border='solid 1px'
-                                borderRadius='md'
-                                onClick={ handleReset }
-                                visibility={ props.event.timezone === timezoneConfigs.timezone ? 'hidden' : 'visible' }
-
-                            >                                { context.home.input.timezoneReset }
-                            </Center>
-                        </HStack>
-                    }
-                    { panel[ 1 ] }
-            </Tabs.Content>
+                    { content }
+                </Tabs.Content>
+            )) }
         </Tabs.Root>
+    )
+}
+
+const ScheduleControls = ({ tips, index, timezoneConfigs, event }) => {
+    const { context } = useLang()
+    return (
+        <HStack mb='2' gap='2' flexWrap='wrap' alignItems='center'>
+            { !event.allDay && (
+                <HStack gap='2' flex='1 1 170px' minW='0'>
+                    <CustomSelect
+                        id='timezone'
+                        label={ context.home.input.timezone }
+                        value={ timezoneConfigs.timezone }
+                        size='sm'
+                        onChange={ timezoneConfigs.updateTimezone }
+                    />
+                    <Center
+                        as='button'
+                        type='button'
+                        flexShrink={ 0 }
+                        fontSize='xs'
+                        fontWeight='medium'
+                        color='ink.muted'
+                        borderColor='ink.muted'
+                        cursor='pointer'
+                        px='2'
+                        minH='8'
+                        borderWidth='1px'
+                        borderRadius='md'
+                        onClick={ () => timezoneConfigs.updateTimezone(event.timezone) }
+                        display={ event.timezone === timezoneConfigs.timezone ? 'none' : 'flex' }
+                    >
+                        { context.home.input.timezoneReset }
+                    </Center>
+                </HStack>
+            ) }
+            <Box display='grid' flex='1 1 200px' minW='0'>
+                { tips.map((tip, value) => (
+                    <HStack
+                        key={ value }
+                        gridArea='1 / 1'
+                        gap='1'
+                        flexWrap='wrap'
+                        justifyContent='flex-end'
+                        visibility={ index === value ? 'visible' : 'hidden' }
+                        aria-hidden={ index !== value }
+                    >
+                        { tip && <TagTemplate mb='0' py='1' fontSize='xs'>{ `💡 ${tip}` }</TagTemplate> }
+                    </HStack>
+                )) }
+            </Box>
+        </HStack>
     )
 }
 
