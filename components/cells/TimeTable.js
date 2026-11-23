@@ -225,55 +225,53 @@ const buildSelectableTimeSet = (event, weekStartsOn) => {
 };
 
 const parseLegacyDateData = (date, event, timezone) => {
-  try {
+  if (typeof date !== "string" && typeof date !== "number") return undefined;
+
+  const shortOffset = /([+-]\d{1,2}(?:\.\d+)?)$/;
+  let normalizedDate = new Date(date);
+
+  if (typeof date === "string") {
     if (event.allDay && !date.includes("Z")) {
-      const offsetMatch = date.match(/(.*?)([+-]\d{1,2}(\.\d+)?$)/);
-      if (offsetMatch) return undefined;
+      if (shortOffset.test(date)) return undefined;
 
       const timezoneDifference = getUTCOffsetDifference("UTC", timezone);
-      return new Date(
-        addMinutes(new Date(date), timezoneDifference * 60),
-      ).toISOString();
-    }
+      normalizedDate = addMinutes(normalizedDate, timezoneDifference * 60);
+    } else if (Number.isNaN(normalizedDate.getTime())) {
+      const [dateTime, offset] = date.split(shortOffset);
+      if (!offset) return undefined;
 
-    return new Date(date).toISOString();
-  } catch {
-    const [dateTime, offset] = date.split(/([+-]\d{1,2}(\.\d+)?$)/);
-    return new Date(
-      addMinutes(new Date(dateTime), Math.abs(parseFloat(offset)) * 60, {
+      const legacyDate = new Date(dateTime);
+      if (Number.isNaN(legacyDate.getTime())) return undefined;
+
+      normalizedDate = addMinutes(legacyDate, Math.abs(Number(offset)) * 60, {
         in: tz(timezone),
-      }),
-    ).toISOString();
+      });
+    }
   }
+
+  const timestamp = normalizedDate.getTime();
+  return Number.isNaN(timestamp) ? undefined : new Date(timestamp).toISOString();
 };
 
 const parseLegacyDayData = (dayAndTime, event) => {
-  const hasLegacyDay = isNaN(parseInt(dayAndTime));
-
-  if (hasLegacyDay && event.allDay) {
-    return convertDaysToIndex(dayAndTime);
+  if (typeof dayAndTime !== "string" && !Number.isFinite(dayAndTime)) {
+    return undefined;
   }
 
-  if (!hasLegacyDay) return dayAndTime;
+  if (!Number.isNaN(parseInt(dayAndTime, 10))) return dayAndTime;
 
   const [day, time] = dayAndTime.split("-");
+  const dayIndex = convertDaysToIndex(event.allDay ? dayAndTime : day);
+  if (dayIndex < 0) return undefined;
+  if (event.allDay) return dayIndex;
+  if (!time?.trim() || !Number.isFinite(Number(time))) return undefined;
+
   const timezoneDifference = getUTCOffsetDifference("UTC", event.timezone);
+  const utcTime = Number(time) - timezoneDifference;
 
-  if (time - timezoneDifference < 0) {
-    if (convertDaysToIndex(day) === 0) {
-      return `6-${time - timezoneDifference + 24}`;
-    }
-    return `${convertDaysToIndex(day) - 1}-${time - timezoneDifference + 24}`;
-  }
-
-  if (time - timezoneDifference >= 24) {
-    if (convertDaysToIndex(day) === 6) {
-      return `0-${time - timezoneDifference - 24}`;
-    }
-    return `${convertDaysToIndex(day) + 1}-${time - timezoneDifference - 24}`;
-  }
-
-  return `${convertDaysToIndex(day)}-${time - timezoneDifference}`;
+  if (utcTime < 0) return `${(dayIndex + 6) % 7}-${utcTime + 24}`;
+  if (utcTime >= 24) return `${(dayIndex + 1) % 7}-${utcTime - 24}`;
+  return `${dayIndex}-${utcTime}`;
 };
 
 const buildSelectionPreview = (dragSelection, cellMatrix) => {

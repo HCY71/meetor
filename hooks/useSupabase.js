@@ -73,7 +73,7 @@ const useSupabase = () => {
           .from("events")
           .update({
             users: dataFound.users.map((u) => {
-              if (u.user === update.user) return update;
+              if (u?.user === update.user) return update;
               else return u;
             }),
           })
