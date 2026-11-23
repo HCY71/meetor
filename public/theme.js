@@ -33,6 +33,8 @@ const semanticColors = {
         faint: { value: { _light: '#EDF2F7', _dark: 'rgba(255, 255, 255, 0.08)' } },
         subtle: { value: { _light: '#E2E8F0', _dark: 'rgba(255, 255, 255, 0.16)' } },
         strong: { value: { _light: 'rgba(0, 0, 0, 0.80)', _dark: 'rgba(255, 255, 255, 0.80)' } },
+        slotFocus: { value: '#4B3308' },
+        slotFocusRim: { value: '#FFF1B9' },
 
         // Rim that pairs with the shadows.glow effect. It stays white in both
         // modes because the glow it outlines is white in both modes.

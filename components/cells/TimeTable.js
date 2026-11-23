@@ -374,6 +374,30 @@ const getAvailabilityColor = (step, isDarkMode) => {
   return `hsl(51, 89%, ${88 - 21 * intensity}%)`;
 };
 
+const groupCellFocusStyles = {
+  "&[data-slot-highlighted], &:focus-visible": {
+    position: "relative",
+    outline: "2px solid transparent",
+    outlineOffset: "-4px",
+    _after: {
+      content: '""',
+      position: "absolute",
+      inset: "3px",
+      borderWidth: "1px",
+      borderStyle: "solid",
+      borderColor: "border.slotFocus",
+      borderRadius: "sm",
+      boxShadow: "0 0 0 1px var(--chakra-colors-border-slot-focus-rim)",
+      pointerEvents: "none",
+    },
+    "@media (forced-colors: active)": {
+      outlineColor: "Highlight",
+      _after: { display: "none" },
+    },
+  },
+  "&[data-slot-highlighted]::after": { borderWidth: "2px" },
+};
+
 const TimeTable = ({ readOnly = false, isRealtimeEnabled = false }) => {
   const event = useEvent();
   const { eventId } = useParams();
@@ -1413,9 +1437,7 @@ const TimeCell = memo(
           p="4px 8px"
           borderRadius="xs"
           backgroundColor={backgroundColor}
-          boxShadow={isHighlighted
-            ? "inset 0 0 0 2px var(--chakra-colors-ink-primary), inset 0 0 0 4px var(--chakra-colors-ink-inverted)"
-            : undefined}
+          css={isReadOnly ? groupCellFocusStyles : undefined}
           transition={
             shouldAnimateBackground ? "background-color .2s ease" : "none"
           }
