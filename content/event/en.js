@@ -1,9 +1,11 @@
 const eventEn = {
     hello: "Hi👋, ",
-    createdAt: "created at ",
+    createdAt: "Created ",
     ago: " ago",
     go: "Start to check your time.",
     yourName: "User: ",
+    copyLink: "Copy link",
+    share: "Share event",
     input: {
         name: "Enter your name",
         checkTime: "Check your time",

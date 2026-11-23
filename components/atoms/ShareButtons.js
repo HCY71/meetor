@@ -3,57 +3,59 @@ import { FiShare, FiLink } from 'react-icons/fi'
 import { toast } from 'react-hot-toast'
 
 import { useLang } from "@/context/LangContext"
+import CustomButton from "./CustomButton"
+
+const copyCurrentLink = async (messages) => {
+    try {
+        await navigator.clipboard.writeText(window.location.href)
+        toast.success(messages.linkCopied)
+    } catch {
+        toast.error(messages.error)
+    }
+}
 
 const CopyLink = () => {
-    const link = window.location.href
     const { context } = useLang()
-    const copyLink = () => {
-        navigator.clipboard.writeText(link)
-        toast.success(context.global.toast.linkCopied)
-    }
     return (
-        <Template as={ FiLink } onClick={ copyLink } />
-    )
-}
-const Share = () => {
-    const link = window.location.href
-    const shareData = {
-        title: "MeetMe.app",
-        text: "Schedule an event with MeetMe.",
-        url: link,
-    }
-    const shareLink = () => {
-        navigator.share(shareData)
-    }
-    return (
-        <Template as={ FiShare } onClick={ shareLink } />
+        <ShareAction icon={ FiLink } label={ context.event.copyLink } onClick={ () => copyCurrentLink(context.global.toast) } />
     )
 }
 
-const Template = ({ as, onClick }) => {
+const Share = ({ eventName }) => {
+    const { context } = useLang()
+    const shareLink = async () => {
+        if (!navigator.share) {
+            await copyCurrentLink(context.global.toast)
+            return
+        }
+        try {
+            await navigator.share({ title: eventName, url: window.location.href })
+        } catch (error) {
+            if (error.name !== "AbortError") toast.error(context.global.toast.error)
+        }
+    }
     return (
-        <Icon
-            as={ as }
-            onClick={ onClick }
-            fontSize='2rem'
-            borderRadius='50%'
-            borderWidth='2px'
-            borderStyle='solid'
-            borderColor='ink.primary'
-            w='52px'
-            h='52px'
-            p={ 3 }
-            cursor='pointer'
-            transition='.2s'
-            _hover={ {
-                bg: 'ink.primary',
-                color: 'ink.inverted'
-            } }
-            _active={ {
-                transform: 'scale(.95)'
-            } }
-        />
+        <ShareAction icon={ FiShare } label={ context.event.share } onClick={ shareLink } />
     )
 }
+
+const ShareAction = ({ icon, label, onClick }) => (
+    <CustomButton
+        ghost
+        type='button'
+        size='sm'
+        boxSize='10'
+        minW='10'
+        p='0'
+        borderRadius='full'
+        aria-label={ label }
+        title={ label }
+        _hover={ { bg: 'ink.primary', color: 'ink.inverted' } }
+        _active={ { _motionSafe: { transform: 'scale(.95)' } } }
+        onClick={ onClick }
+    >
+        <Icon as={ icon } boxSize='5' aria-hidden />
+    </CustomButton>
+)
 
 export { CopyLink, Share }

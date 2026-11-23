@@ -4,6 +4,8 @@ const eventZhTw = {
     ago: "前",
     go: "開始確認你的時間！",
     yourName: "使用者：",
+    copyLink: "複製連結",
+    share: "分享活動",
     input: {
         name: "填上你的姓名",
         checkTime: "確認你的時間",

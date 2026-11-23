@@ -1,12 +1,10 @@
 'use client'
 import { useState, useEffect } from "react"
 import {
-    HStack,
     VStack,
     Text
 } from "@chakra-ui/react"
 import Header from "@/components/atoms/Header"
-import Subtitle from "@/components/atoms/Subtitle"
 import SecondForm from "@/components/SecondForm"
 import { CopyLink, Share } from "@/components/atoms/ShareButtons"
 import useSupabase from "@/hooks/useSupabase"
@@ -18,7 +16,8 @@ import { useLang } from "@/context/LangContext"
 import { useConfigs } from "@/context/ConfigsContext"
 import Link from "next/link"
 import CustomButton from "@/components/atoms/CustomButton"
-import PageSkeleton from "@/components/cells/PageSkeleton"
+import { EventPageSkeleton } from "@/components/cells/PageSkeleton"
+import EventPageFrame, { eventTitleSize } from "@/components/cells/EventPageFrame"
 import { EventProvider } from "@/context/EventContext"
 
 const Page = () => {
@@ -67,27 +66,29 @@ const Page = () => {
             </VStack>
         </VStack>
     )
-    else if (!event) return <PageSkeleton />
+    else if (!event) return <EventPageSkeleton />
     return (
         <EventProvider event={ event }>
-            <VStack gap={ 5 } w='520px' maxW='100%'>
-                { event
-                    &&
-                    <VStack gap={ { base: 2, md: 3 } }>
-                        <Header>
-                            { event.name }
-                        </Header>
-                        <Subtitle>
-                            { context.event.createdAt + getTimeDistance(event, currentDate, configs.lang) + context.event.ago }
-                        </Subtitle>
-                        <HStack mt={ 4 } mb={ 4 } gap={ 3 }>
-                            <CopyLink />
-                            <Share />
-                        </HStack>
-                    </VStack>
+            <EventPageFrame
+                title={
+                    <Header fontSize={ eventTitleSize } lineHeight='1.2' textAlign='start' overflowWrap='anywhere'>
+                        { event.name }
+                    </Header>
                 }
+                metadata={
+                    <Text color='ink.muted' fontSize='sm'>
+                        { context.event.createdAt + getTimeDistance(event, currentDate, configs.lang) + context.event.ago }
+                    </Text>
+                }
+                actions={
+                    <>
+                        <CopyLink />
+                        <Share eventName={ event.name } />
+                    </>
+                }
+            >
                 <SecondForm />
-            </VStack>
+            </EventPageFrame>
         </EventProvider>
     )
 }

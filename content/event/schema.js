@@ -4,6 +4,8 @@ const eventSchema = {
     ago: "string",
     go: "string",
     yourName: "string",
+    copyLink: "string",
+    share: "string",
     input: {
         name: "string",
         checkTime: "string",

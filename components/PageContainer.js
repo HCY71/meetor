@@ -1,4 +1,6 @@
+import { Flex } from "@chakra-ui/react"
 import { Toaster } from "react-hot-toast"
+import { usePathname } from "next/navigation"
 import Navbar from "./Navbar"
 import Content from "./Content"
 import Footer from "./Footer"
@@ -7,23 +9,16 @@ import { useLang } from "@/context/LangContext"
 
 const PageContainer = ({ children }) => {
     const { isLoading } = useLang()
-    if (isLoading) return (
-        <>
-            <Navbar loading />
-            <Content>
-                <PageSkeleton />
-            </Content>
-        </>
-    )
+    const pathname = usePathname()
     return (
-        <>
-            <Toaster />
-            <Navbar />
+        <Flex direction='column' minH='100vh' css={ { '@supports (min-height: 100svh)': { minHeight: '100svh' } } }>
+            { !isLoading && <Toaster /> }
+            <Navbar loading={ isLoading } />
             <Content>
-                { children }
+                { isLoading ? <PageSkeleton pathname={ pathname } /> : children }
             </Content>
-            <Footer />
-        </>
+            <Footer loading={ isLoading } />
+        </Flex>
     )
 }
 
