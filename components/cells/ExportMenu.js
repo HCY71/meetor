@@ -25,7 +25,7 @@ const ExportMenu = ({ onExportCsv, onExportJson }) => {
             aria-label={context.event.export}
             w="240px"
             p="1"
-            bg="bg.canvas"
+            bg="bg.surface"
             color="fg"
             borderWidth="1px"
             borderColor="border.subtle"

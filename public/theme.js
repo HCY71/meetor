@@ -52,14 +52,15 @@ const semanticColors = {
         subtle: { value: { _light: '#A0AEC0', _dark: '#718096' } },
     },
 
-    // Surfaces, from the page backdrop up to the blurred nav. DEFAULT is the
-    // one Chakra paints on <html>, so it matches the canvas.
+    // The page and panels use solid backgrounds. Control tracks and hover
+    // states tint the background underneath them.
     bg: {
-        DEFAULT: { value: { _light: '#FFFFFF', _dark: '#020408' } },
+        DEFAULT: { value: { _light: '{colors.bg.canvas}', _dark: '{colors.bg.canvas}' } },
         canvas: { value: { _light: '#FFFFFF', _dark: '#020408' } },
-        surface: { value: { _light: '#FFFFFF', _dark: '#171923' } },
-        track: { value: { _light: '#EDF2F7', _dark: '#1A202C' } },
+        surface: { value: { _light: '#F4F4F5', _dark: '#1C1D20' } },
+        track: { value: { _light: 'rgba(0, 0, 0, 0.06)', _dark: 'rgba(255, 255, 255, 0.08)' } },
         veil: { value: { _light: 'hsla(0, 0%, 100%, .75)', _dark: 'rgba(2, 4, 8, .75)' } },
+        backdrop: { value: 'rgba(0, 0, 0, 0.48)' },
     },
 
     // The orange hint tags. v2 drew these from its orange palette, whose hues
@@ -73,7 +74,7 @@ const semanticColors = {
 
     // The two ends of the loading skeleton's fade
     skeleton: {
-        start: { value: { _light: '#EDF2F7', _dark: '#1A202C' } },
+        start: { value: '{colors.bg.surface}' },
         end: { value: { _light: '#A0AEC0', _dark: '#4A5568' } },
     },
 }

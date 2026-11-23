@@ -56,7 +56,7 @@ const SideBar = () => {
             bg="bg.surface"
             borderWidth="1px"
             borderStyle="solid"
-            borderColor="border"
+            borderColor="border.subtle"
             borderRadius="md"
             boxShadow="menu"
           >

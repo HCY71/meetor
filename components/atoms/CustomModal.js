@@ -18,13 +18,13 @@ const CustomModal = ({ controls, context, button, initialFocusRef }) => {
             initialFocusEl={ initialFocusRef ? () => initialFocusRef.current : undefined }
         >
             <Portal>
-                <Dialog.Backdrop bg='rgba(0, 0, 0, 0.48)' />
+                <Dialog.Backdrop bg='bg.backdrop' />
                 <Dialog.Positioner>
                     <Dialog.Content
                         maxW={ { base: '20rem', md: '32rem' } }
                         mt='4rem'
                         p={ { base: '.5rem', md: '1rem' } }
-                        bg='bg.canvas'
+                        bg='bg.surface'
                         borderRadius='md'
                         boxShadow='glow'
                         borderWidth='1px'
