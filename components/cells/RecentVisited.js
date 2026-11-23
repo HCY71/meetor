@@ -1,5 +1,6 @@
-import { VStack, HStack, Center } from "@chakra-ui/react"
+import { Box, Grid, HStack, Text, VStack } from "@chakra-ui/react"
 import Link from "next/link"
+import CustomButton from "@/components/atoms/CustomButton"
 import { useLang } from "@/context/LangContext"
 import { useConfigs } from "@/context/ConfigsContext"
 import useLocalStorage from "@/hooks/useLocalStorage"
@@ -12,42 +13,79 @@ const RecentVisited = () => {
     const { context } = useLang()
     const { configs } = useConfigs()
 
-    if (!recent || !recent.length) return
+    if (!Array.isArray(recent) || recent.length === 0) return null
 
     return (
         <VStack
-            bg='ink.primary'
-            borderRadius='md' p={ 5 }
-            color='ink.inverted'
+            as='section'
+            aria-labelledby='recent-events-heading'
+            align='stretch'
+            gap='3'
+            bg='bg.surface'
+            borderWidth='1px'
+            borderColor='border.subtle'
+            borderRadius='md'
+            p='4'
             w='100%'
-            maxW={ { base: '100%', md: '520px' } }
-            fontSize={ { base: '1rem', md: '1.25rem' } }
+            maxW='520px'
             mt={ { base: '1rem', md: '1.5rem' } }
         >
-            <HStack alignSelf='flex-start'>
-                <Center fontWeight='bold' >{ context.home.recent }</Center>
-                <Center
-                    fontSize='0.75rem'
+            <HStack justify='space-between' gap='2'>
+                <Text as='h2' id='recent-events-heading' fontSize={ { base: 'md', md: 'lg' } } fontWeight='bold'>
+                    { context.home.recent }
+                </Text>
+                <CustomButton
+                    ghost
+                    type='button'
+                    size='xs'
+                    h='6'
+                    px='2'
+                    flexShrink={ 0 }
                     fontWeight='medium'
-                    color='ink.inverted'
-                    borderColor='ink.inverted'
-                    cursor='pointer'
-                    p={ 1 }
-                    border='solid 1px'
-                    borderRadius='md'
-                    onClick={ () => setRecent() }
+                    color='ink.muted'
+                    borderColor='border.subtle'
+                    borderRadius='sm'
+                    focusRingColor='ink.primary'
+                    _hover={ { color: 'ink.primary', borderColor: 'ink.subtle' } }
+                    onClick={ () => setRecent([]) }
                 >
                     { context.home.clear }
-                </Center>
+                </CustomButton>
             </HStack>
-            { recent && [ ...recent ].reverse().map(r => (
-                <Link href={ `/events/${r.id}` } className="next-link-custom" key={ r.id }>
-                    <HStack justify='space-between' p={ { base: '0 8px', md: '0 16px' } } >
-                        <Center fontWeight='bold'>{ r.name }</Center>
-                        <Center fontSize={ { base: '.75rem', md: '.875rem' } } textAlign={ 'right' }> { context.event.createdAt + getTimeDistance(r, currentDate, configs.lang) + context.event.ago } </Center>
-                    </HStack>
-                </Link>
-            )) }
+            <Grid as='ul' gap='2' listStyle='none' m='0' p='0'>
+                { [ ...recent ].reverse().map((event) => (
+                    <Box as='li' key={ event.id }>
+                        <Grid
+                            asChild
+                            templateColumns={ { base: 'minmax(0, 1fr)', sm: 'minmax(0, 1fr) auto' } }
+                            alignContent='center'
+                            alignItems='baseline'
+                            rowGap='0.5'
+                            columnGap='3'
+                            minH='6'
+                            borderRadius='md'
+                            focusVisibleRing='outside'
+                            focusRingColor='ink.primary'
+                        >
+                            <Link href={ `/events/${event.id}` } className='group'>
+                                <Text
+                                    as='span'
+                                    fontSize='sm'
+                                    fontWeight='semibold'
+                                    overflowWrap='anywhere'
+                                    textUnderlineOffset='2px'
+                                    _groupHover={ { textDecoration: 'underline' } }
+                                >
+                                    { event.name }
+                                </Text>
+                                <Text as='span' fontSize='xs' color='ink.muted'>
+                                    { context.event.createdAt + getTimeDistance(event, currentDate, configs.lang) + context.event.ago }
+                                </Text>
+                            </Link>
+                        </Grid>
+                    </Box>
+                )) }
+            </Grid>
         </VStack>
     )
 }

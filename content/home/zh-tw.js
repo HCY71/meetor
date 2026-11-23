@@ -1,6 +1,6 @@
 const homeZhTw = {
-    header: "建立行程， \n和分享連結。",
-    description: "Meetor提供簡單易用、支援手機的介面且無需登錄。只需建立行程並分享生成的連結，即可迅速開始時間安排。",
+    header: "一個連結，\n約好時間",
+    description: "Meetor 是免費的多人排程工具。分享連結，讓大家標記有空的時段。不用註冊。",
     subheader: "個行程已安排。",
     recent: "最近的行程",
     clear: "清除紀錄",

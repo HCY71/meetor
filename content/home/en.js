@@ -1,8 +1,8 @@
 const homeEn = {
-    header: "Create an Event, \nand Share It.",
-    description: "Meetor provides a seamless, mobile-friendly, and login-free experience. Just create an event, share the link, and goes for scheduling.",
+    header: "One Link to\nFind a Time",
+    description: "Meetor is a free group scheduling tool. Share a link so everyone can mark when they’re free. No account needed.",
     subheader: "events scheduled.",
-    recent: "Recent events",
+    recent: "Recent Events",
     clear: "Clear History",
     input: {
         name: "Give your event a name",
